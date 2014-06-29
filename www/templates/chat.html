@@ -1,0 +1,17 @@
+<!--
+  This template loads for the 'tab.friend-detail' state (app.js)
+  'firend' is a $scope variable created in the FriendsCtrl controller (controllers.js)
+  The FriendsCtrl pulls data from the Friends service (service.js)
+  The Friends service returns an array of friend data
+-->
+<ion-view title="{{friend.name}}">
+  <ion-content padding="true" class="has-header" start-y="120">
+    <ol class="messages">
+      <li ng-repeat="message in messages" ng-bind-html="message.content" ng-class="message.from"></li>
+    </ol>
+  </ion-content>
+  <ion-footer-bar class="bar-frosted">
+    <button class="button button-clear button-positive" ng-click="send()">Add Message</button>
+    <input type="text" ng-model="inputMessage" placeholder="Start typing..." />
+  </ion-footer-bar>
+</ion-view>
