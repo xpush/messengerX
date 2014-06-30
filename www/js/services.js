@@ -243,15 +243,23 @@ angular.module('starter.services', [])
           console.log( 'channel connect' );
           channelSocket.emit( 'message-unread', function(jsonObj){
             var unreadMessages = jsonObj.result;
+            console.log( unreadMessages );
 
             var messages = [];
             for( var inx = 0 ; inx < unreadMessages.length ; inx++ ){
-              try {
-                messages.push( { content : '<span>'+decodeURIComponent( JSON.parse( unreadMessages[inx].message.data ).message )+'</span>', from : 'you' } );
-              } catch( e ){
-                console.log( e );
-              }
+              var data = JSON.parse( unreadMessages[inx].message.data );
+              var content;
+              content = '<div class="small">'+data.user.id+'</div>' ;
+              content = content + '<img src="'+data.user.image+'" class="profile"/>';
+              content = content + '<span class="from">'+decodeURIComponent( data.message )+'</span>' ;
+              messages.push( { content : content, from : 'you' } );
             }
+
+            //message received complete
+            if( unreadMessages != undefined && unreadMessages.length > 0 ){
+              channelSocket.emit("message-received");
+            }
+
             callback(messages);
           });
         }); 
