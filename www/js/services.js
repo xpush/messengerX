@@ -242,13 +242,12 @@ angular.module('starter.services', [])
         channelSocket.on('connect', function() {
           console.log( 'channel connect' );
           channelSocket.emit( 'message-unread', function(jsonObj){
-            console.log( 'message-unreads');
             var unreadMessages = jsonObj.result;
 
             var messages = [];
             for( var inx = 0 ; inx < unreadMessages.length ; inx++ ){
               try {
-                messages.push( { content : '<p>'+decodeURIComponent( JSON.parse( unreadMessages[inx].message.data ).message )+'</p>', from : 'you' } );
+                messages.push( { content : '<span>'+decodeURIComponent( JSON.parse( unreadMessages[inx].message.data ).message )+'</span>', from : 'you' } );
               } catch( e ){
                 console.log( e );
               }
@@ -268,16 +267,23 @@ angular.module('starter.services', [])
           // var msgClass = data.sender==_userId?'from-op':'from-visitor';
           //chatText +='<div class="message '+msgClass+'">'+decodeURIComponent(data.message)+'</div>';
 
-          if(data.msgClass == 'from-op'){
-            data.picture = CONF._user.image;
-          }else{
-            data.sender = data.user.name;
+          data.message = decodeURIComponent(data.message);          
+          var from = data.user.id == loginUser.userId ? 'me': 'you' ;
+
+          var content;
+          if(from == 'you'){
+            data.sender = data.user.id;
             data.picture = data.user.image;
+
+            content = '<div class="small">'+data.sender+'</div>' ;
+            content = content + '<img src="'+data.picture+'" class="profile"/>';
+            content = content + '<span class="from">'+data.message+'</span>' ;
+            
+          } else {
+            content = '<span>'+data.message+'</span>' 
           }
 
-          data.message = decodeURIComponent(data.message);
-          var from = data.user.id == loginUser.userId ? 'me': 'you' ;
-          var nextMessage = { content : '<p>'+data.message+'</p>', from : from };
+          var nextMessage = { content : content, from : from };
           $scope.add( nextMessage );
         });
       })

@@ -27,7 +27,6 @@ angular.module('starter.controllers', [])
 
   // Channel Init
   Chat.init( param, loginUser, $scope, function( messages ){
-    console.log( "messasge : " + messages );
     if( messages != undefined ){
       $scope.messages = $scope.messages.concat(messages);;
       $scope.$apply();
@@ -88,7 +87,6 @@ angular.module('starter.controllers', [])
                  'image':'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/t1.0-1/p50x50/10462917_1503891336506883_4678783454533660696_t.jpg' };
     //var params = { 'app' : 'messengerx', 'userId' : 'F100002531861340', 'password' : '100002531861340', 'deviceId' : 'WEB' };
     Sign.register( params, function(data){
-      console.log( 'register success : ' + data );
       $state.go('signin');
     });
   };

@@ -12,7 +12,7 @@ body {
 	display:block;
 	float:left;
 	clear:both;
-	max-width:65%;
+	max-width:80%;
 	margin:0 0 1rem 0;
 	padding:0;
 }
@@ -25,16 +25,34 @@ body {
 	float:right;
 }
 
-.messages p {
+.messages span {
 	border-radius:.75rem;
 	background:#e6e5eb;
 	color:#383641;
 	padding:.6875rem;
 	margin:0;
 	font-size:.875rem;
+	display:block;
 }
 
-.messages li.me p {
+.messages div.small {
+	padding:.125rem;
+	color:#5ba0d0;
+	margin:0;
+	font-size:1rem;
+	display:block;
+}
+
+.messages span.from {
+	float: left;
+	margin: 0 5px;	
+	text-overflow: ellipsis;
+	overflow-x: hidden;
+	word-wrap: break-word;
+	max-width:90%;
+}
+
+.messages li.me span {
 	background:#158ffe;
 	color:#fff;
 }
@@ -43,4 +61,11 @@ body {
 	display:block;
 	max-width:65%;
 	border-radius:.75rem;
+}
+
+.messages img.profile {
+	display:inline;
+	width: 40px;
+	height: 40px;
+	float: left;
 }
