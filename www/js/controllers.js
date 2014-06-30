@@ -23,7 +23,10 @@ angular.module('starter.controllers', [])
   param.userId = loginUser.userId;
   param.deviceId = loginUser.deviceId;
 
+  var channelUsers = channelId.split('^')[0];
+
   $scope.messages = [];
+  $scope.channelName = channelUsers.split("$").join(",");
 
   // Channel Init
   Chat.init( param, loginUser, $scope, function( messages ){
@@ -94,19 +97,24 @@ angular.module('starter.controllers', [])
 .controller('ChatCtrl', function($scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $stateParams, Friends, Sign, Chat, SocketManager) {
   var messageOptions = [];
   var friend = Friends.get($stateParams.friendId);
-  $scope.friend = friend;
 
   var loginUser = Sign.getUser();
 
+  var channelUsers = [ loginUser.userId, friend.uid ];
+  channelUsers.sort();
+  var channelKey = channelUsers.join("$");
+
+  $scope.channelName = channelUsers.join(',');
+
   var param = {};
   param.app = loginUser.app;
-  param.channel = loginUser.userId+'^'+friend.uid+'^'+'stalkio'+'^'+'ionic';
+  param.channel = channelKey+'^'+'stalkio'+'^'+'ionic';
   param.userId = loginUser.userId;
   param.deviceId = loginUser.deviceId;
 
   var createObject = {};
   createObject.channel = param.channel;
-  createObject.users = [ loginUser.userId, friend.uid ];
+  createObject.users = channelUsers;
 
   $scope.messages = [];
 

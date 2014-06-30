@@ -4,8 +4,8 @@ angular.module('starter.constants', [])
     version: '1.0 BETA',
     feedVersion: 'V1'
   })
-
-  .constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
+  //.constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
+  .constant('BASE_URL', 'localhost')
 
   .constant('DB_CONFIG', {
     name: 'stalk.db',

@@ -58,14 +58,15 @@ angular.module('starter.services', [])
 
       var query =
         "INSERT OR REPLACE INTO TB_CHANNEL "+
-        "(channel, channel_name, channel_user_id, unread_count) VALUES "+
-        "(?, ?, ?, ?)";
+        "(channel, channel_name, channel_user_id, unread_count, channel_updated) VALUES "+
+        "(?, ?, ?, ?, ?)";
 
       var cond = [
         jsonObj.id,
         jsonObj.name,
         jsonObj.name,
-        1
+        1,
+        Date.now()
       ];
 
       if( scope != undefined ){
@@ -95,8 +96,7 @@ angular.module('starter.services', [])
 
   return {
     list : function( $scope, channel ){
-      scope = $scope;
-
+      scope = $scopeji
       return DB.query(
         'SELECT message, time FROM TB_MESSAGE ORDER BY time ASC WHERE channel = ?', [channel]
       ).then(function(result) {
@@ -243,7 +243,6 @@ angular.module('starter.services', [])
           console.log( 'channel connect' );
           channelSocket.emit( 'message-unread', function(jsonObj){
             var unreadMessages = jsonObj.result;
-            console.log( unreadMessages );
 
             var messages = [];
             for( var inx = 0 ; inx < unreadMessages.length ; inx++ ){
@@ -361,6 +360,9 @@ angular.module('starter.services', [])
       angular.forEach(table.columns, function(column) {
         columns.push(column.name + ' ' + column.type);
       });
+
+      var query = 'DROP TABLE ' + table.name;
+      self.query(query);
 
       var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
       self.query(query);

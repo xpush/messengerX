@@ -4,7 +4,7 @@
   The FriendsCtrl pulls data from the Friends service (service.js)
   The Friends service returns an array of friend data
 -->
-<ion-view title="{{friend.name}}">
+<ion-view title="{{channelName}}">
   <ion-content padding="true" class="has-header" start-y="120">
     <ol class="messages">
       <li ng-repeat="message in messages" ng-bind-html="message.content" ng-class="message.from"></li>
