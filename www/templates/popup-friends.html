@@ -1,0 +1,8 @@
+<ul class="list">
+  <li class="item item-checkbox" ng-repeat="friend in friends" >
+    <label class="checkbox">
+      <input type="checkbox" value="{{friend.name}}" ng-click="toggleSelection('{{friend.uid}}')" ng-checked="selection.indexOf({{friend.uid}}) > -1" />
+    </label>
+    {{friend.name}}
+  </li>
+</ul>

@@ -148,22 +148,24 @@ angular.module('starter.controllers', [])
   };
 
   // Triggered on a button click, or some other target
-  $scope.chatFriends = [];
+  $scope.selection = [];
 
-  $scope.selectFriends = function( friendId ){
-    var inx = $scope.chatFriends.indexOf( friendId );
+  $scope.toggleSelection = function( friendId ){
+    console.log( friendId );
+    var inx = $scope.selection.indexOf( friendId );
     console.log( "inx : " + inx );
-    if( inx > 0 ){
-      $scope.chatFriends.splice(inx, 1);
+    if( inx > -1 ){
+      $scope.selection.splice(inx, 1);
     } else {
-      $scope.chatFriends.push( friendId );
+      $scope.selection.push( friendId );
     }
 
-    console.log( $scope.chatFriends );
+    console.log( $scope.selection );
   };
 
   $scope.showPopup = function() {
     $scope.data = {};
+    $scope.selection = [];
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
@@ -178,12 +180,7 @@ angular.module('starter.controllers', [])
           text: '<b>Save</b>',
           type: 'button-positive',
           onTap: function(e) {
-            if (!$scope.data.wifi) {
-              //don't allow the user to close unless he enters wifi password
-              e.preventDefault();
-            } else {
-              return $scope.data.wifi;
-            }
+            return $scope.selection;
           }
         },
       ]
@@ -191,6 +188,23 @@ angular.module('starter.controllers', [])
 
     myPopup.then(function(res) {
       console.log('Tapped!', res);
+      if( res != undefined ){
+
+
+        var joinUsers = [];
+        for( var key in res ){
+          var joinObject = {};
+          joinObject.deviceId = 'ionic';
+          joinObject.userId = res[key];
+          joinUsers.push( joinObject );
+        }
+
+        console.log( joinUsers );
+
+        Chat.join( joinUsers, function(data){
+          console.log( data );
+        });
+      }
     });
   };  
 });

@@ -313,6 +313,11 @@ angular.module('starter.services', [])
 
       channelSocket.emit('send', param, function (data) {
       });
+    },
+    join : function( users, callback){
+      channelSocket.emit('join', users, function (data) {
+        callback( data );
+      });
     }
   }
 })
