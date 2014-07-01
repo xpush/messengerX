@@ -63,7 +63,15 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, Friends, Sign, Chat, SocketManager) {
+.controller('ChatCtrl', function($timeout, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager) {
+  $scope.friends = [];
+
+  Friends.list(function(friends){
+    if( friends != undefined ){
+      $scope.friends = friends;
+      $scope.$apply();
+    }
+  });
 
   initChat = function(){
     var param = {};
@@ -137,5 +145,52 @@ angular.module('starter.controllers', [])
     var msg = $scope.inputMessage;
     $scope.inputMessage = '';
     Chat.send( msg );
+  };
+
+  // Triggered on a button click, or some other target
+  $scope.chatFriends = [];
+
+  $scope.selectFriends = function( friendId ){
+    var inx = $scope.chatFriends.indexOf( friendId );
+    console.log( "inx : " + inx );
+    if( inx > 0 ){
+      $scope.chatFriends.splice(inx, 1);
+    } else {
+      $scope.chatFriends.push( friendId );
+    }
+
+    console.log( $scope.chatFriends );
+  };
+
+  $scope.showPopup = function() {
+    $scope.data = {};
+
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+      //template: '<ul class="list"><li class="item item-checkbox" ng-repeat="friend in friends"><label class="checkbox"><input type="checkbox"></label>{{friend.name}}</li></ul>',
+      templateUrl: "templates/popup-friends.html",
+      title: 'Select Friends',
+      //subTitle: 'Please use normal things',
+      scope: $scope,
+      buttons: [
+        { text: 'Cancel' },
+        {
+          text: '<b>Save</b>',
+          type: 'button-positive',
+          onTap: function(e) {
+            if (!$scope.data.wifi) {
+              //don't allow the user to close unless he enters wifi password
+              e.preventDefault();
+            } else {
+              return $scope.data.wifi;
+            }
+          }
+        },
+      ]
+    });
+
+    myPopup.then(function(res) {
+      console.log('Tapped!', res);
+    });
   };  
 });
