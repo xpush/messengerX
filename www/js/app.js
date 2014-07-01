@@ -41,6 +41,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       url: "/sign-up",
       templateUrl: "templates/sign-up.html",
       controller: 'SignUpCtrl'
+    })
+
+    .state('chat', {
+      url: '/chat',
+      templateUrl: "templates/chat.html",
+      controller: 'ChatCtrl'
     })       
 
     // setup an abstract state for the tabs directive
@@ -48,7 +54,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       url: "/tab",
       abstract: true,
       templateUrl: "templates/tabs.html"
-    })
+    }) 
 
     // Each tab has its own nav history stack:
     .state('tab.dash', {
@@ -67,26 +73,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         'tab-friends': {
           templateUrl: 'templates/tab-friends.html',
           controller: 'FriendsCtrl'
-        }
-      }
-    })
-    
-    .state('tab.friend-detail', {
-      url: '/friend/:friendId',
-      views: {
-        'tab-friends': {
-          templateUrl: 'templates/chat.html',
-          controller: 'ChatCtrl'
-        }
-      }
-    })
-
-    .state('tab.channel-detail', {
-      url: '/channel/:channelId',
-      views: {
-        'tab-friends': {
-          templateUrl: 'templates/chat.html',
-          controller: 'ChannelDtlCtrl'
         }
       }
     })

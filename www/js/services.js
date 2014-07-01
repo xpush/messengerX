@@ -171,7 +171,6 @@ angular.module('starter.services', [])
       socket.on('_event', function (messageObject) {
         if( messageObject.event == 'NOTIFICATION' ){
           var data = messageObject.data;
-          console.log( data );
           var channel = {'id': data.channel, 'name': data.user.id };
           Channels.add( channel );
         }

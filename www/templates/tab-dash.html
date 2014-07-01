@@ -1,7 +1,10 @@
 <ion-view title="Channles">
   <ion-content class="has-header">
     <ion-list>
-      <ion-item ng-repeat="channel in channels" type="item-text-wrap" href="#/tab/channel/{{channel.id}}">
+      <ion-item ng-repeat="channel in channels" type="item-text-wrap" ng-click="goChat('{{channel.id}}')">
+	  <!--
+      <ion-item ng-repeat="channel in channels" type="item-text-wrap" href="#/tab/channel/{{channel.id}}">        
+      -->
         {{channel.name}}
       </ion-item>
     </ion-list>
