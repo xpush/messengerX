@@ -13,10 +13,13 @@ angular.module('starter.controllers', [])
   });
 
   $scope.goChat = function( channelId ) {
-    $stateParams.channelId = channelId;
-
-    $rootScope.$stateParams = $stateParams;
-    $state.go( 'chat' );
+    Channels.get( channelId ).then(function(data) {
+      console.log( data );
+      $stateParams.channelId = channelId;
+      $stateParams.channelUsers = data.channel_users;
+      $rootScope.$stateParams = $stateParams;
+      $state.go( 'chat' );
+    });
   };  
 })
 .controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, Friends) {
@@ -28,8 +31,8 @@ angular.module('starter.controllers', [])
     }
   });
 
-  $scope.goChat = function( friendId ) {
-    $stateParams.friendId = friendId;
+  $scope.goChat = function( friendIds ) {
+    $stateParams.friendIds = friendIds;
 
     $rootScope.$stateParams = $stateParams;
     $state.go( 'chat' );
@@ -63,7 +66,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($timeout, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager) {
+.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager, Channels) {
   $scope.friends = [];
 
   Friends.list(function(friends){
@@ -72,6 +75,8 @@ angular.module('starter.controllers', [])
       $scope.$apply();
     }
   });
+
+  console.log( "initController" );
 
   initChat = function(){
     var param = {};
@@ -97,35 +102,39 @@ angular.module('starter.controllers', [])
 
   var channelId;
   var channelName;
+  var channelUsers = [];
 
-  if( stateParams.friendId != undefined ){
-    var friend = Friends.get(stateParams.friendId);
+  if( stateParams.channelId != undefined ) {
+    channelId = stateParams.channelId;
 
-    var channelUsers = [ loginUser.userId, friend.uid ];
+    channelUsers = stateParams.channelUsers.split(",");
     channelUsers.sort();
-    var channelKey = channelUsers.join("$");
+    channelName = channelUsers.join(",");
 
-    channelId = channelKey+'^'+'stalkio'+'^'+'ionic';
-    channelName = channelUsers.join(',');
+    initChat();
+  } else {
+    var friendIds = stateParams.friendIds.split("$");
+
+    channelUsers.push( loginUser.userId );
+    channelUsers = channelUsers.concat( friendIds );
+    channelUsers.sort();
 
     var createObject = {};
+    createObject.name = channelUsers.join(',');
+    createObject.channel_users = channelUsers;
+
+    channelName = createObject.name;
+
+    var channelId = Channels.generateId(createObject);
     createObject.channel = channelId;
-    createObject.users = channelUsers;
 
     SocketManager.get( function(socket){
       socket.emit("channel-create", createObject, function(){
         console.log( "channel-create success" );
+        Channels.add( createObject );
         initChat();
       });
     });
-
-  } else if( stateParams.channelId != undefined ) {
-    channelId = stateParams.channelId;
-
-    var channelUsers = channelId.split('^')[0];
-    channelName = channelUsers.split("$").join(",");
-
-    initChat();
   }
 
   $rootScope.$stateParams = {};
@@ -190,20 +199,34 @@ angular.module('starter.controllers', [])
       console.log('Tapped!', res);
       if( res != undefined ){
 
-
         var joinUsers = [];
+
+        //TO-DO : Only ID
         for( var key in res ){
           var joinObject = {};
           joinObject.deviceId = 'ionic';
           joinObject.userId = res[key];
           joinUsers.push( joinObject );
+
+          if( channelUsers.indexOf( res[key] ) < 0 ){
+            channelUsers.push( res[key] );
+          }
         }
 
         console.log( joinUsers );
+        console.log( channelUsers );
 
-        Chat.join( joinUsers, function(data){
-          console.log( data );
-        });
+        if( channelUsers.length == 3 ){
+          $rootScope.$stateParams.friendIds = channelUsers.join( "$" );
+
+          var current = $state.current;
+          $state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
+          console.log( 'reload' );
+        } else {
+          Chat.join( joinUsers, function(data){
+            console.log( data );
+          });
+        }
       }
     });
   };  

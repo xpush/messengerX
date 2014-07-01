@@ -2,7 +2,8 @@ angular.module('starter.constants', [])
 
   .constant('APP_INFO', {
     version: '1.0 BETA',
-    feedVersion: 'V1'
+    feedVersion: 'V1',
+    appKey : 'messengerX'
   })
   .constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
   //.constant('BASE_URL', 'localhost')
@@ -25,9 +26,9 @@ angular.module('starter.constants', [])
         name: 'TB_CHANNEL',
         columns: [
           //{name: '_id',     type: 'integer primary key autoincrement'},
-          {name: 'channel',   type: 'text primary key'},
+          {name: 'channel_id',   type: 'text primary key'},
           {name: 'channel_name',  type: 'text'},
-          {name: 'channel_user_id',    type: 'text'},
+          {name: 'channel_users',    type: 'text'},
           {name: 'channel_image', type: 'text'},
           {name: 'unread_count', type: 'integer'},
           {name: 'latest_message', type: 'text'},

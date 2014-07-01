@@ -40,45 +40,58 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Channels', function(DB) {
+.factory('Channels', function(DB, UTIL, APP_INFO) {
   // Might use a resource here that returns a JSON array
   var scope;
 
   return {
+    get : function( channelId ){
+      return DB.query(
+        'SELECT channel_id, channel_name, channel_users, unread_count FROM TB_CHANNEL where channel_id = ? ', [channelId]
+      ).then(function(result) {
+          return DB.fetch(result);
+        });
+    },
     list : function( $scope ){
       scope = $scope;
 
       return DB.query(
-        'SELECT channel as id, channel_name as name, unread_count FROM TB_CHANNEL ORDER BY channel_updated DESC'
+        'SELECT channel_id, channel_name, channel_users, unread_count FROM TB_CHANNEL ORDER BY channel_updated DESC'
       ).then(function(result) {
           return DB.fetchAll(result);
         });
     },
     add : function(jsonObj){
+      console.log( "add ");
+      console.log( jsonObj );
+
+      var channelId = '';
 
       var query =
         "INSERT OR REPLACE INTO TB_CHANNEL "+
-        "(channel, channel_name, channel_user_id, unread_count, channel_updated) VALUES "+
+        "(channel_id, channel_name, channel_users, unread_count, channel_updated) VALUES "+
         "(?, ?, ?, ?, ?)";
 
       var cond = [
-        jsonObj.id,
+        jsonObj.channel,
         jsonObj.name,
-        jsonObj.name,
+        jsonObj.channel_users,
         1,
         Date.now()
       ];
 
       if( scope != undefined ){
-        var channel = {'id':jsonObj.id,'name':jsonObj.name,'unread_count':1};
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count':1};
+
         var dupFlag = false;
         for( var inx = 0; !dupFlag && inx < scope.channels.length ; inx++){
-          if( scope.channels[inx].id == channel.id ){
+          if( scope.channels[inx].channelId == channel.channelId ){
             dupFlag = true;
           }
         }
 
         if( !dupFlag ){
+          console.log( channel );
           scope.channels.push(angular.extend({}, channel));
           scope.$apply();
         }
@@ -87,6 +100,16 @@ angular.module('starter.services', [])
       return DB.query(query, cond).then(function(result) {
         return result;
       });
+    },
+    generateId : function(jsonObj){
+      var channelId;
+      if( jsonObj.channel_users.length > 2 ){
+        channelId = UTIL.getUniqueKey()+"^"+APP_INFO.appKey;;
+      } else {
+        jsonObj.channel_users.sort();
+        channelId = jsonObj.channel_users.join( "$" )+"^"+APP_INFO.appKey;
+      }
+      return channelId;
     }
   }
 })
@@ -171,7 +194,12 @@ angular.module('starter.services', [])
       socket.on('_event', function (messageObject) {
         if( messageObject.event == 'NOTIFICATION' ){
           var data = messageObject.data;
-          var channel = {'id': data.channel, 'name': data.user.id };
+
+          var channel = {'channel': data.channel, 'name': data.user.id };
+          if( data.channel.indexOf( "$" ) > -1 ){
+            data.channel_users = data.channel.split( "^" )[0].split( "$" ).join( "," );
+          }
+
           Channels.add( channel );
         }
       });
@@ -403,4 +431,19 @@ angular.module('starter.services', [])
   };
 
   return self;
+})
+.factory('UTIL', function(){
+  return {
+    getUniqueKey : function () {
+      var s = [], itoh = '0123456789ABCDEF';
+      for (var i = 0; i < 36; i++) s[i] = Math.floor(Math.random()*0x10);
+      s[14] = 4;
+      s[19] = (s[19] & 0x3) | 0x8;
+
+      for (var x = 0; x < 36; x++) s[x] = itoh[s[x]];
+      s[8] = s[13] = s[18] = s[23] = '-';
+
+      return s.join('');
+    }
+  }
 });
