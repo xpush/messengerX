@@ -73,9 +73,9 @@ angular.module('starter.services', [])
       SocketManager.get( function( socket ){        
         socket.emit( 'user-list', {}, function( data ){
           console.log( 'user-list' );
-          console.log( data );
           if( data.status == 'ok' ){
             var userArray = data.result;
+            console.log( userArray );
             var jnx = 0;
             for( var inx = 0 ; inx < userArray.length ; inx++ ){              
               var tmpUserId = userArray[inx].userId;

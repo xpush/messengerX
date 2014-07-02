@@ -32,12 +32,23 @@ angular.module('starter.controllers', [])
       $scope.$apply();
     }
   });
-
+  
   $scope.goChat = function( friendIds ) {
     $stateParams.friendIds = friendIds;
 
     $rootScope.$stateParams = $stateParams;
     $state.go( 'chat' );
+  };
+
+  $scope.selection = [];
+
+  $scope.toggleSelection = function( friendId ){
+    var inx = $scope.selection.indexOf( friendId );
+    if( inx > -1 ){
+      $scope.selection.splice(inx, 1);
+    } else {
+      $scope.selection.push( friendId );
+    }
   };
 
   $scope.showPopup = function() {
@@ -88,14 +99,15 @@ angular.module('starter.controllers', [])
             Friends.list(function(friends){
               if( friends != undefined ){
                 $scope.friends = friends;
-                $scope.$apply();
+                var current = $state.current;
+                $state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
               }
             });
           }
         });
       }
     });
-  };  
+  };
 })
 .controller('AccountCtrl', function($scope) {
 
@@ -219,16 +231,12 @@ angular.module('starter.controllers', [])
   $scope.selection = [];
 
   $scope.toggleSelection = function( friendId ){
-    console.log( friendId );
     var inx = $scope.selection.indexOf( friendId );
-    console.log( "inx : " + inx );
     if( inx > -1 ){
       $scope.selection.splice(inx, 1);
     } else {
       $scope.selection.push( friendId );
     }
-
-    console.log( $scope.selection );
   };
 
   $scope.showPopup = function() {
