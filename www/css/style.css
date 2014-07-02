@@ -45,7 +45,7 @@ body {
 
 .messages span.from {
 	float: left;
-	margin: 0 5px;	
+	margin: 0 5px;
 	text-overflow: ellipsis;
 	overflow-x: hidden;
 	word-wrap: break-word;
@@ -68,4 +68,17 @@ body {
 	width: 40px;
 	height: 40px;
 	float: left;
+}
+
+.signin-background {
+  background-image: url('../img/login-background.jpg');
+}
+
+/*.signin-content {
+  position: fixed;
+  bottom: 20px;
+}*/
+
+.signin-content {
+    bottom: 1px !important; /* place bar-subfooter above footer */
 }
