@@ -9,23 +9,33 @@ angular.module('starter.services', [])
   // Some fake testing data
   var friends = [];
   var friendNames = [];
+  var loginUserId = Sign.getUser().userId;
 
   return {
     all: function() {
       return friends;
     },
+    add: function(userIds, callback) {
+      SocketManager.get( function( socket ){
+        socket.emit( 'group-add', {'userIds':userIds, 'groupId' : loginUserId}, function( data ){
+          callback( data );
+        });
+      });      
+    },    
     get: function(friendId) {
       // Simple index lookup
       return friends[friendId];
     },
     list : function(callback){
-      SocketManager.get( function( socket ){
-        socket.emit( 'user-list', {}, function( data ){
+      
+      SocketManager.get( function( socket ){        
+        socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
+          console.log( 'group-list' );
           if( data.status == 'ok' ){
             var users = data.result;
             var jnx = 0;
             for( var inx = 0 ; inx < users.length ; inx++ ){              
-              if( users[inx].userId != Sign.getUser().userId ){
+              if( users[inx].userId != loginUserId ){
                 if( friendNames.indexOf( users[inx].userId ) < 0 ){
                   friendNames.push( users[inx].userId );
                   friends.push( { 'id' : jnx++, uid : users[inx].userId, name: users[inx].userId } );
@@ -33,7 +43,52 @@ angular.module('starter.services', [])
               }
             }
 
+            console.log( "===friends====" );
+            console.log( friends );
             callback( friends );
+          }
+        });
+      });
+    }
+  }
+})
+.factory('Users', function(SocketManager, Sign) {
+  // Might use a resource here that returns a JSON array
+  var loginUserId = Sign.getUser().userId;
+
+  // Some fake testing data
+  var users = [];
+  var userIds = [];
+
+  return {
+    all: function() {
+      return users;
+    },
+    get: function(userId) {
+      // Simple index lookup
+      return users[userId];
+    },
+    list : function(callback){
+
+      SocketManager.get( function( socket ){        
+        socket.emit( 'user-list', {}, function( data ){
+          console.log( 'user-list' );
+          console.log( data );
+          if( data.status == 'ok' ){
+            var userArray = data.result;
+            var jnx = 0;
+            for( var inx = 0 ; inx < userArray.length ; inx++ ){              
+              var tmpUserId = userArray[inx].userId;
+              if( tmpUserId != loginUserId ){
+                if( userIds.indexOf( tmpUserId ) < 0 ){
+                  userIds.push( tmpUserId );
+                  users.push( { 'id' : jnx++, uid : tmpUserId, name: tmpUserId } );
+                }
+              }
+            }
+
+            console.log( users );
+            callback( users );
           }
         });
       });

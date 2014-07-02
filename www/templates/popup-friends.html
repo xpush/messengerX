@@ -1,8 +1,8 @@
 <ul class="list">
-  <li class="item item-checkbox" ng-repeat="friend in friends" >
+  <li class="item item-checkbox" ng-repeat="data in datas" >
     <label class="checkbox">
-      <input type="checkbox" value="{{friend.name}}" ng-click="toggleSelection('{{friend.uid}}')" ng-checked="selection.indexOf({{friend.uid}}) > -1" />
+      <input type="checkbox" value="{{data.name}}" ng-click="toggleSelection('{{data.uid}}')" ng-checked="selection.indexOf({{data.uid}}) > -1" />
     </label>
-    {{friend.name}}
+    {{data.name}}
   </li>
 </ul>

@@ -22,8 +22,10 @@ angular.module('starter.controllers', [])
     });
   };  
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, Friends) {
-  //$scope.friends = Friends.all();
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users) {
+  $scope.friends = [];
+  $scope.datas = [];
+  
   Friends.list(function(friends){
     if( friends != undefined ){
       $scope.friends = friends;
@@ -37,6 +39,63 @@ angular.module('starter.controllers', [])
     $rootScope.$stateParams = $stateParams;
     $state.go( 'chat' );
   };
+
+  $scope.showPopup = function() {
+    $scope.data = {};
+    $scope.selection = [];
+
+    Users.list(function(users){
+      if( users != undefined ){
+        $scope.datas = users;
+        $scope.$apply();
+      }
+    });     
+
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+      //template: '<ul class="list"><li class="item item-checkbox" ng-repeat="friend in friends"><label class="checkbox"><input type="checkbox"></label>{{friend.name}}</li></ul>',
+      templateUrl: "templates/popup-friends.html",
+      title: 'Add Friends',
+      //subTitle: 'Please use normal things',
+      scope: $scope,
+      buttons: [
+        { text: 'Cancel' },
+        {
+          text: '<b>Save</b>',
+          type: 'button-positive',
+          onTap: function(e) {
+            return $scope.selection;
+          }
+        },
+      ]
+    });
+
+    myPopup.then(function(res) {
+      console.log('Tapped!', res);
+      if( res != undefined ){
+
+        var addUsers = [];
+
+        //TO-DO : Only ID
+        for( var key in res ){
+          if( addUsers.indexOf( res[key] ) < 0 ){
+            addUsers.push( res[key] );
+          }
+        }
+
+        Friends.add( addUsers, function( data ){
+          if( data.status == 'ok' ){
+            Friends.list(function(friends){
+              if( friends != undefined ){
+                $scope.friends = friends;
+                $scope.$apply();
+              }
+            });
+          }
+        });
+      }
+    });
+  };  
 })
 .controller('AccountCtrl', function($scope) {
 
@@ -67,11 +126,11 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager, Channels) {
-  $scope.friends = [];
+  $scope.datas = [];
 
   Friends.list(function(friends){
     if( friends != undefined ){
-      $scope.friends = friends;
+      $scope.datas = friends;
       $scope.$apply();
     }
   });
