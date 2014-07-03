@@ -1,16 +1,18 @@
 <ion-view title="Account">
   <ion-content class="has-header padding">
 		<div class="list card">
-	    <a class="item item-thumbnail-left" href="#">
-	      <img src="{{loginUser.image}}" />
-	      <h2>{{loginUser.userId}}</h2>
-	      <p>{{loginUser.name}}</p>
+	    <a class="item item-thumbnail-left" >
+	      <img src="{{loginUser.datas.image}}" />
+	      <h2>{{loginUser.datas.name}}</h2>
+	      	<label class="item item-input">
+    				<input type="text" placeholder="Short Message" ng-model="loginUser.datas.message">
+  				</label>
 	  	</a>
 			<div class="item item-input-inset">
 				<label class="item-input-wrapper">
-		  		<input type="text" placeholder="Email" ng-model="loginUser.image" />
+		  		<input type="text" placeholder="Profile Image" ng-model="newImage" />
 				</label>
-				<button class="button button-small">
+				<button class="button button-small" ng-click="changeImage(newImage);">
 		  		Submit
 				</button>
 			</div>	  	

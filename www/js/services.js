@@ -32,12 +32,14 @@ angular.module('starter.services', [])
         socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
           if( data.status == 'ok' ){
             var users = data.result;
+            console.log( users );
             var jnx = 0;
             for( var inx = 0 ; inx < users.length ; inx++ ){              
               if( users[inx].userId != loginUserId ){
                 if( friendNames.indexOf( users[inx].userId ) < 0 ){
                   friendNames.push( users[inx].userId );
-                  friends.push( { 'id' : jnx++, uid : users[inx].userId, name: users[inx].userId } );
+                  friends.push( { 'id' : jnx++, 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
+                    'message' : users[inx].datas.message, 'image': users[inx].datas.image  } );
                 }
               }
             }
@@ -79,11 +81,13 @@ angular.module('starter.services', [])
               if( tmpUserId != loginUserId ){
                 if( userIds.indexOf( tmpUserId ) < 0 ){
                   userIds.push( tmpUserId );
-                  users.push( { 'id' : jnx++, uid : tmpUserId, name: tmpUserId } );
+                  users.push( { 'id' : jnx++, 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name,
+                    'message' : users[inx].datas.message, 'image': userArray[inx].datas.image } );
                 }
               }
             }
 
+            console.log( "users");
             console.log( users );
             callback( users );
           }
@@ -234,6 +238,7 @@ angular.module('starter.services', [])
         'token='+loginUser.userToken;
         
       // Session Socket
+      console.log( loginUser.sessionServer );
       var socket = io.connect(loginUser.sessionServer+'/session?'+query, socketOptions);
       socket.on('connect', function() {
         console.log( 'session socket connect');
@@ -399,6 +404,9 @@ angular.module('starter.services', [])
       channelSocket.emit('join', users, function (data) {
         callback( data );
       });
+    },
+    exit : function(){
+      channelSocket.disconnect();
     }
   }
 })

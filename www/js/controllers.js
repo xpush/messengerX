@@ -28,6 +28,7 @@ angular.module('starter.controllers', [])
   
   Friends.list(function(friends){
     if( friends != undefined ){
+      console.log( friends ); 
       $scope.friends = friends;
       $scope.$apply();
     }
@@ -64,7 +65,6 @@ angular.module('starter.controllers', [])
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
-      //template: '<ul class="list"><li class="item item-checkbox" ng-repeat="friend in friends"><label class="checkbox"><input type="checkbox"></label>{{friend.name}}</li></ul>',
       templateUrl: "templates/popup-friends.html",
       title: 'Add Friends',
       //subTitle: 'Please use normal things',
@@ -111,20 +111,34 @@ angular.module('starter.controllers', [])
 })
 .controller('AccountCtrl', function($scope, Sign) {
   $scope.loginUser = Sign.getUser();
-  $scope.loginUser.image = '../www/img/default_image.jpg';
+  console.log( $scope.loginUser );
+
+  $scope.newImage = '';
+
+  $scope.changeImage = function(newImage){
+    $scope.loginUser.datas.image = newImage;
+
+    var params = { 'app' : 'messengerx', 'userId' : $scope.loginUser.userId, 'password' : $scope.loginUser.password, 'deviceId' : 'ionic',  datas : { 'name' : $scope.loginUser.datas.name,
+                 'image': $scope.loginUser.datas.image, 'message' : $scope.loginUser.datas.message } };
+    Sign.register( params, function(data){
+      if( data.status == 'ok' ){
+        Sign.setUser( $scope.loginUser );
+      }
+    });
+  };
+
 })
 .controller('SignInCtrl', function($scope, $state, $stateParams, $http, Sign) {
   $scope.signIn = function(user) {
-		var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic',  datas : { 'name' : user.username,
-                 'image':'./www/img/default_image.jpg' } };
+		var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic' };
 
     Sign.login( params, function(data){
-      var loginUser = params;
+      console.log( data );
+      var loginUser = data.result.user;
       loginUser.userToken = data.result.token;
       loginUser.sessionServer = data.result.serverUrl;
-
-      loginUser.name = data.result.user.datas.name;
-      loginUser.image = data.result.user.datas.image;      
+      loginUser.password = user.password;
+      loginUser.deviceId = 'ionic';
 
       Sign.setUser( loginUser );
       $state.go('tab.friends');
@@ -134,7 +148,7 @@ angular.module('starter.controllers', [])
 .controller('SignUpCtrl', function($scope, $state, $stateParams, $http, Sign) {
   $scope.signUp = function(user) {
     var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic', datas : {'name' : user.username,
-                 'image':'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/t1.0-1/p50x50/10462917_1503891336506883_4678783454533660696_t.jpg'} };
+                 'image':'../www/img/default_image.jpg', 'message':'' } };
     //var params = { 'app' : 'messengerx', 'userId' : 'F100002531861340', 'password' : '100002531861340', 'deviceId' : 'WEB' };
     Sign.register( params, function(data){
       $state.go('signin');
@@ -191,16 +205,20 @@ angular.module('starter.controllers', [])
     var friendIds = stateParams.friendIds.split("$");
     
     channelUsers = channelUsers.concat( friendIds );
-    if( channelUsers.indexOf( loginUser.userId ) < 0 ){
+    if( channelUsers.length == 1 ){
+      channelName = channelUsers.join(',');
       channelUsers.push( loginUser.userId );
+    } else {
+      if( channelUsers.indexOf( loginUser.userId ) < 0 ){
+        channelUsers.push( loginUser.userId );
+      }
+      channelUsers.sort();
+      channelName = channelUsers.join(',');
     }
-    channelUsers.sort();
 
     var createObject = {};
-    createObject.name = channelUsers.join(',');
     createObject.users = channelUsers;
-
-    channelName = createObject.name;
+    createObject.name = channelName;
 
     var channelId = Channels.generateId(createObject);
     createObject.channel = channelId;
@@ -301,5 +319,21 @@ angular.module('starter.controllers', [])
         }
       }
     });
-  };  
+  };
+
+  $scope.$on('$destroy', function() {
+     window.onbeforeunload = undefined;
+  });
+  $scope.$on('$locationChangeStart', function(event, next, current) {
+    console.log( event );
+    console.log( next );
+    console.log( current );
+    if( current.indexOf('/chat') > -1 ){
+      if(!confirm("Are you sure you want to leave this page?")) {
+        event.preventDefault();
+      } else {
+        Chat.exit();
+      }
+    }
+  });
 });

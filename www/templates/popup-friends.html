@@ -1,8 +1,8 @@
 <ul class="list">
   <li class="item item-checkbox" ng-repeat="data in datas" >
     <label class="checkbox" >
-      <input type="checkbox" value="{{data.name}}" ng-click="toggleSelection('{{data.uid}}')" ng-checked="selection.indexOf('{{data.uid}}') > -1 || channelUsers.indexOf('{{data.uid}}') > -1 " ng-disabled="channelUsers.indexOf('{{data.uid}}') > -1"/>
+      <input type="checkbox" ng-click="toggleSelection('{{data.userId}}')" ng-checked="selection.indexOf('{{data.userId}}') > -1 || channelUsers.indexOf('{{data.userId}}') > -1 " ng-disabled="channelUsers.indexOf('{{data.userId}}') > -1"/>
     </label>
-    {{data.name}}
+    {{data.userName}}
   </li>
 </ul>
