@@ -82,3 +82,10 @@ body {
 .signin-content {
     bottom: 1px !important; /* place bar-subfooter above footer */
 }
+
+input:disabled + .checkbox-icon:before {
+    border-color: silver !important;
+}
+input:disabled:checked + .checkbox-icon:before {
+    background-color: silver !important;
+}

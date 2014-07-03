@@ -185,9 +185,11 @@ angular.module('starter.controllers', [])
     initChat();
   } else {
     var friendIds = stateParams.friendIds.split("$");
-
-    channelUsers.push( loginUser.userId );
+    
     channelUsers = channelUsers.concat( friendIds );
+    if( channelUsers.indexOf( loginUser.userId ) < 0 ){
+      channelUsers.push( loginUser.userId );
+    }
     channelUsers.sort();
 
     var createObject = {};
@@ -239,9 +241,10 @@ angular.module('starter.controllers', [])
     }
   };
 
-  $scope.showPopup = function() {
+  $scope.showPopup = function() {    
     $scope.data = {};
     $scope.selection = [];
+    $scope.channelUsers = channelUsers;
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
@@ -263,7 +266,6 @@ angular.module('starter.controllers', [])
     });
 
     myPopup.then(function(res) {
-      console.log('Tapped!', res);
       if( res != undefined ){
 
         var joinUsers = [];
@@ -280,10 +282,8 @@ angular.module('starter.controllers', [])
           }
         }
 
-        console.log( joinUsers );
-        console.log( channelUsers );
-
-        if( channelUsers.length == 3 ){
+        // channel with 2 people
+        if( channelId.indexOf( "$" ) > -1 ){
           $rootScope.$stateParams.friendIds = channelUsers.join( "$" );
 
           var current = $state.current;
