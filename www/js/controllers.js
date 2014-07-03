@@ -111,12 +111,12 @@ angular.module('starter.controllers', [])
 })
 .controller('AccountCtrl', function($scope, Sign) {
   $scope.loginUser = Sign.getUser();
-  $scope.loginUser.image = '../www/img/default_profile_image.jpg';
+  $scope.loginUser.image = '../www/img/default_image.jpg';
 })
 .controller('SignInCtrl', function($scope, $state, $stateParams, $http, Sign) {
   $scope.signIn = function(user) {
 		var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic',  datas : { 'name' : user.username,
-                 'image':'./www/img/default_profile_image.jpg' } };
+                 'image':'./www/img/default_image.jpg' } };
 
     Sign.login( params, function(data){
       var loginUser = params;
