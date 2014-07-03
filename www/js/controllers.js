@@ -109,18 +109,22 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('AccountCtrl', function($scope) {
-
+.controller('AccountCtrl', function($scope, Sign) {
+  $scope.loginUser = Sign.getUser();
+  $scope.loginUser.image = '../www/img/default_profile_image.jpg';
 })
 .controller('SignInCtrl', function($scope, $state, $stateParams, $http, Sign) {
   $scope.signIn = function(user) {
-		var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic', 'name' : user.username,
-                 'image':'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/t1.0-1/p50x50/10462917_1503891336506883_4678783454533660696_t.jpg' };
+		var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic',  datas : { 'name' : user.username,
+                 'image':'./www/img/default_profile_image.jpg' } };
 
     Sign.login( params, function(data){
       var loginUser = params;
       loginUser.userToken = data.result.token;
       loginUser.sessionServer = data.result.serverUrl;
+
+      loginUser.name = data.result.user.datas.name;
+      loginUser.image = data.result.user.datas.image;      
 
       Sign.setUser( loginUser );
       $state.go('tab.friends');
@@ -129,8 +133,8 @@ angular.module('starter.controllers', [])
 })
 .controller('SignUpCtrl', function($scope, $state, $stateParams, $http, Sign) {
   $scope.signUp = function(user) {
-    var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic', 'name' : user.username,
-                 'image':'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/t1.0-1/p50x50/10462917_1503891336506883_4678783454533660696_t.jpg' };
+    var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic', datas : {'name' : user.username,
+                 'image':'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/t1.0-1/p50x50/10462917_1503891336506883_4678783454533660696_t.jpg'} };
     //var params = { 'app' : 'messengerx', 'userId' : 'F100002531861340', 'password' : '100002531861340', 'deviceId' : 'WEB' };
     Sign.register( params, function(data){
       $state.go('signin');
@@ -194,7 +198,7 @@ angular.module('starter.controllers', [])
 
     var createObject = {};
     createObject.name = channelUsers.join(',');
-    createObject.channel_users = channelUsers;
+    createObject.users = channelUsers;
 
     channelName = createObject.name;
 
@@ -202,7 +206,8 @@ angular.module('starter.controllers', [])
     createObject.channel = channelId;
 
     SocketManager.get( function(socket){
-      socket.emit("channel-create", createObject, function(){
+      socket.emit("channel-create", createObject, function(data){
+        console.log( data );
         console.log( "channel-create success" );
         Channels.add( createObject );
         initChat();

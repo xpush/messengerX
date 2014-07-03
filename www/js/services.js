@@ -30,7 +30,6 @@ angular.module('starter.services', [])
       
       SocketManager.get( function( socket ){        
         socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
-          console.log( 'group-list' );
           if( data.status == 'ok' ){
             var users = data.result;
             var jnx = 0;
@@ -43,8 +42,6 @@ angular.module('starter.services', [])
               }
             }
 
-            console.log( "===friends====" );
-            console.log( friends );
             callback( friends );
           }
         });
@@ -117,8 +114,6 @@ angular.module('starter.services', [])
         });
     },
     add : function(jsonObj){
-      console.log( "add ");
-      console.log( jsonObj );
 
       var channelId = '';
 
@@ -130,7 +125,7 @@ angular.module('starter.services', [])
       var cond = [
         jsonObj.channel,
         jsonObj.name,
-        jsonObj.channel_users,
+        jsonObj.users,
         1,
         Date.now()
       ];
@@ -158,11 +153,11 @@ angular.module('starter.services', [])
     },
     generateId : function(jsonObj){
       var channelId;
-      if( jsonObj.channel_users.length > 2 ){
+      if( jsonObj.users.length > 2 ){
         channelId = UTIL.getUniqueKey()+"^"+APP_INFO.appKey;;
       } else {
-        jsonObj.channel_users.sort();
-        channelId = jsonObj.channel_users.join( "$" )+"^"+APP_INFO.appKey;
+        jsonObj.users.sort();
+        channelId = jsonObj.users.join( "$" )+"^"+APP_INFO.appKey;
       }
       return channelId;
     }
@@ -247,12 +242,14 @@ angular.module('starter.services', [])
       });
 
       socket.on('_event', function (messageObject) {
-        if( messageObject.event == 'NOTIFICATION' ){
+        if( messageObject.event == 'NOTIFICATION' ){          
           var data = messageObject.data;
+
+          console.log( 'NOTI : ' + data );
 
           var channel = {'channel': data.channel, 'name': data.user.id };
           if( data.channel.indexOf( "$" ) > -1 ){
-            data.channel_users = data.channel.split( "^" )[0].split( "$" ).join( "," );
+            channel.users = data.channel.split( "^" )[0].split( "$" ).join( "," );
           }
 
           Channels.add( channel );
@@ -319,6 +316,7 @@ angular.module('starter.services', [])
           'force new connection': true
         };
 
+        console.log( socketServerUrl );
         channelSocket = io.connect(socketServerUrl+'/channel?'+query, socketOptions);
 
         channelSocket.on('connect', function() {
