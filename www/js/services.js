@@ -55,10 +55,6 @@ angular.module('starter.services', [])
   // Might use a resource here that returns a JSON array
   var loginUserId = Sign.getUser().userId;
 
-  // Some fake testing data
-  var users = [];
-  var userIds = [];
-
   return {
     all: function() {
       return users;
@@ -69,6 +65,9 @@ angular.module('starter.services', [])
     },
     list : function(callback){
 
+      var users = [];
+      var userIds = [];      
+
       SocketManager.get( function( socket ){        
         socket.emit( 'user-list', {}, function( data ){
           console.log( 'user-list' );
@@ -78,17 +77,15 @@ angular.module('starter.services', [])
             var jnx = 0;
             for( var inx = 0 ; inx < userArray.length ; inx++ ){              
               var tmpUserId = userArray[inx].userId;
+              console.log( "tmpUserId : " + tmpUserId );
               if( tmpUserId != loginUserId ){
                 if( userIds.indexOf( tmpUserId ) < 0 ){
                   userIds.push( tmpUserId );
-                  users.push( { 'id' : jnx++, 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name,
-                    'message' : users[inx].datas.message, 'image': userArray[inx].datas.image } );
+                  users.push( { 'id' : jnx++, 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image } );
                 }
               }
             }
 
-            console.log( "users");
-            console.log( users );
             callback( users );
           }
         });
