@@ -165,8 +165,6 @@ angular.module('starter.controllers', [])
     }
   });
 
-  console.log( "initController" );
-
   initChat = function(){
     var param = {};
     param.app = loginUser.app;
@@ -175,7 +173,6 @@ angular.module('starter.controllers', [])
     param.deviceId = loginUser.deviceId;  
 
     // Channel Init
-    console.log( "initChat" );
     Chat.init( param, loginUser, $scope, function( messages ){
       if( messages != undefined ){
         $scope.messages = $scope.messages.concat(messages);;
@@ -296,10 +293,7 @@ angular.module('starter.controllers', [])
 
         //TO-DO : Only ID
         for( var key in res ){
-          var joinObject = {};
-          joinObject.deviceId = 'ionic';
-          joinObject.userId = res[key];
-          joinUsers.push( joinObject );
+          joinUsers.push( res[key] );
 
           if( channelUsers.indexOf( res[key] ) < 0 ){
             channelUsers.push( res[key] );
@@ -312,9 +306,10 @@ angular.module('starter.controllers', [])
 
           var current = $state.current;
           $state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
-          console.log( 'reload' );
         } else {
-          var joinObject = { 'users' : joinUsers, 'datas' : { 'name' : channelName,'users' : joinUsers } };
+          channelName = channelUsers.sort().join(",");
+          $scope.channelName = channelName;
+          var joinObject = { 'users' : joinUsers, 'datas' : { 'name' : channelName,'users' : channelUsers } };
           Chat.join( joinObject, function(data){
             console.log( data );
           });
@@ -327,9 +322,6 @@ angular.module('starter.controllers', [])
      window.onbeforeunload = undefined;
   });
   $scope.$on('$locationChangeStart', function(event, next, current) {
-    console.log( event );
-    console.log( next );
-    console.log( current );
     if( current.indexOf('/chat') > -1 ){
       if(!confirm("Are you sure you want to leave this page?")) {
         event.preventDefault();

@@ -79,7 +79,7 @@ angular.module('starter.services', [])
               console.log( "tmpUserId : " + tmpUserId );
               if( tmpUserId != loginUserId ){
                 if( userIds.indexOf( tmpUserId ) < 0 ){
-                  userIds.push( tmpUserId );
+                  userIds.push( tmpUserId );DR
                   users.push( { 'id' : jnx++, 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image } );
                 }
               }
