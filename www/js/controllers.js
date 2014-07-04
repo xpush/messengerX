@@ -196,9 +196,9 @@ angular.module('starter.controllers', [])
   if( stateParams.channelId != undefined ) {
     channelId = stateParams.channelId;
 
-    channelUsers = stateParams.channelName;
+    channelUsers = stateParams.channelUsers.split(",");
     channelUsers.sort();
-    channelName = channelUsers.join(",");
+    channelName = stateParams.channelName;
 
     initChat();
   } else {
@@ -219,6 +219,7 @@ angular.module('starter.controllers', [])
     var createObject = {};
     createObject.users = channelUsers;
     createObject.name = channelName;
+    createObject.datas = { 'name' : channelName, 'users' : channelUsers };
 
     var channelId = Channels.generateId(createObject);
     createObject.channel = channelId;
@@ -313,7 +314,8 @@ angular.module('starter.controllers', [])
           $state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
           console.log( 'reload' );
         } else {
-          Chat.join( joinUsers, function(data){
+          var joinObject = { 'users' : joinUsers, 'datas' : { 'name' : channelName,'users' : joinUsers } };
+          Chat.join( joinObject, function(data){
             console.log( data );
           });
         }

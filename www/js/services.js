@@ -234,7 +234,7 @@ angular.module('starter.services', [])
         'token='+loginUser.userToken;
         
       // Session Socket
-      console.log( loginUser.sessionServer );
+      console.log( "session-socket-server : " + loginUser.sessionServer );
       var socket = io.connect(loginUser.sessionServer+'/session?'+query, socketOptions);
       socket.on('connect', function() {
         console.log( 'session socket connect');
@@ -246,20 +246,21 @@ angular.module('starter.services', [])
         if( messageObject.event == 'NOTIFICATION' ){          
           var data = messageObject.data;
 
-          console.log( 'NOTI : ' + data );
+          console.log( 'NOTI : ' );
 
-          var channel = {'channel': data.channel, 'name': data.user.id };
-          if( data.channel.indexOf( "$" ) > -1 ){
-            channel.users = data.channel.split( "^" )[0].split( "$" ).join( "," );
-          }
-
-          Channels.add( channel );
+          socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
+            console.log( channelJson );
+            //var channel = {'channel': data.channel, 'name': channelJson.result.datas.names, 'users' : channelJson.result.datas.names };
+            var channel = {'channel': data.channel, 'name': channelJson.result.datas.name, 'users' : channelJson.result.datas.users };
+            Channels.add( channel );
+          });
         }
       });
 
       socket.on('disconnect', function (data) {
+        console.log( data );
         console.info('session socket disconnect');
-      });    
+      });
     }
   }
 })
@@ -314,7 +315,7 @@ angular.module('starter.services', [])
 
         CONF._app = params.app;
         CONF._channel = params.channel;
-        CONF._user = { userId : loginUser.userId, userName : loginUser.datas.userName, url :'', image : loginUser.datas.image};
+        CONF._user = { userId : loginUser.userId, userName : loginUser.datas.name, url :'', image : loginUser.datas.image};
 
         var query = "app=" + params.app + "&channel=" + params.channel + "&userId=" + params.userId + "&deviceId=" + params.deviceId
          + "&server=" + data.result.server.name;
@@ -409,8 +410,8 @@ angular.module('starter.services', [])
       channelSocket.emit('send', param, function (data) {
       });
     },
-    join : function( users, callback){
-      channelSocket.emit('join', users, function (data) {
+    join : function( param, callback){
+      channelSocket.emit('join', param, function (data) {
         callback( data );
       });
     },
