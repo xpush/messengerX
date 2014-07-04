@@ -7,7 +7,7 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'ionic', 'ionic.contrib.frostedGlass'])
 
-.run(function($ionicPlatform, DB) {
+.run(function($ionicPlatform, $rootScope, DB, Sign) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -20,6 +20,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
 
     DB.init();
+
+    // tootScope function
+    $rootScope.logout = function( ){
+      Sign.logout();
+    };
   });
 })
 

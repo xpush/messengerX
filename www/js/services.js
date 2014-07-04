@@ -32,7 +32,6 @@ angular.module('starter.services', [])
         socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
           if( data.status == 'ok' ){
             var users = data.result;
-            console.log( users );
             var jnx = 0;
             for( var inx = 0 ; inx < users.length ; inx++ ){              
               if( users[inx].userId != loginUserId ){
@@ -264,7 +263,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Sign', function($http, BASE_URL) {
+.factory('Sign', function($http, $state, BASE_URL) {
   var loginUser;
   return {
     login : function( params, callback ){
@@ -277,6 +276,12 @@ angular.module('starter.services', [])
         // or server returns response with an error status.
       });
     },
+    logout : function(){
+
+      // Clear login
+      loginUser = {};
+      $state.go('signin');
+    },    
     register : function( params, callback ){
       $http.post("http://"+BASE_URL+":8000/user/register", params)
       .success(function(data) {
@@ -309,7 +314,7 @@ angular.module('starter.services', [])
 
         CONF._app = params.app;
         CONF._channel = params.channel;
-        CONF._user = { id : loginUser.userId, name : loginUser.name, url :'', image : loginUser.image};
+        CONF._user = { userId : loginUser.userId, userName : loginUser.datas.userName, url :'', image : loginUser.datas.image};
 
         var query = "app=" + params.app + "&channel=" + params.channel + "&userId=" + params.userId + "&deviceId=" + params.deviceId
          + "&server=" + data.result.server.name;
@@ -329,11 +334,20 @@ angular.module('starter.services', [])
             var messages = [];
             for( var inx = 0 ; inx < unreadMessages.length ; inx++ ){
               var data = JSON.parse( unreadMessages[inx].message.data );
+
               var content;
-              content = '<div class="small">'+data.user.id+'</div>' ;
-              content = content + '<img src="'+data.user.image+'" class="profile"/>';
-              content = content + '<span class="from">'+decodeURIComponent( data.message )+'</span>' ;
-              messages.push( { content : content, from : 'you' } );
+              var from = data.user.userId == loginUser.userId ? 'me' : 'you';
+
+              if(from == 'you'){                
+                content = '<div class="small">'+ data.user.userId+'</div>' ;
+                content = content + '<img src="'+ data.user.image+'" class="profile"/>';
+                content = content + '<span class="from">'+decodeURIComponent( data.message )+'</span>' ;
+                
+              } else {
+                content = '<span>'+data.message+'</span>' 
+              }
+
+              messages.push( { content : content, from : from } );
             }
 
             //message received complete
@@ -357,16 +371,14 @@ angular.module('starter.services', [])
           //chatText +='<div class="message '+msgClass+'">'+decodeURIComponent(data.message)+'</div>';
 
           data.message = decodeURIComponent(data.message);          
-          var from = data.user.id == loginUser.userId ? 'me': 'you' ;
+          var from = data.user.userId == loginUser.userId ? 'me': 'you' ;
 
           var content;
           if(from == 'you'){
-            data.sender = data.user.id;
-            data.picture = data.user.image;
 
-            content = '<div class="small">'+data.sender+'</div>' ;
-            content = content + '<img src="'+data.picture+'" class="profile"/>';
-            content = content + '<span class="from">'+data.message+'</span>' ;
+            content = '<div class="small">'+ data.user.userId+'</div>' ;
+            content = content + '<img src="'+ data.user.image+'" class="profile"/>';
+            content = content + '<span class="from">'+decodeURIComponent( data.message )+'</span>' ;
             
           } else {
             content = '<span>'+data.message+'</span>' 
@@ -390,7 +402,7 @@ angular.module('starter.services', [])
         data:     {
           user:     CONF._user,
           message:  msg,
-          sender : 'operator'
+          sender : CONF._user.userId
         }
       };
 

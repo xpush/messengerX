@@ -17,6 +17,7 @@ angular.module('starter.controllers', [])
       console.log( data );
       $stateParams.channelId = channelId;
       $stateParams.channelUsers = data.channel_users;
+      $stateParams.channelName = data.channel_name;
       $rootScope.$stateParams = $stateParams;
       $state.go( 'chat' );
     });
@@ -28,7 +29,6 @@ angular.module('starter.controllers', [])
   
   Friends.list(function(friends){
     if( friends != undefined ){
-      console.log( friends ); 
       $scope.friends = friends;
       $scope.$apply();
     }
@@ -196,7 +196,7 @@ angular.module('starter.controllers', [])
   if( stateParams.channelId != undefined ) {
     channelId = stateParams.channelId;
 
-    channelUsers = stateParams.channelUsers.split(",");
+    channelUsers = stateParams.channelName;
     channelUsers.sort();
     channelName = channelUsers.join(",");
 
