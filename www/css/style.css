@@ -83,6 +83,22 @@ body {
     bottom: 1px !important; /* place bar-subfooter above footer */
 }
 
+.tiny-profile img {
+	width:32px;
+	height:32px;
+}
+
+.tiny-profile span {
+	color : #000000;
+	line-height: 32px;
+	display: inline-block;
+	text-overflow: ellipsis;
+	vertical-align: top;
+	padding-left: 4px;
+	margin-right: 20px;
+	max-width: 175px;
+}
+
 input:disabled + .checkbox-icon:before {
     border-color: silver !important;
 }

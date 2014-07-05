@@ -111,16 +111,17 @@ angular.module('starter.controllers', [])
 })
 .controller('AccountCtrl', function($scope, Sign) {
   $scope.loginUser = Sign.getUser();
-  console.log( $scope.loginUser );
 
   $scope.newImage = '';
 
   $scope.changeImage = function(newImage){
-    $scope.loginUser.datas.image = newImage;
+    if( newImage != '' ){
+      $scope.loginUser.datas.image = newImage;
+    }
 
     var params = { 'app' : 'messengerx', 'userId' : $scope.loginUser.userId, 'password' : $scope.loginUser.password, 'deviceId' : 'ionic',  datas : { 'name' : $scope.loginUser.datas.name,
                  'image': $scope.loginUser.datas.image, 'message' : $scope.loginUser.datas.message } };
-    Sign.register( params, function(data){
+    Sign.update( params, function(data){
       if( data.status == 'ok' ){
         Sign.setUser( $scope.loginUser );
       }
@@ -128,18 +129,18 @@ angular.module('starter.controllers', [])
   };
 
 })
-.controller('SignInCtrl', function($scope, $state, $stateParams, $http, Sign) {
+.controller('SignInCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
   $scope.signIn = function(user) {
 		var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic' };
 
     Sign.login( params, function(data){
-      console.log( data );
       var loginUser = data.result.user;
       loginUser.userToken = data.result.token;
       loginUser.sessionServer = data.result.serverUrl;
       loginUser.password = user.password;
       loginUser.deviceId = 'ionic';
 
+      $rootScope.loginUser = loginUser;
       Sign.setUser( loginUser );
       $state.go('tab.friends');
     });

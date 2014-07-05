@@ -72,14 +72,13 @@ angular.module('starter.services', [])
           console.log( 'user-list' );
           if( data.status == 'ok' ){
             var userArray = data.result;
-            console.log( userArray );
             var jnx = 0;
             for( var inx = 0 ; inx < userArray.length ; inx++ ){              
               var tmpUserId = userArray[inx].userId;
               console.log( "tmpUserId : " + tmpUserId );
               if( tmpUserId != loginUserId ){
                 if( userIds.indexOf( tmpUserId ) < 0 ){
-                  userIds.push( tmpUserId );DR
+                  userIds.push( tmpUserId );
                   users.push( { 'id' : jnx++, 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image } );
                 }
               }
@@ -292,7 +291,17 @@ angular.module('starter.services', [])
         // called asynchronously if an error occurs
         // or server returns response with an error status.
       });
-    },    
+    },
+    update : function( params, callback ){
+      $http.post("http://"+BASE_URL+":8000/user/update", params)
+      .success(function(data) {
+        callback( data );
+      })
+      .error(function(data, status, headers, config) {
+        // called asynchronously if an error occurs
+        // or server returns response with an error status.
+      });
+    },
 
     setUser : function( user ){
       loginUser = user;
@@ -365,11 +374,6 @@ angular.module('starter.services', [])
         });         
 
         channelSocket.on('message', function (data) {
-          //console.info('\t MESSAGE : '+JSON.stringify(data));
-          data.timestamp = Date.now()
-          //var chatText = '<div class="timestamp">'+getTimeStamp()+':'+data.sender+'</div>';
-          // var msgClass = data.sender==_userId?'from-op':'from-visitor';
-          //chatText +='<div class="message '+msgClass+'">'+decodeURIComponent(data.message)+'</div>';
 
           data.message = decodeURIComponent(data.message);          
           var from = data.user.userId == loginUser.userId ? 'me': 'you' ;
