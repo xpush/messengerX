@@ -56,12 +56,12 @@ angular.module('starter.controllers', [])
     $scope.data = {};
     $scope.selection = [];
 
-    Users.list(function(users){
+    Users.list($scope.friends, function(users){
       if( users != undefined ){
         $scope.datas = users;
         $scope.$apply();
       }
-    });     
+    });
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({

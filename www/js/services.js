@@ -62,10 +62,15 @@ angular.module('starter.services', [])
       // Simple index lookup
       return users[userId];
     },
-    list : function(callback){
+    list : function(friends,callback){
 
       var users = [];
-      var userIds = [];      
+      var userIds = [];
+
+      var friendIds = [];
+      for( var key in friends ){
+        friendIds.push( friends[key].userId );
+      }
 
       SocketManager.get( function( socket ){        
         socket.emit( 'user-list', {}, function( data ){
@@ -74,11 +79,10 @@ angular.module('starter.services', [])
             var userArray = data.result;
             var jnx = 0;
             for( var inx = 0 ; inx < userArray.length ; inx++ ){              
-              var tmpUserId = userArray[inx].userId;
-              console.log( "tmpUserId : " + tmpUserId );
-              if( tmpUserId != loginUserId ){
-                if( userIds.indexOf( tmpUserId ) < 0 ){
-                  userIds.push( tmpUserId );
+              var cUserId = userArray[inx].userId;
+              if( friendIds.indexOf( cUserId ) < 0 && cUserId != loginUserId ){
+                if( userIds.indexOf( cUserId ) < 0 ){
+                  userIds.push( cUserId );
                   users.push( { 'id' : jnx++, 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image } );
                 }
               }
