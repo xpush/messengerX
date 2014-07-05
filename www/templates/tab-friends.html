@@ -9,10 +9,10 @@
       LogOut
     </button>
   </ion-nav-buttons>
-  <ion-content class="has-header">
+  <ion-content class="has-header" >
     <ion-list>
     	<ion-item ng-repeat="friend in friends" class="item item-thumbnail-left" ng-click="goChat('{{friend.userId}}')">
-        <img src="{{friend.image}}" />
+        <img src="{{friend.image}} " />
         <h2>{{friend.userName}}</h2>
         <p>{{friend.message}}</p>
       </ion-item>

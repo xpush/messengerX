@@ -6,15 +6,16 @@ angular.module('starter.controllers', [])
 .controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels) {
 
   var channelIds = [];
-  $scope.channels = [];
+  $scope.channels = {};
 
-  Channels.list( $scope ).then(function(data) {
-    $scope.channels = $scope.channels.concat(data);
+  Channels.list( $scope ).then(function(channels) {
+    for( var inx = 0 ; inx < channels.length ; inx++ ){
+      $scope.channels[ channels[inx].channel_id ] = channels[inx];
+    }
   });
 
   $scope.goChat = function( channelId ) {
     Channels.get( channelId ).then(function(data) {
-      console.log( data );
       $stateParams.channelId = channelId;
       $stateParams.channelUsers = data.channel_users;
       $stateParams.channelName = data.channel_name;
@@ -24,16 +25,16 @@ angular.module('starter.controllers', [])
   };  
 })
 .controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users) {
-  $scope.friends = [];
+  $scope.friends = {};
   $scope.datas = [];
-  
+
   Friends.list(function(friends){
     if( friends != undefined ){
       $scope.friends = friends;
       $scope.$apply();
     }
   });
-  
+
   $scope.goChat = function( friendIds ) {
     $stateParams.friendIds = friendIds;
 
@@ -129,7 +130,7 @@ angular.module('starter.controllers', [])
   };
 
 })
-.controller('SignInCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
+.controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, Sign) {
   $scope.signIn = function(user) {
 		var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic' };
 
@@ -142,6 +143,7 @@ angular.module('starter.controllers', [])
 
       $rootScope.loginUser = loginUser;
       Sign.setUser( loginUser );
+
       $state.go('tab.friends');
     });
   };
@@ -217,15 +219,16 @@ angular.module('starter.controllers', [])
     var createObject = {};
     createObject.users = channelUsers;
     createObject.name = channelName;
-    createObject.datas = { 'name' : channelName, 'users' : channelUsers };
+    createObject.datas = { 'name' : channelName, 'users' : channelUsers, 'from' : loginUser.datas.name, 'users_cnt': channelUsers.length };
 
     var channelId = Channels.generateId(createObject);
     createObject.channel = channelId;
 
     SocketManager.get( function(socket){
       socket.emit("channel-create", createObject, function(data){
-        console.log( data );
         console.log( "channel-create success" );
+
+        createObject.unreadCount = 0;
         Channels.add( createObject );
         initChat();
       });
@@ -310,7 +313,7 @@ angular.module('starter.controllers', [])
         } else {
           channelName = channelUsers.sort().join(",");
           $scope.channelName = channelName;
-          var joinObject = { 'users' : joinUsers, 'datas' : { 'name' : channelName,'users' : channelUsers } };
+          var joinObject = { 'users' : joinUsers, 'datas' : { 'name' : channelName,'users' : channelUsers,  'from' : loginUser.datas.name, 'users_cnt': channelUsers.length } };
           Chat.join( joinObject, function(data){
             console.log( data );
           });

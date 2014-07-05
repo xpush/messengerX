@@ -7,15 +7,16 @@ angular.module('starter.services', [])
   // Might use a resource here that returns a JSON array
 
   // Some fake testing data
-  var friends = [];
-  var friendNames = [];
-  var loginUserId = Sign.getUser().userId;
+  var friends = {};
+  var loginUserId;
+  var scope;
 
   return {
     all: function() {
       return friends;
     },
     add: function(userIds, callback) {
+      loginUserId = Sign.getUser().userId;
       SocketManager.get( function( socket ){
         socket.emit( 'group-add', {'userIds':userIds, 'groupId' : loginUserId}, function( data ){
           callback( data );
@@ -27,7 +28,9 @@ angular.module('starter.services', [])
       return friends[friendId];
     },
     list : function(callback){
-      
+      friends = {};
+      loginUserId = Sign.getUser().userId;
+
       SocketManager.get( function( socket ){        
         socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
           if( data.status == 'ok' ){
@@ -35,11 +38,8 @@ angular.module('starter.services', [])
             var jnx = 0;
             for( var inx = 0 ; inx < users.length ; inx++ ){              
               if( users[inx].userId != loginUserId ){
-                if( friendNames.indexOf( users[inx].userId ) < 0 ){
-                  friendNames.push( users[inx].userId );
-                  friends.push( { 'id' : jnx++, 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
-                    'message' : users[inx].datas.message, 'image': users[inx].datas.image  } );
-                }
+                friends[ users[inx].userId ] = { 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
+                  'message' : users[inx].datas.message, 'image': users[inx].datas.image  };
               }
             }
 
@@ -52,7 +52,7 @@ angular.module('starter.services', [])
 })
 .factory('Users', function(SocketManager, Sign) {
   // Might use a resource here that returns a JSON array
-  var loginUserId = Sign.getUser().userId;
+  var loginUserId;
 
   return {
     all: function() {
@@ -64,27 +64,20 @@ angular.module('starter.services', [])
     },
     list : function(friends,callback){
 
-      var users = [];
-      var userIds = [];
+      loginUserId = Sign.getUser().userId;
 
-      var friendIds = [];
-      for( var key in friends ){
-        friendIds.push( friends[key].userId );
-      }
+      var users = {};
 
       SocketManager.get( function( socket ){        
         socket.emit( 'user-list', {}, function( data ){
           console.log( 'user-list' );
           if( data.status == 'ok' ){
             var userArray = data.result;
-            var jnx = 0;
             for( var inx = 0 ; inx < userArray.length ; inx++ ){              
               var cUserId = userArray[inx].userId;
-              if( friendIds.indexOf( cUserId ) < 0 && cUserId != loginUserId ){
-                if( userIds.indexOf( cUserId ) < 0 ){
-                  userIds.push( cUserId );
-                  users.push( { 'id' : jnx++, 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image } );
-                }
+
+              if( friends[ cUserId ] == undefined && cUserId != loginUserId ){
+                users[ userArray[inx].userId ] = { 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image };
               }
             }
 
@@ -95,59 +88,99 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Channels', function(DB, UTIL, APP_INFO) {
+.factory('Channels', function(DB, UTIL, APP_INFO, Sign) {
   // Might use a resource here that returns a JSON array
   var scope;
+  var loginUserId;
 
   return {
     get : function( channelId ){
+      loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT channel_id, channel_name, channel_users, unread_count FROM TB_CHANNEL where channel_id = ? ', [channelId]
+        'SELECT channel_id, channel_name, channel_users, unread_count FROM TB_CHANNEL where channel_id = ? and owner_id = ? ', [channelId,loginUserId]
       ).then(function(result) {
           return DB.fetch(result);
         });
     },
     list : function( $scope ){
       scope = $scope;
+      loginUserId = Sign.getUser().userId;
 
       return DB.query(
-        'SELECT channel_id, channel_name, channel_users, unread_count FROM TB_CHANNEL ORDER BY channel_updated DESC'
+        'SELECT channel_id, channel_name, channel_users, unread_count FROM TB_CHANNEL where owner_id = ? ORDER BY channel_updated DESC', [loginUserId]
       ).then(function(result) {
           return DB.fetchAll(result);
         });
     },
-    add : function(jsonObj){
-
-      var channelId = '';
+    update : function(jsonObj){
+      loginUserId = Sign.getUser().userId;
 
       var query =
-        "INSERT OR REPLACE INTO TB_CHANNEL "+
-        "(channel_id, channel_name, channel_users, unread_count, channel_updated) VALUES "+
-        "(?, ?, ?, ?, ?)";
+        "UPDATE TB_CHANNEL "+
+        "SET channel_name = ?, channel_users = ?, unread_count = ?, channel_updated = ? "+
+        "WHERE channel_id = ? and owner_id = ? ";
+
+      var cond = [
+        jsonObj.name,
+        jsonObj.users,
+        jsonObj.unreadCount,
+        Date.now(),
+        jsonObj.channel,
+        loginUserId
+      ];
+
+      if( scope != undefined ){
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count':jsonObj.unreadCount};
+        scope.channels[ jsonObj.channel ] = channel;
+
+        console.log( scope.channels );
+      }
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
+    },
+    resetCount : function(channelId){
+      loginUserId = Sign.getUser().userId;
+
+      var query =
+        "UPDATE TB_CHANNEL "+
+        "SET unread_count = ?, channel_updated = ? "+
+        "WHERE channel_id = ? and owner_id = ? ";
+
+      var cond = [
+        0,
+        Date.now(),
+        channelId,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
+    },
+    add : function(jsonObj){
+      console.log( "add" );
+      console.log( jsonObj );
+      loginUserId = Sign.getUser().userId;
+
+      var query =
+        "INSERT INTO TB_CHANNEL "+
+        "(channel_id, channel_name, channel_users, unread_count, channel_updated, owner_id) VALUES "+
+        "(?, ?, ?, ?, ?, ?)";
 
       var cond = [
         jsonObj.channel,
         jsonObj.name,
         jsonObj.users,
-        1,
-        Date.now()
+        jsonObj.unreadCount,
+        Date.now(),
+        loginUserId
       ];
 
       if( scope != undefined ){
-        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count':1};
-
-        var dupFlag = false;
-        for( var inx = 0; !dupFlag && inx < scope.channels.length ; inx++){
-          if( scope.channels[inx].channelId == channel.channelId ){
-            dupFlag = true;
-          }
-        }
-
-        if( !dupFlag ){
-          console.log( channel );
-          scope.channels.push(angular.extend({}, channel));
-          scope.$apply();
-        }
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count':jsonObj.unreadCount};
+        scope.channels[ jsonObj.channel ] = channel;
       }
 
       return DB.query(query, cond).then(function(result) {
@@ -172,7 +205,7 @@ angular.module('starter.services', [])
 
   return {
     list : function( $scope, channel ){
-      scope = $scopeji
+      scope = $scope;
       return DB.query(
         'SELECT message, time FROM TB_MESSAGE ORDER BY time ASC WHERE channel = ?', [channel]
       ).then(function(result) {
@@ -252,10 +285,23 @@ angular.module('starter.services', [])
           console.log( 'NOTI : ' );
 
           socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
-            console.log( channelJson );
             //var channel = {'channel': data.channel, 'name': channelJson.result.datas.names, 'users' : channelJson.result.datas.names };
-            var channel = {'channel': data.channel, 'name': channelJson.result.datas.name, 'users' : channelJson.result.datas.users };
-            Channels.add( channel );
+            var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users };
+            if( channelJson.result.datas.users_cnt > 2 ){
+              channel.name = channelJson.result.datas.name; 
+            } else {
+              channel.name = channelJson.result.datas.from;
+            }
+            
+            Channels.get( data.channel ).then(function(channnelInfo) {
+              if( channnelInfo != undefined ){
+                channel.unreadCount = channnelInfo.unread_count + 1;
+                Channels.update( channel );
+              } else {
+                channel.unreadCount = 1;
+                Channels.add( channel );
+              }
+            });
           });
         }
       });
@@ -284,7 +330,8 @@ angular.module('starter.services', [])
 
       // Clear login
       loginUser = {};
-      $state.go('signin');
+      //$state.go('signin');
+      $state.transitionTo('signin', {}, { reload: true, notify: true });
     },    
     register : function( params, callback ){
       $http.post("http://"+BASE_URL+":8000/user/register", params)
@@ -315,7 +362,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Chat', function($http, BASE_URL) {
+.factory('Chat', function($http, BASE_URL, Channels ) {
   var channelSocket;
   var CONF = {};
 
@@ -337,7 +384,6 @@ angular.module('starter.services', [])
           'force new connection': true
         };
 
-        console.log( socketServerUrl );
         channelSocket = io.connect(socketServerUrl+'/channel?'+query, socketOptions);
 
         channelSocket.on('connect', function() {
@@ -367,6 +413,7 @@ angular.module('starter.services', [])
             //message received complete
             if( unreadMessages != undefined && unreadMessages.length > 0 ){
               channelSocket.emit("message-received");
+              Channels.resetCount( params.channel );
             }
 
             callback(messages);
@@ -506,7 +553,11 @@ angular.module('starter.services', [])
   };
 
   self.fetch = function(result) {
-    return result.rows.item(0);
+    if( result.rows == undefined || result.rows.length == 0 ){
+      return undefined;
+    } else {
+      return result.rows.item(0);
+    }
   };
 
   return self;
