@@ -22,9 +22,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     DB.init();
 
     // tootScope function
-    $rootScope.logout = function( ){
+    $rootScope.logout = function(){
       Sign.logout();
     };
+
+    $rootScope.totalUnreadCount = 0;
   });
 })
 

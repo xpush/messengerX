@@ -27,13 +27,19 @@ angular.module('starter.controllers', [])
 .controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users) {
   $scope.friends = {};
   $scope.datas = [];
+  $scope.friendCount = 0;
 
-  Friends.list(function(friends){
+  Friends.list(function(friends, friendCount){
     if( friends != undefined ){
       $scope.friends = friends;
+      $scope.friendCount = friendCount;
       $scope.$apply();
     }
   });
+
+  $scope.goProfile = function(){
+    $state.go( 'tab.account' );
+  };
 
   $scope.goChat = function( friendIds ) {
     $stateParams.friendIds = friendIds;

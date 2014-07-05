@@ -35,15 +35,16 @@ angular.module('starter.services', [])
         socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
           if( data.status == 'ok' ){
             var users = data.result;
-            var jnx = 0;
+            var friendCount = 0;
             for( var inx = 0 ; inx < users.length ; inx++ ){              
               if( users[inx].userId != loginUserId ){
+                friendCount++;
                 friends[ users[inx].userId ] = { 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
                   'message' : users[inx].datas.message, 'image': users[inx].datas.image  };
               }
             }
 
-            callback( friends );
+            callback( friends, friendCount );
           }
         });
       });
@@ -240,7 +241,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('SocketManager', function($http, Sign, Channels) {
+.factory('SocketManager', function($http, $rootScope, Sign, Channels) {
   var sessionSocket;
   var initFlag = false;
   return {
@@ -285,13 +286,14 @@ angular.module('starter.services', [])
           console.log( 'NOTI : ' );
 
           socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
-            //var channel = {'channel': data.channel, 'name': channelJson.result.datas.names, 'users' : channelJson.result.datas.names };
             var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users };
             if( channelJson.result.datas.users_cnt > 2 ){
               channel.name = channelJson.result.datas.name; 
             } else {
               channel.name = channelJson.result.datas.from;
             }
+
+            $rootScope.totalUnreadCount++;
             
             Channels.get( data.channel ).then(function(channnelInfo) {
               if( channnelInfo != undefined ){
@@ -362,7 +364,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Chat', function($http, BASE_URL, Channels ) {
+.factory('Chat', function($http, $rootScope, BASE_URL, Channels ) {
   var channelSocket;
   var CONF = {};
 
@@ -413,6 +415,7 @@ angular.module('starter.services', [])
             //message received complete
             if( unreadMessages != undefined && unreadMessages.length > 0 ){
               channelSocket.emit("message-received");
+              $rootScope.totalUnreadCount = $rootScope.totalUnreadCount - unreadMessages.length;
               Channels.resetCount( params.channel );
             }
 

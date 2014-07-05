@@ -99,6 +99,11 @@ body {
 	max-width: 175px;
 }
 
+.total-unread-message {
+	height:24px;
+	padding:4px 8px;
+}
+
 input:disabled + .checkbox-icon:before {
     border-color: silver !important;
 }

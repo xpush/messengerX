@@ -1,17 +1,23 @@
 <ion-view title="Friends">
   <ion-nav-buttons side="right">
-    <span class="tiny-profile">
-      <img src="{{loginUser.datas.image}}" />
-      <span>{{loginUser.datas.name}}</span>
-    </span>
-
     <button class="button" ng-click="logout()">
       LogOut
     </button>
   </ion-nav-buttons>
   <ion-content class="has-header" >
     <ion-list>
-    	<ion-item ng-repeat="friend in friends" class="item item-thumbnail-left" ng-click="goChat('{{friend.userId}}')">
+      <div class="item item-divider">
+        Profile
+      </div>
+      <ion-item class="item item-avatar" ng-click="goProfile()">
+        <img src="{{loginUser.datas.image}}" />
+        <h2>{{loginUser.datas.name}}</h2>
+        <p>{{loginUser.datas.message}}</p>
+      </ion-item>
+      <div class="item item-divider">
+        Friends({{friendCount}})
+      </div>
+    	<ion-item ng-repeat="friend in friends" class="item item-avatar" ng-click="goChat('{{friend.userId}}')">
         <img src="{{friend.image}} " />
         <h2>{{friend.userName}}</h2>
         <p>{{friend.message}}</p>
@@ -20,7 +26,7 @@
   </ion-content>
   <ion-footer-bar align-title="right" class="bar">
     <h1 class="title">
-      <button class="button icon ion-plus-circled" ng-click="showPopup()"></button>
+      <button class="button icon ion-person-add" ng-click="showPopup()"></button>
     </h1>
   </ion-footer-bar>
 </ion-view>
