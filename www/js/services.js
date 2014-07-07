@@ -253,7 +253,7 @@ angular.module('starter.services', [])
     },
     init : function(callback){
 
-     var loginUser = Sign.getUser();
+      var loginUser = Sign.getUser();
 
       var socketOptions ={
         transports: ['websocket'],
@@ -301,13 +301,16 @@ angular.module('starter.services', [])
       });
 
       socket.on('disconnect', function (data) {
-        console.log( data );
         console.info('session socket disconnect');
       });
+    },
+    close : function(){
+      initFlag = false;
+      sessionSocket.disconnect();
     }
   }
 })
-.factory('Sign', function($http, $state, BASE_URL) {
+.factory('Sign', function($http, $state, $rootScope, BASE_URL) {
   var loginUser;
   return {
     login : function( params, callback ){
@@ -324,6 +327,7 @@ angular.module('starter.services', [])
 
       // Clear login
       loginUser = {};
+      $rootScope.loginUser = {};
       //$state.go('signin');
       $state.transitionTo('signin', {}, { reload: true, notify: true });
     },    
