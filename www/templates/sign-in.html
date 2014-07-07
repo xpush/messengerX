@@ -1,7 +1,7 @@
 <ion-view title="Sign-In" hide-nav-bar="true" hide-back-button="true" class="signin-background">
   <ion-content>
-    <br><br><br><br>
-    <div class="list signin-content">
+    <div style="position: fixed; bottom: 20px; width: 100%">
+    <div class="list signin-content" >
       <label class="item item-input">
         <span class="input-label">Id</span>
         <input type="text" ng-model="user.userid">
@@ -15,14 +15,12 @@
       <button class="button button-block button-positive" ng-click="signIn(user)">
         Sign-In
       </button>
-      <p class="text-center">
-        <a href="#/forgot-password">Forgot password</a>
-      </p>
-      <p class="text-center">
-        <a href="#/sign-up">Sign-Up</a>
-      </p>
+      <div class="button-bar">
+        <a href="#/forgot-password" class="button button-small button-assertive">Forgot password</a>
+        <a href="#/sign-up" class="button button-small button-dark">Sign-Up</a>
+      </div>
     </div>
-
+    </div>
   </ion-content>
 
 </ion-view>
