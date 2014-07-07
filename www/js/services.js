@@ -133,8 +133,6 @@ angular.module('starter.services', [])
       if( scope != undefined ){
         var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count':jsonObj.unreadCount};
         scope.channels[ jsonObj.channel ] = channel;
-
-        console.log( scope.channels );
       }
 
       return DB.query(query, cond).then(function(result) {
@@ -161,8 +159,6 @@ angular.module('starter.services', [])
       });
     },
     add : function(jsonObj){
-      console.log( "add" );
-      console.log( jsonObj );
       loginUserId = Sign.getUser().userId;
 
       var query =
@@ -271,7 +267,6 @@ angular.module('starter.services', [])
         'token='+loginUser.userToken;
         
       // Session Socket
-      console.log( "session-socket-server : " + loginUser.sessionServer );
       var socket = io.connect(loginUser.sessionServer+'/session?'+query, socketOptions);
       socket.on('connect', function() {
         console.log( 'session socket connect');
@@ -282,8 +277,6 @@ angular.module('starter.services', [])
       socket.on('_event', function (messageObject) {
         if( messageObject.event == 'NOTIFICATION' ){          
           var data = messageObject.data;
-
-          console.log( 'NOTI : ' );
 
           socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
             var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users };
