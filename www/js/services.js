@@ -493,6 +493,7 @@ angular.module('starter.services', [])
 .factory('DB', function($q, DB_CONFIG) {
   var self = this;
   self.db = null;
+  var changeDBFlag = false;
 
   self.init = function() {
     // Use self.db = window.sqlitePlugin.openDatabase({name: DB_CONFIG.name}); in production
@@ -512,19 +513,26 @@ angular.module('starter.services', [])
       }
     } catch(e) {
       // Error handling code goes here.
-      if (e == INVALID_STATE_ERR) {
+      if( e.toString().indexOf( 'version mismatch' ) > -1 ){
+        self.db = openDatabase(shortName, DB_CONFIG.version, displayName, maxSize);
+      } else if (e == INVALID_STATE_ERR) {
         // Version number mismatch.
         window.plugins.toast.showShortCenter(
           "죄송합니다. DB 버젼을 지원하지 않습니다.\n북마크 기능을 사용하실 수 없습니다.",function(a){},function(b){}
         );
+        return;
       } else {
-
         window.plugins.toast.showShortCenter(
           "죄송합니다. "+e+"\n북마크 기능을 사용하실 수 없습니다.",function(a){},function(b){}
         );
-
+        return;
       }
-      return;
+    }
+
+    if( self.db.version != DB_CONFIG.version ){    
+      self.db.changeVersion(self.db.version, DB_CONFIG.version, function (t) {        
+        changeDBFlag = true;
+      });
     }
 
     angular.forEach(DB_CONFIG.tables, function(table) {
@@ -534,7 +542,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( DB_CONFIG.version != 1 ){
+      if( changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }

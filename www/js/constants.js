@@ -10,7 +10,7 @@ angular.module('starter.constants', [])
 
   .constant('DB_CONFIG', {
     name: 'stalk.db',
-    version: 1, 
+    version: '1.1', 
     tables: [
       {
         name: 'TB_MESSAGE',
