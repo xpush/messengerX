@@ -255,9 +255,11 @@ angular.module('starter.controllers', [])
   };
 
   $scope.send = function() {    
-    var msg = $scope.inputMessage;
-    $scope.inputMessage = '';
-    Chat.send( msg );
+    if( $scope.inputMessage != '' ){
+      var msg = $scope.inputMessage;
+      $scope.inputMessage = '';
+      Chat.send( msg );
+    }
   };
 
   // Triggered on a button click, or some other target

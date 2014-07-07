@@ -408,7 +408,12 @@ angular.module('starter.services', [])
             //message received complete
             if( unreadMessages != undefined && unreadMessages.length > 0 ){
               channelSocket.emit("message-received");
-              $rootScope.totalUnreadCount = $rootScope.totalUnreadCount - unreadMessages.length;
+
+              var nextCount = $rootScope.totalUnreadCount - unreadMessages.length;
+              if( nextCount < 0 ){
+                nextCount = 0;
+              }
+              $rootScope.totalUnreadCount = nextCount;
               Channels.resetCount( params.channel );
             }
 
