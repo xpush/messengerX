@@ -157,7 +157,7 @@ angular.module('starter.controllers', [])
 .controller('SignUpCtrl', function($scope, $state, $stateParams, $http, Sign) {
   $scope.signUp = function(user) {
     var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic', datas : {'name' : user.username,
-                 'image':'../www/img/default_image.jpg', 'message':'' } };
+                 'image':'../img/default_image.jpg', 'message':'' } };
     //var params = { 'app' : 'messengerx', 'userId' : 'F100002531861340', 'password' : '100002531861340', 'deviceId' : 'WEB' };
     Sign.register( params, function(data){
       $state.go('signin');
