@@ -529,10 +529,10 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      /**
-      var query = 'DROP TABLE ' + table.name;
-      self.query(query);      
-      */
+      if( DB_CONFIG.version != 1 ){
+        var query = 'DROP TABLE ' + table.name;
+        self.query(query);
+      }
 
       var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';      
       self.query(query);
@@ -549,6 +549,7 @@ angular.module('starter.services', [])
     var deferred = $q.defer();
     self.db.transaction(function(transaction) {
       transaction.executeSql(query, bindings, function(transaction, result) {
+        console.log( result );
         deferred.resolve(result);
       }, function(transaction, error) {
         deferred.reject(error);
