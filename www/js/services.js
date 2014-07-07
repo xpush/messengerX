@@ -515,8 +515,10 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
+      /**
       var query = 'DROP TABLE ' + table.name;
       self.query(query);
+      */
 
       var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
       self.query(query);
