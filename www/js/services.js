@@ -284,11 +284,10 @@ angular.module('starter.services', [])
               channel.name = channelJson.result.datas.name; 
             } else {
               channel.name = channelJson.result.datas.from;
-            }
-
-            $rootScope.totalUnreadCount++;
+            }          
             
             Channels.get( data.channel ).then(function(channnelInfo) {
+              $rootScope.totalUnreadCount++;
               if( channnelInfo != undefined ){
                 channel.unreadCount = channnelInfo.unread_count + 1;
                 Channels.update( channel );
