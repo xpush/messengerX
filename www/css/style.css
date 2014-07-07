@@ -31,7 +31,7 @@ body {
 	color:#383641;
 	padding:.6875rem;
 	margin:0;
-	font-size:.875rem;
+	font-size:.975rem;
 	display:block;
 }
 
@@ -43,9 +43,22 @@ body {
 	display:block;
 }
 
-.messages span.from {
+.messages .from span {
 	float: left;
 	margin: 0 5px;
+	text-overflow: ellipsis;
+	overflow-x: hidden;
+	word-wrap: break-word;
+	max-width:90%;
+}
+
+.messages .from span.time {
+	border-radius:.25rem;
+	float: left;
+	margin-left: -5px;
+	background:#FFFFFF;
+	font-size:.775rem;
+	padding:.125rem;
 	text-overflow: ellipsis;
 	overflow-x: hidden;
 	word-wrap: break-word;

@@ -356,7 +356,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Chat', function($http, $rootScope, BASE_URL, Channels, Messages ) {
+.factory('Chat', function($http, $rootScope, BASE_URL, Channels, Messages, UTIL ) {
   var channelSocket;
   var CONF = {};
 
@@ -412,9 +412,11 @@ angular.module('starter.services', [])
                 var content;
                 if(data.type == 'you'){                
                   content = '<div class="small">'+ data.sender_name+'</div>' ;
-                  content = content + '<img src="'+ data.sender_image+'" class="profile"/>';
-                  content = content + '<span class="from">'+data.message+'</span>';
-                  
+                  content += '<div class="from">'
+                  content += '<img src="'+ data.sender_image+'" class="profile"/>';
+                  content += '<span class="from">'+data.message+'</span>';
+                  content += '<span class="time">'+ UTIL.toTime( data.time )+'</span>';
+                  content += '</div>'
                 } else {
                   content = '<span>'+data.message+'</span>' 
                 }
@@ -440,8 +442,11 @@ angular.module('starter.services', [])
           if(data.type == 'you'){
 
             content = '<div class="small">'+ data.user.userId+'</div>' ;
-            content = content + '<img src="'+ data.user.image+'" class="profile"/>';
-            content = content + '<span class="from">'+decodeURIComponent( data.message )+'</span>' ;
+            content += '<div class="from">'
+            content += '<img src="'+ data.user.image+'" class="profile"/>';
+            content += '<span >'+decodeURIComponent( data.message )+'</span>';
+            content += '<span class="time">'+UTIL.toTime( data.timestamp )+'</span>';
+            content += '</div>'
             
           } else {
             content = '<span>'+data.message+'</span>' 
@@ -549,7 +554,6 @@ angular.module('starter.services', [])
     var deferred = $q.defer();
     self.db.transaction(function(transaction) {
       transaction.executeSql(query, bindings, function(transaction, result) {
-        console.log( result );
         deferred.resolve(result);
       }, function(transaction, error) {
         deferred.reject(error);
@@ -591,6 +595,16 @@ angular.module('starter.services', [])
       s[8] = s[13] = s[18] = s[23] = '-';
 
       return s.join('');
+    },
+    toTime : function( timestamp ){
+      var date = new Date( timestamp );
+      var hour = date.getHours();
+      hour = hour > 10 ? hour : "0"+hour;
+
+
+      var minute = date.getMinutes();
+      minute = minute > 10 ? minute : "0"+minute;
+      return hour + ":" + minute;
     }
   }
 });

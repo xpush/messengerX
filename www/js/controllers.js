@@ -185,6 +185,7 @@ angular.module('starter.controllers', [])
     Chat.init( param, loginUser, $scope, function( messages ){
       if( messages != undefined ){
         $scope.messages = $scope.messages.concat(messages);
+        $ionicScrollDelegate.scrollBottom(true);
       }
     });
   };  
