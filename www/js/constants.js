@@ -14,13 +14,16 @@ angular.module('starter.constants', [])
       {
         name: 'TB_MESSAGE',
         columns: [
-          {name: '_id',     type: 'integer primary key autoincrement'},
-          {name: 'channel',   type: 'text'},
-          {name: 'sender',  type: 'text'},
+          {name: 'channel_id',   type: 'text'},
+          {name: 'sender_id',  type: 'text'},
+          {name: 'sender_name',  type: 'text'},
+          {name: 'sender_image',  type: 'text'},
           {name: 'message',    type: 'text'},
-          {name: 'type', type: 'integer'},
-          {name: 'time', type: 'integer'}
-        ]
+          {name: 'type', type: 'text'},
+          {name: 'time', type: 'integer'},
+          {name: 'owner_id', type: 'text'}
+        ],
+        table_index : { name : 'IDX_TB_MESSAGE', columns : [ 'channel_id', 'owner_id' ] }
       },
       {
         name: 'TB_CHANNEL',

@@ -196,40 +196,36 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Messages', function(DB) {
+.factory('Messages', function(DB, Sign) {
   // Might use a resource here that returns a JSON array
   var scope;
 
   return {
-    list : function( $scope, channel ){
-      scope = $scope;
+    list : function( channel ){
+      var loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT message, time FROM TB_MESSAGE ORDER BY time ASC WHERE channel = ?', [channel]
+        'SELECT sender_id, sender_name, message, time, type FROM TB_MESSAGE WHERE channel_id = ? and owner_id = ? ;', [channel,loginUserId]
       ).then(function(result) {
-          return DB.fetchAll(result);
-        });
+        return DB.fetchAll(result);
+      });
     },
-    add : function(jsonObj){
-
+    add : function(jsonObj){      
+      var loginUserId = Sign.getUser().userId;
       var query =
         "INSERT INTO TB_MESSAGE "+
-        "(channel, sender, message, type, time) VALUES "+
-        "(?, ?, ?, ?, ?)";
+        "(channel_id, sender_id, sender_name, sender_image, message, type, time, owner_id) VALUES "+
+        "(?, ?, ?, ?, ?, ?, ?, ?)";
 
       var cond = [
         jsonObj.channel,
         jsonObj.sender,
+        jsonObj.user.userName,
+        jsonObj.user.image,
         jsonObj.message,
-        '1',
-        Date.now()
+        jsonObj.type,
+        jsonObj.timestamp,
+        loginUserId
       ];
-
-      if( scope != undefined ){
-        var message = {'id':jsonObj.id,'name':jsonObj.name,'unread_count':1};
-
-        scope.messages.push(angular.extend({}, message));
-        scope.$apply();
-      }
 
       return DB.query(query, cond).then(function(result) {
         return result;
@@ -360,7 +356,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Chat', function($http, $rootScope, BASE_URL, Channels ) {
+.factory('Chat', function($http, $rootScope, BASE_URL, Channels, Messages ) {
   var channelSocket;
   var CONF = {};
 
@@ -388,24 +384,13 @@ angular.module('starter.services', [])
           console.log( 'channel connect' );
           channelSocket.emit( 'message-unread', function(jsonObj){
             var unreadMessages = jsonObj.result;
-
-            var messages = [];
+            
             for( var inx = 0 ; inx < unreadMessages.length ; inx++ ){
               var data = JSON.parse( unreadMessages[inx].message.data );
+              data.message = decodeURIComponent( data.message );              
+              data.type = data.user.userId == loginUser.userId ? 'me' : 'you';
 
-              var content;
-              var from = data.user.userId == loginUser.userId ? 'me' : 'you';
-
-              if(from == 'you'){                
-                content = '<div class="small">'+ data.user.userId+'</div>' ;
-                content = content + '<img src="'+ data.user.image+'" class="profile"/>';
-                content = content + '<span class="from">'+decodeURIComponent( data.message )+'</span>' ;
-                
-              } else {
-                content = '<span>'+data.message+'</span>' 
-              }
-
-              messages.push( { content : content, from : from } );
+              Messages.add( data );             
             }
 
             //message received complete
@@ -420,7 +405,25 @@ angular.module('starter.services', [])
               Channels.resetCount( params.channel );
             }
 
-            callback(messages);
+            var messages = [];
+            Messages.list( params.channel ).then(function(messageArray) {
+              for( var inx = 0 ; inx < messageArray.length ; inx++ ){
+                var data = messageArray[inx];
+                var content;
+                if(data.type == 'you'){                
+                  content = '<div class="small">'+ data.sender_name+'</div>' ;
+                  content = content + '<img src="'+ data.sender_image+'" class="profile"/>';
+                  content = content + '<span class="from">'+data.message+'</span>';
+                  
+                } else {
+                  content = '<span>'+data.message+'</span>' 
+                }
+
+                messages.push( { content : content, from : data.type } );
+              }
+
+              callback(messages);
+            });
           });
         }); 
 
@@ -431,10 +434,10 @@ angular.module('starter.services', [])
         channelSocket.on('message', function (data) {
 
           data.message = decodeURIComponent(data.message);          
-          var from = data.user.userId == loginUser.userId ? 'me': 'you' ;
+          data.type = data.user.userId == loginUser.userId ? 'me': 'you' ;
 
           var content;
-          if(from == 'you'){
+          if(data.type == 'you'){
 
             content = '<div class="small">'+ data.user.userId+'</div>' ;
             content = content + '<img src="'+ data.user.image+'" class="profile"/>';
@@ -444,8 +447,11 @@ angular.module('starter.services', [])
             content = '<span>'+data.message+'</span>' 
           }
 
-          var nextMessage = { content : content, from : from };
-          $scope.add( nextMessage );
+          var nextMessage = { content : content, from : data.type };
+
+          // Add to DB
+          Messages.add( data );
+          $scope.add( nextMessage );          
         });
       })
       .error(function(data, status, headers, config) {
@@ -525,18 +531,22 @@ angular.module('starter.services', [])
 
       /**
       var query = 'DROP TABLE ' + table.name;
-      self.query(query);
+      self.query(query);      
       */
 
-      var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
+      var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';      
       self.query(query);
+
+      if( table.table_index != undefined ){
+        var query = 'CREATE INDEX IF NOT EXISTS ' + table.table_index.name +' ON ' +table.name + ' (' + table.table_index.columns.join(',') + ')';
+        self.query(query);
+      }
     });
   };
 
   self.query = function(query, bindings) {
     bindings = typeof bindings !== 'undefined' ? bindings : [];
     var deferred = $q.defer();
-
     self.db.transaction(function(transaction) {
       transaction.executeSql(query, bindings, function(transaction, result) {
         deferred.resolve(result);
