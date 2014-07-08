@@ -438,10 +438,12 @@ angular.module('starter.services', [])
           data.message = decodeURIComponent(data.message);          
           data.type = data.user.userId == loginUser.userId ? 'me': 'you' ;
 
+          console.log( data );
+
           var content;
           if(data.type == 'you'){
 
-            content = '<div class="small">'+ data.user.userId+'</div>' ;
+            content = '<div class="small">'+ data.user.userName+'</div>' ;
             content += '<div class="from">'
             content += '<img src="'+ data.user.image+'" class="profile"/>';
             content += '<span >'+decodeURIComponent( data.message )+'</span>';

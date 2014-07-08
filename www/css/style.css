@@ -135,7 +135,7 @@ input:disabled:checked + .checkbox-icon:before {
 }
 
 .item-users p {
-	top : 20px;
+	margin-top : 10px;
 	margin-left: 40px;	
 	height: 38px;
 	vertical-align: middle;
