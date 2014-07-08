@@ -506,17 +506,13 @@ angular.module('starter.services', [])
         );
       } else {
         var shortName = DB_CONFIG.name;
-        var version = '1.0';
         var displayName = 'news database';
         var maxSize = 5 * 1024 * 1024; // in bytes
-        self.db = openDatabase(shortName, version, displayName, maxSize);
+        self.db = openDatabase(shortName, '', displayName, maxSize);      
       }
     } catch(e) {
       // Error handling code goes here.
-      if( e.toString().indexOf( 'version mismatch' ) > -1 ){
-        changeDBFlag = true;
-        self.db = openDatabase(shortName, DB_CONFIG.version, displayName, maxSize);        
-      } else if (e == INVALID_STATE_ERR) {
+      if (e == INVALID_STATE_ERR) {
         // Version number mismatch.
         window.plugins.toast.showShortCenter(
           "죄송합니다. DB 버젼을 지원하지 않습니다.\n북마크 기능을 사용하실 수 없습니다.",function(a){},function(b){}
