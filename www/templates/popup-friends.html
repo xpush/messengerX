@@ -1,9 +1,10 @@
 <ul class="list">
-  <li class="item item-checkbox" ng-repeat="data in datas" >
+  <li class="item item-checkbox item-users" ng-repeat="data in datas" >	
     <label class="checkbox" >
       <input type="checkbox" ng-click="toggleSelection('{{data.userId}}')" ng-checked="selection.indexOf('{{data.userId}}') > -1 || channelUsers.indexOf('{{data.userId}}') > -1 " ng-disabled="channelUsers.indexOf('{{data.userId}}') > -1"/>
     </label>
-    {{data.userName}}
+  	<img src="{{data.image}}"></img>
+    <p>{{data.userName}}</p>    
   </li>
   <li class="item item-checkbox" ng-if="datas.length == 0">
   	There is no user

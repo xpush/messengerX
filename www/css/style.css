@@ -123,3 +123,23 @@ input:disabled + .checkbox-icon:before {
 input:disabled:checked + .checkbox-icon:before {
     background-color: silver !important;
 }
+
+.item-users img {
+	position: absolute;
+	top: 15px;
+	left: 50px;
+	max-width: 40px;
+	max-height: 40px;
+	width: 100%;
+	border-radius: 4px;
+}
+
+.item-users p {
+	padding-top: 10px;
+	margin-left: 40px;	
+	height: 38px;
+	vertical-align: middle;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;	
+}

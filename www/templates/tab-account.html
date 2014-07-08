@@ -3,10 +3,13 @@
 		<div class="list card">
 	    <a class="item item-thumbnail-left" >
 	      <img src="{{loginUser.datas.image}}" />
-	      <h2>{{loginUser.datas.name}}</h2>
-	      	<label class="item item-input">
-    				<input type="text" placeholder="Status Message" ng-model="loginUser.datas.message">
-  				</label>
+	      <h2>{{loginUser.datas.id}}</h2>
+	      <label class="item item-input">
+    			<input type="text" placeholder="Name" ng-model="loginUser.datas.name" />
+  			</label>	      
+	      <label class="item item-input">
+    			<input type="text" placeholder="Status Message" ng-model="loginUser.datas.message" />
+  			</label>
 	  	</a>
 			<div class="item item-input-inset">
 				<label class="item-input-wrapper">
