@@ -6,7 +6,11 @@
     <title></title>
 
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">  
+    <link href="css/style.css" rel="stylesheet">
+
+    <script src="lib/polymer/components/platform/platform.js"></script>
+    <link rel="import" href="lib/polymer/components/font-roboto/roboto.html">
+    <link rel="import" href="lib/polymer/components/paper-input/paper-input.html">
 
     <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
     <link href="css/ionic.app.css" rel="stylesheet">
@@ -23,22 +27,22 @@
     <script src="js/controllers.js"></script>
     <script src="js/services.js"></script>
     <script src="js/constants.js"></script>
-    <script src="js/directives.js"></script>    
+    <script src="js/directives.js"></script>
 
     <!-- ionic frosted-glass -->
     <link href="http://code.ionicframework.com/contrib/ionic-contrib-frosted-glass/ionic.contrib.frostedGlass.css" rel="stylesheet">
 
-    <script src="http://code.ionicframework.com/contrib/ionic-contrib-frosted-glass/ionic.contrib.frostedGlass.js"></script>    
+    <script src="http://code.ionicframework.com/contrib/ionic-contrib-frosted-glass/ionic.contrib.frostedGlass.js"></script>
 
     <!-- socket.io -->
-    
+
     <!--
-    <script src="js/socket.io-1.0.6.js"></script>  
+    <script src="js/socket.io-1.0.6.js"></script>
   -->
     <script src="https://cdn.socket.io/socket.io-1.0.6.js"></script>
   </head>
-  <body ng-app="starter" animation="slide-left-right-ios7">
-    <!-- 
+  <body unresolved touch-action="auto" ng-app="starter" animation="slide-left-right-ios7">
+    <!--
       The nav bar that will be updated as we navigate between views.
     -->
     <ion-nav-bar class="bar-stable nav-title-slide-ios7">
@@ -46,7 +50,7 @@
         Back
       </ion-nav-back-button>
     </ion-nav-bar>
-    <!-- 
+    <!--
       The views will be rendered in the <ion-nav-view> directive below
       Templates are in the /templates folder (but you could also
       have templates inline in this html file if you'd like).

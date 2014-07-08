@@ -83,15 +83,6 @@ body {
 	float: left;
 }
 
-.signin-background {
-  background-image: url('../img/login-background.jpg');
-}
-
-/*.signin-content {
-  position: fixed;
-  bottom: 20px;
-}*/
-
 .signin-content {
     bottom: 1px !important; /* place bar-subfooter above footer */
 }
@@ -136,10 +127,15 @@ input:disabled:checked + .checkbox-icon:before {
 
 .item-users p {
 	margin-top : 10px;
-	margin-left: 40px;	
+	margin-left: 40px;
 	height: 38px;
 	vertical-align: middle;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	white-space: nowrap;	
+	white-space: nowrap;
+}
+
+
+paper-input {
+  width: 100%;
 }
