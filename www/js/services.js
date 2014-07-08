@@ -103,15 +103,45 @@ angular.module('starter.services', [])
           return DB.fetch(result);
         });
     },
-    list : function( $scope ){
+    list : function( $scope, socket ){
       scope = $scope;
       loginUserId = Sign.getUser().userId;
 
       return DB.query(
         'SELECT channel_id, channel_name, channel_users, unread_count FROM TB_CHANNEL where owner_id = ? ORDER BY channel_updated DESC', [loginUserId]
       ).then(function(result) {
-          return DB.fetchAll(result);
-        });
+        return DB.fetchAll(result);
+      });
+    },
+    upsert:function(jsonObj){
+      loginUserId = Sign.getUser().userId;
+
+      var query =
+        "INSERT OR IGNORE INTO TB_CHANNEL "+
+        "(channel_id, channel_name, channel_users, unread_count, channel_updated, owner_id) VALUES "+
+        "(?, ?, ?, ?, ?, ?) "+
+        "UPDATE TB_CHANNEL SET unread_count = unread_count + 1 WHETE channel_id = ? and owner_id = ? "
+
+      var cond = [
+        jsonObj.channel,
+        jsonObj.name,
+        jsonObj.users,
+        jsonObj.unreadCount,
+        Date.now(),
+        loginUserId,
+        jsonObj.channel,
+        owner_id
+      ];
+
+      if( scope != undefined ){
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count':jsonObj.unreadCount};
+        scope.channels[ jsonObj.channel ] = channel;
+      }
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
+
     },
     update : function(jsonObj){
       loginUserId = Sign.getUser().userId;
@@ -303,6 +333,22 @@ angular.module('starter.services', [])
     close : function(){
       initFlag = false;
       sessionSocket.disconnect();
+    },
+    unreadMessage : function(callback){
+      var loginUser = Sign.getUser();
+      sessionSocket.emit( "message-unread", function(resultObject) {
+        var messageArray = resultObject.result;
+        for( var inx = 0 ; inx < messageArray.length ; inx++ ){
+          console.log( messageArray[inx].message );
+          var data = messageArray[inx].message.data;
+          data = JSON.parse(data);
+          console.log( data );
+          data.message = decodeURIComponent( data.message );          
+          data.type = data.user.userId == loginUser.userId ? 'me' : 'you';
+        }
+
+        callback( result );
+      });
     }
   }
 })
@@ -541,6 +587,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
+      changeDBFlag = true;
       if( changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
@@ -552,7 +599,7 @@ angular.module('starter.services', [])
       if( table.table_index != undefined ){
         setTimeout( function(){
 
-          var query = 'CREATE INDEX IF NOT EXISTS ' + table.table_index.name +' ON ' +table.name + ' (' + table.table_index.columns.join(',') + ')';
+          var query = 'CREATE '+ table.table_index.type +' INDEX IF NOT EXISTS ' + table.table_index.name +' ON ' +table.name + ' (' + table.table_index.columns.join(',') + ')';
           self.query(query);
         }, 2000 );
       }

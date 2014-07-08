@@ -1,9 +1,12 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope, SocketManager, Channels, Sign, Chat) {
+.controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels, SocketManager) {
 
-})
-.controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels) {
+  /**
+  SocketManager.unreadMessage( function(unreadMessage){
+    console.log( unreadMessage )
+  });
+  */
 
   var channelIds = [];
   $scope.channels = {};
@@ -281,7 +284,6 @@ angular.module('starter.controllers', [])
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
-      //template: '<ul class="list"><li class="item item-checkbox" ng-repeat="friend in friends"><label class="checkbox"><input type="checkbox"></label>{{friend.name}}</li></ul>',
       templateUrl: "templates/popup-friends.html",
       title: 'Select Friends',
       //subTitle: 'Please use normal things',

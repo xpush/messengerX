@@ -24,7 +24,7 @@ angular.module('starter.constants', [])
           {name: 'time', type: 'integer'},
           {name: 'owner_id', type: 'text'}
         ],
-        table_index : { name : 'IDX_TB_MESSAGE', columns : [ 'channel_id', 'owner_id' ] }
+        table_index : { type : '', name : 'IDX_TB_MESSAGE', columns : [ 'channel_id', 'owner_id' ] }
       },
       {
         name: 'TB_CHANNEL',
@@ -38,7 +38,8 @@ angular.module('starter.constants', [])
           {name: 'latest_message', type: 'text'},
           {name: 'channel_updated', type: 'integer'},
           {name: 'owner_id', type: 'text'}
-        ]
+        ],
+        table_index : { type : 'UNIQUE', name : 'IDX_TB_CHANNEL', columns : [ 'channel_id', 'owner_id' ] }
       }
     ]
 });
