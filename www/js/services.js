@@ -514,7 +514,8 @@ angular.module('starter.services', [])
     } catch(e) {
       // Error handling code goes here.
       if( e.toString().indexOf( 'version mismatch' ) > -1 ){
-        self.db = openDatabase(shortName, DB_CONFIG.version, displayName, maxSize);
+        changeDBFlag = true;
+        self.db = openDatabase(shortName, DB_CONFIG.version, displayName, maxSize);        
       } else if (e == INVALID_STATE_ERR) {
         // Version number mismatch.
         window.plugins.toast.showShortCenter(
@@ -551,8 +552,11 @@ angular.module('starter.services', [])
       self.query(query);
 
       if( table.table_index != undefined ){
-        var query = 'CREATE INDEX IF NOT EXISTS ' + table.table_index.name +' ON ' +table.name + ' (' + table.table_index.columns.join(',') + ')';
-        self.query(query);
+        setTimeout( function(){
+
+          var query = 'CREATE INDEX IF NOT EXISTS ' + table.table_index.name +' ON ' +table.name + ' (' + table.table_index.columns.join(',') + ')';
+          self.query(query);
+        }, 2000 );
       }
     });
   };
