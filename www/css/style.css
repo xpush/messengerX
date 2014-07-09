@@ -139,3 +139,11 @@ input:disabled:checked + .checkbox-icon:before {
 paper-input {
   width: 100%;
 }
+
+.button-add-friend {
+	position: absolute;
+	right : 10px;
+	bottom : 60px;
+	border-radius: 40px	;
+	z-index:999;
+}

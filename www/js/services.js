@@ -113,36 +113,41 @@ angular.module('starter.services', [])
         return DB.fetchAll(result);
       });
     },
-    upsert:function(jsonObj){
+    addCount : function(jsonObj){
       loginUserId = Sign.getUser().userId;
 
       var query =
-        "INSERT OR IGNORE INTO TB_CHANNEL "+
-        "(channel_id, channel_name, channel_users, unread_count, channel_updated, owner_id) VALUES "+
-        "(?, ?, ?, ?, ?, ?) "+
-        "UPDATE TB_CHANNEL SET unread_count = unread_count + 1 WHETE channel_id = ? and owner_id = ? "
+        "INSERT OR REPLACE INTO TB_CHANNEL "+
+        "(channel_id, unread_count, channel_updated, owner_id) "+
+        "SELECT new.channel_id, IFNULL( old.unread_count, new.unread_count) as unread_count, new.channel_updated, new.owner_id "+
+        "FROM ( "+
+        "  SELECT ? as channel_id, 0 as unread_count , ? as channel_updated, ? as owner_id " +
+        ") as new " +
+        " LEFT JOIN ( " +
+        "   SELECT channel_id, unread_count + 1 as unread_count, channel_updated, owner_id " +
+        "   FROM TB_CHANNEL " +
+        " ) AS old ON new.channel_id = old.channel_id AND new.owner_id = old.owner_id ; ";
 
       var cond = [
         jsonObj.channel,
-        jsonObj.name,
-        jsonObj.users,
-        jsonObj.unreadCount,
         Date.now(),
-        loginUserId,
-        jsonObj.channel,
-        owner_id
+        loginUserId
       ];
-
-      if( scope != undefined ){
-        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count':jsonObj.unreadCount};
-        scope.channels[ jsonObj.channel ] = channel;
-      }
 
       return DB.query(query, cond).then(function(result) {
         return result;
       });
 
     },
+    getAllCount : function(jsonObj){
+      loginUserId = Sign.getUser().userId;
+
+      return DB.query(
+        'SELECT sum( unread_count ) as total_count FROM TB_CHANNEL where owner_id = ? ', [loginUserId]
+      ).then(function(result) {
+        return DB.fetch(result);
+      });
+    },    
     update : function(jsonObj){
       loginUserId = Sign.getUser().userId;
 
@@ -169,18 +174,20 @@ angular.module('starter.services', [])
         return result;
       });
     },
-    resetCount : function(channelId){
+    updateCount : function(param){
       loginUserId = Sign.getUser().userId;
 
-      var query =
-        "UPDATE TB_CHANNEL "+
-        "SET unread_count = ?, channel_updated = ? "+
-        "WHERE channel_id = ? and owner_id = ? ";
+      var query = "UPDATE TB_CHANNEL ";
+      if( param.reset ){
+        query += "SET unread_count = 0, channel_updated = ? ";
+      } else {
+        query += "SET unread_count = unread_count + 1, channel_updated = ? ";
+      }
+      query += "WHERE channel_id = ? and owner_id = ? ";     
 
       var cond = [
-        0,
         Date.now(),
-        channelId,
+        param.channel,
         loginUserId
       ];
 
@@ -188,25 +195,55 @@ angular.module('starter.services', [])
         return result;
       });
     },
-    add : function(jsonObj){
+    insert : function(jsonObj){
       loginUserId = Sign.getUser().userId;
-
       var query =
-        "INSERT INTO TB_CHANNEL "+
+        "INSERT OR IGNORE INTO TB_CHANNEL "+
         "(channel_id, channel_name, channel_users, unread_count, channel_updated, owner_id) VALUES "+
-        "(?, ?, ?, ?, ?, ?)";
+        "(?, ?, ?, 0, ?, ?)";
 
       var cond = [
         jsonObj.channel,
         jsonObj.name,
         jsonObj.users,
-        jsonObj.unreadCount,
+        Date.now(),
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });        
+
+    },
+    add : function(jsonObj){
+      loginUserId = Sign.getUser().userId;
+
+      var query =
+        "INSERT OR REPLACE INTO TB_CHANNEL "+
+        "(channel_id, channel_name, channel_users, unread_count, channel_updated, owner_id) "+
+        "SELECT new.channel_id, new.channel_name, new.channel_users, IFNULL( old.unread_count, new.unread_count) as unread_count, new.channel_updated, new.owner_id "+
+        "FROM ( "+
+        "  SELECT ? as channel_id, ? as channel_name, ? as channel_users, 1 as unread_count, ? as channel_updated, ? as owner_id " +
+        ") as new " +
+        " LEFT JOIN ( " +
+        "   SELECT channel_id, channel_name, channel_users, unread_count + 1 as unread_count, channel_updated, owner_id " +
+        "   FROM TB_CHANNEL " +
+        " ) AS old ON new.channel_id = old.channel_id AND old.owner_id = new.owner_id ; ";      
+
+      var cond = [
+        jsonObj.channel,
+        jsonObj.name,
+        jsonObj.users,
         Date.now(),
         loginUserId
       ];
 
       if( scope != undefined ){
-        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count':jsonObj.unreadCount};
+        var unreadCount = 1;
+        if( scope.channels[ jsonObj.channel ] != undefined ){
+          unreadCount = scope.channels[ jsonObj.channel ].unread_count + 1;
+        }
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount};
         scope.channels[ jsonObj.channel ] = channel;
       }
 
@@ -263,9 +300,10 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('SocketManager', function($http, $rootScope, Sign, Channels) {
+.factory('SocketManager', function($http, $rootScope, Sign, Channels, Messages) {
   var sessionSocket;
   var initFlag = false;
+  var self;
   return {
     get : function(callback){
       if( !initFlag ){
@@ -278,6 +316,7 @@ angular.module('starter.services', [])
       }
     },
     init : function(callback){
+      self = this;
 
       var loginUser = Sign.getUser();
 
@@ -291,18 +330,28 @@ angular.module('starter.services', [])
         'userId='+encodeURIComponent(loginUser.userId)+'&'+
         'deviceId='+loginUser.deviceId+'&'+
         'token='+loginUser.userToken;
-        
+
       // Session Socket
       var socket = io.connect(loginUser.sessionServer+'/session?'+query, socketOptions);
+
       socket.on('connect', function() {
         console.log( 'session socket connect');
         initFlag = true;
-        callback( socket );
+        sessionSocket = socket;
+
+        self.channelList(function(result){
+          //callback( socket );
+          self.unreadMessage( function(result){
+            socket.emit("message-received");
+            callback( socket );
+          });
+        });
       });
 
       socket.on('_event', function (messageObject) {
-        if( messageObject.event == 'NOTIFICATION' ){          
+        if( messageObject.event == 'NOTIFICATION' ){
           var data = messageObject.data;
+          console.log( data );
 
           socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
             var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users };
@@ -310,9 +359,13 @@ angular.module('starter.services', [])
               channel.name = channelJson.result.datas.name; 
             } else {
               channel.name = channelJson.result.datas.from;
-            }          
+            } 
             
-            Channels.get( data.channel ).then(function(channnelInfo) {
+            $rootScope.totalUnreadCount++;
+            Channels.add( channel );
+
+            /**
+            Channels.get( data.channel ).then(function(channnelInfo) {        
               $rootScope.totalUnreadCount++;
               if( channnelInfo != undefined ){
                 channel.unreadCount = channnelInfo.unread_count + 1;
@@ -322,6 +375,7 @@ angular.module('starter.services', [])
                 Channels.add( channel );
               }
             });
+            */
           });
         }
       });
@@ -339,17 +393,37 @@ angular.module('starter.services', [])
       sessionSocket.emit( "message-unread", function(resultObject) {
         var messageArray = resultObject.result;
         for( var inx = 0 ; inx < messageArray.length ; inx++ ){
-          console.log( messageArray[inx].message );
           var data = messageArray[inx].message.data;
           data = JSON.parse(data);
-          console.log( data );
           data.message = decodeURIComponent( data.message );          
           data.type = data.user.userId == loginUser.userId ? 'me' : 'you';
+
+          var channel = {'channel': data.channel };
+          Channels.updateCount( channel );
+          Messages.add( data );
         }
 
-        callback( result );
+        callback({'status':'ok'});
       });
-    }
+    },
+    channelList : function(callback){
+      var loginUser = Sign.getUser();
+      sessionSocket.emit( "channel-list", function(resultObject) {    
+        var channelArray = resultObject.result;
+        for( var inx = 0 ; inx < channelArray.length ; inx++ ){
+          var data = channelArray[inx];
+          var channel = {'channel': data.channel, 'users' : data.datas.users };
+          if( data.datas.users_cnt > 2 ){
+            channel.name = data.datas.name; 
+          } else {
+            channel.name = data.datas.from;
+          }           
+          Channels.insert( channel );
+        }
+
+        callback({'status':'ok'});
+      });
+    }   
   }
 })
 .factory('Sign', function($http, $state, $rootScope, BASE_URL) {
@@ -442,15 +516,17 @@ angular.module('starter.services', [])
             //message received complete
             if( unreadMessages != undefined && unreadMessages.length > 0 ){
               channelSocket.emit("message-received");
-
-              var nextCount = $rootScope.totalUnreadCount - unreadMessages.length;
-              if( nextCount < 0 ){
-                nextCount = 0;
-              }
-              $rootScope.totalUnreadCount = nextCount;
-              Channels.resetCount( params.channel );
             }
 
+            /*
+            *Reset Count Start
+            */      
+            var param = { 'channel' :  params.channel, 'reset' : true }
+            Channels.updateCount( param );
+
+            /*
+            *Reset Count End
+            */
             var messages = [];
             Messages.list( params.channel ).then(function(messageArray) {
               for( var inx = 0 ; inx < messageArray.length ; inx++ ){
@@ -587,7 +663,6 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      changeDBFlag = true;
       if( changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);

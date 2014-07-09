@@ -1,21 +1,19 @@
 angular.module('starter.controllers', [])
 
-.controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels, SocketManager) {
+.controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels ) {
 
-  /**
-  SocketManager.unreadMessage( function(unreadMessage){
-    console.log( unreadMessage )
-  });
-  */
-
-  var channelIds = [];
-  $scope.channels = {};
+  Channels.getAllCount().then( function ( result ){
+    $rootScope.totalUnreadCount = result.total_count;
+  });  
 
   Channels.list( $scope ).then(function(channels) {
     for( var inx = 0 ; inx < channels.length ; inx++ ){
       $scope.channels[ channels[inx].channel_id ] = channels[inx];
     }
   });
+
+  var channelIds = [];
+  $scope.channels = {};
 
   $scope.goChat = function( channelId ) {
     Channels.get( channelId ).then(function(data) {
@@ -27,7 +25,12 @@ angular.module('starter.controllers', [])
     });
   };  
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, Channels) {
+
+  Channels.getAllCount().then( function ( result ){
+    $rootScope.totalUnreadCount = result.total_count;
+  });
+
   $scope.friends = {};
   $scope.datas = [];
   $scope.friendCount = 0;
@@ -120,6 +123,7 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('AccountCtrl', function($scope, Sign) {
+
   $scope.loginUser = Sign.getUser();
 
   $scope.newImage = '';
