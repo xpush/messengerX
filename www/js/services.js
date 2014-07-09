@@ -98,7 +98,7 @@ angular.module('starter.services', [])
     get : function( channelId ){
       loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT channel_id, channel_name, channel_users, unread_count FROM TB_CHANNEL where channel_id = ? and owner_id = ? ', [channelId,loginUserId]
+        'SELECT channel_id, channel_name, channel_users, latest_message, unread_count FROM TB_CHANNEL where channel_id = ? and owner_id = ? ', [channelId,loginUserId]
       ).then(function(result) {
           return DB.fetch(result);
         });
@@ -108,7 +108,7 @@ angular.module('starter.services', [])
       loginUserId = Sign.getUser().userId;
 
       return DB.query(
-        'SELECT channel_id, channel_name, channel_users, unread_count FROM TB_CHANNEL where owner_id = ? ORDER BY channel_updated DESC', [loginUserId]
+        'SELECT channel_id, channel_name, channel_users, latest_message, unread_count FROM TB_CHANNEL where owner_id = ? ORDER BY channel_updated DESC', [loginUserId]
       ).then(function(result) {
         return DB.fetchAll(result);
       });
@@ -148,33 +148,7 @@ angular.module('starter.services', [])
         return DB.fetch(result);
       });
     },    
-    update : function(jsonObj){
-      loginUserId = Sign.getUser().userId;
-
-      var query =
-        "UPDATE TB_CHANNEL "+
-        "SET channel_name = ?, channel_users = ?, unread_count = ?, channel_updated = ? "+
-        "WHERE channel_id = ? and owner_id = ? ";
-
-      var cond = [
-        jsonObj.name,
-        jsonObj.users,
-        jsonObj.unreadCount,
-        Date.now(),
-        jsonObj.channel,
-        loginUserId
-      ];
-
-      if( scope != undefined ){
-        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count':jsonObj.unreadCount};
-        scope.channels[ jsonObj.channel ] = channel;
-      }
-
-      return DB.query(query, cond).then(function(result) {
-        return result;
-      });
-    },
-    updateCount : function(param){
+    update : function(param){
       loginUserId = Sign.getUser().userId;
 
       var query = "UPDATE TB_CHANNEL ";
@@ -183,13 +157,21 @@ angular.module('starter.services', [])
       } else {
         query += "SET unread_count = unread_count + 1, channel_updated = ? ";
       }
+
+      if( param.message != undefined ){
+         query += ", latest_message = ? "
+      }
+
       query += "WHERE channel_id = ? and owner_id = ? ";     
 
-      var cond = [
-        Date.now(),
-        param.channel,
-        loginUserId
-      ];
+      var cond = [Date.now()];
+
+      if( param.message != undefined ){
+        cond.push( param.message );
+      }
+
+      cond.push( param.channel );
+      cond.push( loginUserId );
 
       return DB.query(query, cond).then(function(result) {
         return result;
@@ -220,10 +202,10 @@ angular.module('starter.services', [])
 
       var query =
         "INSERT OR REPLACE INTO TB_CHANNEL "+
-        "(channel_id, channel_name, channel_users, unread_count, channel_updated, owner_id) "+
-        "SELECT new.channel_id, new.channel_name, new.channel_users, IFNULL( old.unread_count, new.unread_count) as unread_count, new.channel_updated, new.owner_id "+
+        "(channel_id, channel_name, channel_users, latest_message, unread_count, channel_updated, owner_id) "+
+        "SELECT new.channel_id, new.channel_name, new.channel_users, new.latest_message, IFNULL( old.unread_count, new.unread_count) as unread_count, new.channel_updated, new.owner_id "+
         "FROM ( "+
-        "  SELECT ? as channel_id, ? as channel_name, ? as channel_users, 1 as unread_count, ? as channel_updated, ? as owner_id " +
+        "  SELECT ? as channel_id, ? as channel_name, ? as channel_users, ? as latest_message, 1 as unread_count, ? as channel_updated, ? as owner_id " +
         ") as new " +
         " LEFT JOIN ( " +
         "   SELECT channel_id, channel_name, channel_users, unread_count + 1 as unread_count, channel_updated, owner_id " +
@@ -234,6 +216,7 @@ angular.module('starter.services', [])
         jsonObj.channel,
         jsonObj.name,
         jsonObj.users,
+        jsonObj.message,
         Date.now(),
         loginUserId
       ];
@@ -243,7 +226,7 @@ angular.module('starter.services', [])
         if( scope.channels[ jsonObj.channel ] != undefined ){
           unreadCount = scope.channels[ jsonObj.channel ].unread_count + 1;
         }
-        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount};
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message};
         scope.channels[ jsonObj.channel ] = channel;
       }
 
@@ -355,8 +338,9 @@ angular.module('starter.services', [])
 
           socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
             var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users };
+            channel.message = decodeURIComponent( data.message ); 
             if( channelJson.result.datas.users_cnt > 2 ){
-              channel.name = channelJson.result.datas.name; 
+              channel.name = channelJson.result.datas.name;               
             } else {
               channel.name = channelJson.result.datas.from;
             } 
@@ -398,18 +382,19 @@ angular.module('starter.services', [])
           data.message = decodeURIComponent( data.message );          
           data.type = data.user.userId == loginUser.userId ? 'me' : 'you';
 
-          var channel = {'channel': data.channel };
-          Channels.updateCount( channel );
+          var channel = {'channel': data.channel, 'message':data.message };
+          Channels.update( channel );
           Messages.add( data );
-        }
+        }      
 
         callback({'status':'ok'});
       });
     },
     channelList : function(callback){
       var loginUser = Sign.getUser();
-      sessionSocket.emit( "channel-list", function(resultObject) {    
+      sessionSocket.emit( "channel-list", function(resultObject) {            
         var channelArray = resultObject.result;
+        console.log( channelArray );
         for( var inx = 0 ; inx < channelArray.length ; inx++ ){
           var data = channelArray[inx];
           var channel = {'channel': data.channel, 'users' : data.datas.users };
@@ -522,7 +507,7 @@ angular.module('starter.services', [])
             *Reset Count Start
             */      
             var param = { 'channel' :  params.channel, 'reset' : true }
-            Channels.updateCount( param );
+            Channels.update( param );
 
             /*
             *Reset Count End

@@ -1,6 +1,8 @@
 angular.module('starter.controllers', [])
 
-.controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels ) {
+.controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels, Friends, Sign ) {
+
+  var loginUserId = Sign.getUser().userId;
 
   Channels.getAllCount().then( function ( result ){
     $rootScope.totalUnreadCount = result.total_count;
@@ -23,7 +25,22 @@ angular.module('starter.controllers', [])
       $rootScope.$stateParams = $stateParams;
       $state.go( 'chat' );
     });
-  };  
+  };
+
+  $scope.getImage = function( channelId ){
+
+    var image = "../www/img/default_image.jpg";
+    if( channelId.indexOf( "$" ) > -1  ){
+      var friendId = channelId.split( "^" )[0].replace("$").replace( loginUserId );
+      console.log( friendId );
+      if( Friends.get[friendId] != undefined ){
+        console.log( Friends.get[friendId] );
+        image = Friends.get[friendId].datas.image;
+      }
+    }
+
+    return image;
+  }
 })
 .controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, Channels) {
 
@@ -348,4 +365,5 @@ angular.module('starter.controllers', [])
       }
     }
   });
+
 });

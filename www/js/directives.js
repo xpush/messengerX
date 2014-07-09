@@ -13,7 +13,31 @@ angular.module('starter.directives', [])
     });
   };
 })
+.directive('channelImage', function(Friends, Sign) {
+  return {
+    restrict: 'E',
+    scope: {
+       rowChannelId: '=channelId',
+       image: '&'
+    },    
+    replace: true,
+    transclude: false,
+    controller: function($scope) {
+      var loginUserId = Sign.getUser().userId;
+      var image = "../www/img/default_image.jpg";      
+      var rowChannelId = $scope.rowChannelId;
+      if( rowChannelId.indexOf( "$" ) > -1  ){
+        var friendId = rowChannelId.split( "^" )[0].replace("$", "" ).replace( loginUserId, "" );
+        if( Friends.get( friendId ) != undefined ){
+          image = Friends.get( friendId ).image;
+        }
+      }
 
+      $scope.image = image;
+    },
+    template: '<img src="{{image}}" />'
+  };
+})
 .directive('paperInput', function($parse, $timeout, $browser) {
   return {
     restrict: 'E',
