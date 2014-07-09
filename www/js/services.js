@@ -98,7 +98,7 @@ angular.module('starter.services', [])
     get : function( channelId ){
       loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT channel_id, channel_name, channel_users, latest_message, unread_count FROM TB_CHANNEL where channel_id = ? and owner_id = ? ', [channelId,loginUserId]
+        'SELECT channel_id, channel_name, channel_users, latest_message, unread_count, channel_updated FROM TB_CHANNEL where channel_id = ? and owner_id = ? ', [channelId,loginUserId]
       ).then(function(result) {
           return DB.fetch(result);
         });
@@ -108,7 +108,7 @@ angular.module('starter.services', [])
       loginUserId = Sign.getUser().userId;
 
       return DB.query(
-        'SELECT channel_id, channel_name, channel_users, latest_message, unread_count FROM TB_CHANNEL where owner_id = ? ORDER BY channel_updated DESC', [loginUserId]
+        'SELECT channel_id, channel_name, channel_users, latest_message, unread_count, channel_updated FROM TB_CHANNEL where owner_id = ? ORDER BY channel_updated DESC', [loginUserId]
       ).then(function(result) {
         return DB.fetchAll(result);
       });
@@ -394,7 +394,6 @@ angular.module('starter.services', [])
       var loginUser = Sign.getUser();
       sessionSocket.emit( "channel-list", function(resultObject) {            
         var channelArray = resultObject.result;
-        console.log( channelArray );
         for( var inx = 0 ; inx < channelArray.length ; inx++ ){
           var data = channelArray[inx];
           var channel = {'channel': data.channel, 'users' : data.datas.users };
@@ -522,7 +521,7 @@ angular.module('starter.services', [])
                   content += '<div class="from">'
                   content += '<img src="'+ data.sender_image+'" class="profile"/>';
                   content += '<span class="from">'+data.message+'</span>';
-                  content += '<span class="time">'+ UTIL.toTime( data.time )+'</span>';
+                  content += '<span class="time">'+ UTIL.timeToString( data.time )+'</span>';
                   content += '</div>'
                 } else {
                   content = '<span>'+data.message+'</span>' 
@@ -554,7 +553,7 @@ angular.module('starter.services', [])
             content += '<div class="from">'
             content += '<img src="'+ data.user.image+'" class="profile"/>';
             content += '<span >'+decodeURIComponent( data.message )+'</span>';
-            content += '<span class="time">'+UTIL.toTime( data.timestamp )+'</span>';
+            content += '<span class="time">'+UTIL.timeToString( data.timestamp )+'</span>';
             content += '</div>'
             
           } else {
@@ -713,15 +712,29 @@ angular.module('starter.services', [])
 
       return s.join('');
     },
-    toTime : function( timestamp ){
+    timeToString : function( timestamp, dateFlag ){
+      var cDate = new Date();
+
+      var cYyyymmdd = cDate.getFullYear()+""+(cDate.getMonth()+1)+""+cDate.getDate();
       var date = new Date( timestamp );
+
+      var yyyy = date.getFullYear();
+      var mm = date.getMonth()+1;
+      var dd = date.getDate();
+
       var hour = date.getHours();
       hour = hour > 10 ? hour : "0"+hour;
 
-
       var minute = date.getMinutes();
       minute = minute > 10 ? minute : "0"+minute;
-      return hour + ":" + minute;
+
+      var yyyymmdd = yyyy + "" + mm + ""+ dd;
+
+      if ( dateFlag && cYyyymmdd != yyyymmdd  ) {
+        return yyyy + "." + mm + "."+ dd;;
+      } else {
+        return hour + ":" + minute;
+      }
     }
   }
 });

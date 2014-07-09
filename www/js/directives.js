@@ -15,9 +15,9 @@ angular.module('starter.directives', [])
 })
 .directive('channelImage', function(Friends, Sign) {
   return {
-    restrict: 'E',
+    restrict: 'A',
     scope: {
-       rowChannelId: '=channelId',
+       rowChannelId: '=id',
        image: '&'
     },    
     replace: true,
@@ -36,6 +36,21 @@ angular.module('starter.directives', [])
       $scope.image = image;
     },
     template: '<img src="{{image}}" />'
+  };
+})
+.directive('updatedTime', function(UTIL) {
+  return {
+    restrict: 'A',
+    scope: {
+       timestamp: '=timestamp',
+       timeString: '&'
+    },    
+    replace: true,
+    transclude: false,
+    controller: function($scope) {
+      $scope.timeString = UTIL.timeToString( $scope.timestamp, true );
+    },
+    template: '<span class="channel-time">{{timeString}}</span>'
   };
 })
 .directive('paperInput', function($parse, $timeout, $browser) {

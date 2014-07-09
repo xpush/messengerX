@@ -2,10 +2,11 @@
   <ion-content class="has-header">
     <ion-list>
       <ion-item ng-repeat="channel in channels" ng-click="goChat('{{channel.channel_id}}')" class="item item-avatar">
-      	<img src="{{channel.channel_image}}" />
+        <img channel-image id="channel.channel_id" ></img>
         <h2>{{channel.channel_name}}</h2>
-        <p>{{channel.latest_message}}</p>
-        <span ng-if="channel.unread_count > 0" class="badge badge-assertive">{{channel.unread_count}}</span>
+        <p>{{channel.latest_message}}&nbsp;</p>
+        <span ng-if="channel.unread_count > 0" class="channel-message-unread">{{channel.unread_count}}</span>
+        <span updated-time timestamp="channel.channel_updated"></span>
       </ion-item>
     </ion-list>
   </ion-content>
