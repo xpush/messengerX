@@ -149,8 +149,8 @@ paper-input {
 }
 
 .channel-message-unread {
-	top : 40px;
-	left: 40px;
+	top : 50px;
+	left: 50px;
 	display: -webkit-box;
 	display: -webkit-flex;
 	display: -moz-box;
@@ -181,4 +181,28 @@ paper-input {
 	position: absolute;
 	top: 10px;
 	right: 10px;
+}
+
+.item-channel  {
+	padding-left: 80px;
+	min-height: 70px;
+}
+
+.item-channel > img:first-child, .item-channel .item-image, .item-channel .item-content > img:first-child, .item-channel .item-content .item-image, .item-channel-left > img:first-child, .item-channel-left .item-image, .item-channel-left .item-content > img:first-child, .item-channel-left .item-content .item-image {
+ 	position: absolute;
+	top: 15px;
+	left: 15px;
+	max-width: 50px;
+	max-height: 50px;
+	width: 100%;
+ }
+
+
+/*
+* override ionic css
+*/
+.popup-body {
+	padding: 10px;
+	max-height: 300px;
+	overflow-y: auto;
 }

@@ -3,7 +3,7 @@ angular.module('starter.services', [])
 /**
  * A simple example service that returns some data.
  */
-.factory('Friends', function(SocketManager, Sign) {
+.factory('Friends', function(SocketManager, Sign, UTIL) {
   // Might use a resource here that returns a JSON array
 
   // Some fake testing data
@@ -40,7 +40,7 @@ angular.module('starter.services', [])
               if( users[inx].userId != loginUserId ){
                 friendCount++;
                 friends[ users[inx].userId ] = { 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
-                  'message' : users[inx].datas.message, 'image': users[inx].datas.image  };
+                  'message' : users[inx].datas.message, 'image': users[inx].datas.image, 'chosung' : UTIL.getChosung( users[inx].datas.name ) };
               }
             }
 
@@ -212,22 +212,35 @@ angular.module('starter.services', [])
         "   FROM TB_CHANNEL " +
         " ) AS old ON new.channel_id = old.channel_id AND old.owner_id = new.owner_id ; ";      
 
+      var currentTimestamp = Date.now();
       var cond = [
         jsonObj.channel,
         jsonObj.name,
         jsonObj.users,
         jsonObj.message,
-        Date.now(),
+        currentTimestamp,
         loginUserId
       ];
 
       if( scope != undefined ){
-        var unreadCount = 1;
-        if( scope.channels[ jsonObj.channel ] != undefined ){
-          unreadCount = scope.channels[ jsonObj.channel ].unread_count + 1;
+
+        var unreadCount = 1;    
+        var searchIndex = -1;
+        for( var inx = 0 ; inx < scope.channelArray.length; inx++ ){
+          if( scope.channelArray[inx].channel_id == jsonObj.channel ){
+            searchIndex = inx;
+            break;
+          }
         }
-        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message};
-        scope.channels[ jsonObj.channel ] = channel;
+
+        if( searchIndex > -1 ){
+          unreadCount = scope.channelArray[ searchIndex ].unread_count + 1;
+          scope.channelArray.splice(searchIndex, 1);
+        }
+        
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message, 'channel_updated': currentTimestamp};
+        scope.channelArray.unshift( channel );
+        scope.$apply();     
       }
 
       return DB.query(query, cond).then(function(result) {
@@ -334,7 +347,6 @@ angular.module('starter.services', [])
       socket.on('_event', function (messageObject) {
         if( messageObject.event == 'NOTIFICATION' ){
           var data = messageObject.data;
-          console.log( data );
 
           socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
             var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users };
@@ -700,7 +712,8 @@ angular.module('starter.services', [])
   return self;
 })
 .factory('UTIL', function(){
-  return {
+  var cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+  return {          
     getUniqueKey : function () {
       var s = [], itoh = '0123456789ABCDEF';
       for (var i = 0; i < 36; i++) s[i] = Math.floor(Math.random()*0x10);
@@ -735,6 +748,14 @@ angular.module('starter.services', [])
       } else {
         return hour + ":" + minute;
       }
-    }
+    },
+    getChosung : function(str) {
+      result = "";
+      for(i=0;i<str.length;i++) {
+        code = str.charCodeAt(i)-44032;
+        if(code>-1 && code<11172) result += cho[Math.floor(code/588)];
+      }
+      return result;      
+    }    
   }
 });

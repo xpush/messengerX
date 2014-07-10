@@ -38,6 +38,23 @@ angular.module('starter.directives', [])
     template: '<img src="{{image}}" />'
   };
 })
+.directive('setCaret', function() {
+
+  return {
+    restrict: 'A',
+    link: function(scope,element,attrs) {
+      var changed = false;
+      element.bind('keypress', function() {
+        if(element[0].selectionStart > 3 && !changed) {
+          changed = true;
+          element[0].selectionEnd = parseInt(attrs.position, 10);
+        }
+      })
+
+    },
+  }
+
+})
 .directive('updatedTime', function(UTIL) {
   return {
     restrict: 'A',

@@ -2,8 +2,6 @@ angular.module('starter.controllers', [])
 
 .controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels, Friends, Sign ) {
 
-  $scope.channels = {};
-
   var loginUserId = Sign.getUser().userId;
 
   Channels.getAllCount().then( function ( result ){
@@ -11,12 +9,11 @@ angular.module('starter.controllers', [])
   });  
 
   $scope.channelArray = [];
-  Channels.list( $scope ).then(function(channels) {
-    for( var inx = 0 ; inx < channels.length ; inx++ ){
-      $scope.channels[ channels[inx].channel_id ] = channels[inx];
-    }
 
-    console.log( $scope.channelArray );
+  Channels.list( $scope ).then(function(channels) {
+    $scope.channelArray = [];
+    $scope.channelArray = channels;
+    //$scope.$apply();
   });
 
   $scope.goChat = function( channelId ) {
@@ -53,10 +50,11 @@ angular.module('starter.controllers', [])
   $scope.friends = {};
   $scope.datas = [];
   $scope.friendCount = 0;
+  $scope.searchKey = "";
 
   Friends.list(function(friends, friendCount){
     if( friends != undefined ){
-      $scope.friends = friends;
+      $scope.friends = angular.copy( friends );
       $scope.friendCount = friendCount;
       $scope.$apply();
     }
@@ -65,6 +63,22 @@ angular.module('starter.controllers', [])
   $scope.goProfile = function(){
     $state.go( 'tab.account' );
   };
+
+  $scope.searchByKey = function( searchKey ){
+    var friends = angular.copy(  Friends.all() ) ;
+
+    if( searchKey != '' ){     
+      for( var key in friends ){
+        if( friends[key].chosung.indexOf( searchKey ) < 0 ){
+          delete friends[key]
+        }
+      }
+
+      $scope.friends = friends;
+    } else {
+      $scope.friends = Friends.all();
+    }
+  }
 
   $scope.goChat = function( friendIds ) {
     $stateParams.friendIds = friendIds;
