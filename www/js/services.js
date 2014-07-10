@@ -3,10 +3,64 @@ angular.module('starter.services', [])
 /**
  * A simple example service that returns some data.
  */
-.factory('Friends', function(SocketManager, Sign, UTIL) {
-  // Might use a resource here that returns a JSON array
+.factory('UserDao', function(Sign, DB) {
+  return {
+     addFriend : function( jsonObj ){
+      var loginUserId = Sign.getUser().userId;
 
-  // Some fake testing data
+      var query =
+        "INSERT OR REPLACE INTO TB_USER "+
+        "(user_id, user_name, message, image, chosung, owner_id, friend_flag) VALUES "+
+        "( ?, ?, ?, ?, ?, ?, 'Y') "    
+
+      var currentTimestamp = Date.now();
+      var cond = [
+        jsonObj.userId,
+        jsonObj.userName,
+        jsonObj.message,
+        jsonObj.image,
+        jsonObj.chosung,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });      
+    },
+    add : function(jsonObj){
+      var loginUserId = Sign.getUser().userId;
+
+      var query =
+        "INSERT OR REPLACE INTO TB_USER "+
+        "(user_id, user_name, message, image, chosung, owner_id) VALUES "+
+        "( ?, ?, ?, ?, ?, ?) "    
+
+      var currentTimestamp = Date.now();
+      var cond = [
+        jsonObj.userId,
+        jsonObj.userName,
+        jsonObj.message,
+        jsonObj.image,
+        jsonObj.chosung,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });      
+    },
+    list : function( jsonObj ){
+      var loginUserId = Sign.getUser().userId;
+      return DB.query(
+        'SELECT user_id, user_name, message, image, chosung, owner_id, friend_flag FROM TB_USER where owner_id = ? and friend_flag = ? ORDER BY user_name', [loginUserId, jsonObj.friendFlag]
+      ).then(function(result) {
+        return DB.fetchAll(result);
+      });
+    }  
+  }
+})
+.factory('Friends', function(SocketManager, Sign, UTIL, UserDao) {
+  // Might use a resource here that returns a JSON array
   var friends = {};
   var loginUserId;
   var scope;
@@ -28,64 +82,76 @@ angular.module('starter.services', [])
       return friends[friendId];
     },
     list : function(callback){
-      friends = {};
-      loginUserId = Sign.getUser().userId;
+      UserDao.list( { 'friendFlag' : 'Y'} ).then( function ( result ){
+        friends = {};
+        for( var key in result ){
+          friends[ result[key].user_id ] = { 'image': result[key].image, 'chosung' : result[key].chosung };
+        }
+        console.log( friends );
+        callback( result );
+      });
+    },
+    refresh : function(callback){
+      var loginUserId = Sign.getUser().userId;
 
       SocketManager.get( function( socket ){        
         socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
           if( data.status == 'ok' ){
             var users = data.result;
-            var friendCount = 0;
+            friends = {};
+
             for( var inx = 0 ; inx < users.length ; inx++ ){              
               if( users[inx].userId != loginUserId ){
-                friendCount++;
-                friends[ users[inx].userId ] = { 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
-                  'message' : users[inx].datas.message, 'image': users[inx].datas.image, 'chosung' : UTIL.getChosung( users[inx].datas.name ) };
+                var user = { 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
+                  'message' : users[inx].datas.message, 'image': users[inx].datas.image, 'chosung' : UTIL.getChosung( users[inx].datas.name ), 'friendFlag' : 'Y' };
+
+                friends[ users[inx].userId ] = { 'image': users[inx].datas.image };
+                UserDao.addFriend( user );
               }
             }
 
-            callback( friends, friendCount );
+            callback( {'status':'ok'} );
           }
         });
       });
     }
   }
 })
-.factory('Users', function(SocketManager, Sign) {
+.factory('Users', function(SocketManager, Sign, UserDao, Friends, UTIL) {
   // Might use a resource here that returns a JSON array
   var loginUserId;
 
   return {
-    all: function() {
-      return users;
-    },
-    get: function(userId) {
-      // Simple index lookup
-      return users[userId];
-    },
-    list : function(friends,callback){
+    list : function(callback){
 
       loginUserId = Sign.getUser().userId;
 
-      var users = {};
+      var friends = Friends.all();
 
       SocketManager.get( function( socket ){        
         socket.emit( 'user-list', {}, function( data ){
           console.log( 'user-list' );
           if( data.status == 'ok' ){
             var userArray = data.result;
-            for( var inx = 0 ; inx < userArray.length ; inx++ ){              
+            for( var inx = 0 ; inx < userArray.length ; inx++ ){             
               var cUserId = userArray[inx].userId;
 
               if( friends[ cUserId ] == undefined && cUserId != loginUserId ){
-                users[ userArray[inx].userId ] = { 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image };
+                var user = { 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image,
+                  'message' : userArray[inx].datas.message, 'image': userArray[inx].datas.image, 'chosung' : UTIL.getChosung( userArray[inx].datas.name ) };
+                UserDao.add( user );
+                console.log( "for : " + inx );
               }
-            }
 
-            callback( users );
+            }
           }
+
+          UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
+            console.log( result );
+            callback( result );
+          });
         });
-      });
+      })
     }
   }
 })

@@ -40,6 +40,20 @@ angular.module('starter.constants', [])
           {name: 'owner_id', type: 'text'}
         ],
         table_index : { type : 'UNIQUE', name : 'IDX_TB_CHANNEL', columns : [ 'channel_id', 'owner_id' ] }
+      },
+      {
+        name: 'TB_USER',
+        columns: [
+          //{name: '_id',     type: 'integer primary key autoincrement'},
+          {name: 'user_id',   type: 'text'},
+          {name: 'user_name',  type: 'text'},
+          {name: 'message',    type: 'text'},
+          {name: 'image', type: 'text'},
+          {name: 'chosung', type: 'text'},
+          {name: 'owner_id', type: 'text'},
+          {name: 'friend_flag', type: 'text DEFAULT "N" '}
+        ],
+        table_index : { type : 'UNIQUE', name : 'IDX_TB_USER', columns : [ 'user_id', 'owner_id' ] }
       }
     ]
 });

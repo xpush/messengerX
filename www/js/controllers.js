@@ -13,7 +13,6 @@ angular.module('starter.controllers', [])
   Channels.list( $scope ).then(function(channels) {
     $scope.channelArray = [];
     $scope.channelArray = channels;
-    //$scope.$apply();
   });
 
   $scope.goChat = function( channelId ) {
@@ -47,16 +46,17 @@ angular.module('starter.controllers', [])
     $rootScope.totalUnreadCount = result.total_count;
   });
 
-  $scope.friends = {};
+  $scope.friends = [];
   $scope.datas = [];
   $scope.friendCount = 0;
   $scope.searchKey = "";
 
-  Friends.list(function(friends, friendCount){
+  Friends.list(function(friends){
     if( friends != undefined ){
+      $scope.friends = [];
       $scope.friends = angular.copy( friends );
-      $scope.friendCount = friendCount;
-      $scope.$apply();
+      $scope.friendCount = $scope.friends.length;
+      //$scope.$apply();
     }
   });
 
@@ -99,13 +99,13 @@ angular.module('starter.controllers', [])
   };
 
   $scope.showPopup = function() {
-    $scope.data = {};
+
     $scope.selection = [];
 
-    Users.list($scope.friends, function(users){
+    Users.list(function(users){
       if( users != undefined ){
+        $scope.datas = [];
         $scope.datas = users;
-        $scope.$apply();
       }
     });
 
@@ -175,6 +175,11 @@ angular.module('starter.controllers', [])
     });
   };
 
+  $scope.syncFriends = function(){
+    Friends.refresh( function(result){
+      console.log( result );
+    });
+  }
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, Sign) {
   $scope.signIn = function(user) {
@@ -381,5 +386,4 @@ angular.module('starter.controllers', [])
       }
     }
   });
-
 });

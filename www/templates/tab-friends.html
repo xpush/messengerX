@@ -21,9 +21,9 @@
       <div class="item item-divider">
         Friends({{friendCount}})
       </div>
-    	<ion-item ng-repeat="friend in friends" class="item item-avatar" ng-click="goChat('{{friend.userId}}')">
+    	<ion-item ng-repeat="friend in friends" class="item item-avatar" ng-click="goChat('{{friend.user_id}}')">
         <img src="{{friend.image}}" />
-        <h2>{{friend.userName}}</h2>
+        <h2>{{friend.user_name}}</h2>
         <p>{{friend.message}}</p>
       </ion-item>
     </ion-list>
