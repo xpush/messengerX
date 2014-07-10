@@ -5,21 +5,27 @@ angular.module('starter.services', [])
  */
 .factory('UserDao', function(Sign, DB) {
   return {
-     addFriend : function( jsonObj ){
+    addFriend : function( userIds ){
       var loginUserId = Sign.getUser().userId;
 
-      var query =
-        "INSERT OR REPLACE INTO TB_USER "+
-        "(user_id, user_name, message, image, chosung, owner_id, friend_flag) VALUES "+
-        "( ?, ?, ?, ?, ?, ?, 'Y') "    
+      var inUserId = "";
+      for( var inx = 0 ; inx < userIds.length ; inx++ ){
+        inUserId += "'"+userIds[inx]+"'";
 
-      var currentTimestamp = Date.now();
+        if( inx < userIds.length-1 ){
+          inUserId += ", ";
+        }
+      }
+
+      var query =
+        "UPDATE TB_USER "+
+        "SET friend_flag = 'Y' "+
+        "WHERE user_id in ( "+
+        inUserId +
+        " ) "+
+        "AND owner_id = ? ";
+
       var cond = [
-        jsonObj.userId,
-        jsonObj.userName,
-        jsonObj.message,
-        jsonObj.image,
-        jsonObj.chosung,
         loginUserId
       ];
 
@@ -27,13 +33,24 @@ angular.module('starter.services', [])
         return result;
       });      
     },
-    add : function(jsonObj){
+    add : function(jsonObj, friendFlag){
       var loginUserId = Sign.getUser().userId;
 
       var query =
         "INSERT OR REPLACE INTO TB_USER "+
-        "(user_id, user_name, message, image, chosung, owner_id) VALUES "+
-        "( ?, ?, ?, ?, ?, ?) "    
+        "(user_id, user_name, message, image, chosung, owner_id ";
+
+      if(jsonObj.friendFlag){
+        query += ", friend_flag ";
+      }
+
+      query += ") VALUES ( ?, ?, ?, ?, ?, ? ";
+
+      if(friendFlag){
+        query += ", 'Y' ";
+      }
+
+      query += ") ";
 
       var currentTimestamp = Date.now();
       var cond = [
@@ -73,6 +90,7 @@ angular.module('starter.services', [])
       loginUserId = Sign.getUser().userId;
       SocketManager.get( function( socket ){
         socket.emit( 'group-add', {'userIds':userIds, 'groupId' : loginUserId}, function( data ){
+          UserDao.addFriend( userIds );
           callback( data );
         });
       });      
@@ -87,7 +105,6 @@ angular.module('starter.services', [])
         for( var key in result ){
           friends[ result[key].user_id ] = { 'image': result[key].image, 'chosung' : result[key].chosung };
         }
-        console.log( friends );
         callback( result );
       });
     },
@@ -99,15 +116,18 @@ angular.module('starter.services', [])
           if( data.status == 'ok' ){
             var users = data.result;
             friends = {};
-
+            try {
             for( var inx = 0 ; inx < users.length ; inx++ ){              
               if( users[inx].userId != loginUserId ){
                 var user = { 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
                   'message' : users[inx].datas.message, 'image': users[inx].datas.image, 'chosung' : UTIL.getChosung( users[inx].datas.name ), 'friendFlag' : 'Y' };
 
                 friends[ users[inx].userId ] = { 'image': users[inx].datas.image };
-                UserDao.addFriend( user );
+                UserDao.add( user, true );
               }
+            }
+            } catch ( e ){
+              console.log( e );
             }
 
             callback( {'status':'ok'} );
@@ -140,14 +160,11 @@ angular.module('starter.services', [])
                 var user = { 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image,
                   'message' : userArray[inx].datas.message, 'image': userArray[inx].datas.image, 'chosung' : UTIL.getChosung( userArray[inx].datas.name ) };
                 UserDao.add( user );
-                console.log( "for : " + inx );
               }
-
             }
           }
 
           UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
-            console.log( result );
             callback( result );
           });
         });
@@ -425,19 +442,6 @@ angular.module('starter.services', [])
             
             $rootScope.totalUnreadCount++;
             Channels.add( channel );
-
-            /**
-            Channels.get( data.channel ).then(function(channnelInfo) {        
-              $rootScope.totalUnreadCount++;
-              if( channnelInfo != undefined ){
-                channel.unreadCount = channnelInfo.unread_count + 1;
-                Channels.update( channel );
-              } else {
-                channel.unreadCount = 1;
-                Channels.add( channel );
-              }
-            });
-            */
           });
         }
       });
@@ -725,7 +729,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( changeDBFlag ){
+      if( !changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }

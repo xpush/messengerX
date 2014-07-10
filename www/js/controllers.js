@@ -98,6 +98,19 @@ angular.module('starter.controllers', [])
     }
   };
 
+  $scope.syncFriends = function(){
+    console.log( "syncFriends" );
+    Friends.refresh( function(result){
+      Friends.list(function(friends){
+        if( friends != undefined ){
+          $scope.friends = [];
+          $scope.friends = angular.copy( friends );
+          $scope.friendCount = $scope.friends.length;
+        }
+      });
+    });
+  }
+
   $scope.showPopup = function() {
 
     $scope.selection = [];
@@ -144,9 +157,10 @@ angular.module('starter.controllers', [])
           if( data.status == 'ok' ){
             Friends.list(function(friends){
               if( friends != undefined ){
+                $scope.friends = [];
                 $scope.friends = friends;
-                var current = $state.current;
-                $state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
+                //var current = $state.current;
+                //$state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
               }
             });
           }
@@ -176,6 +190,7 @@ angular.module('starter.controllers', [])
   };
 
   $scope.syncFriends = function(){
+    console.log( "syncFriends" );
     Friends.refresh( function(result){
       console.log( result );
     });
