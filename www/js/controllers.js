@@ -2,20 +2,22 @@ angular.module('starter.controllers', [])
 
 .controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels, Friends, Sign ) {
 
+  $scope.channels = {};
+
   var loginUserId = Sign.getUser().userId;
 
   Channels.getAllCount().then( function ( result ){
     $rootScope.totalUnreadCount = result.total_count;
   });  
 
+  $scope.channelArray = [];
   Channels.list( $scope ).then(function(channels) {
     for( var inx = 0 ; inx < channels.length ; inx++ ){
       $scope.channels[ channels[inx].channel_id ] = channels[inx];
     }
-  });
 
-  var channelIds = [];
-  $scope.channels = {};
+    console.log( $scope.channelArray );
+  });
 
   $scope.goChat = function( channelId ) {
     Channels.get( channelId ).then(function(data) {
@@ -259,7 +261,7 @@ angular.module('starter.controllers', [])
         console.log( "channel-create success" );
 
         createObject.unreadCount = 0;
-        Channels.add( createObject );
+        Channels.insert( createObject );
         initChat();
       });
     });

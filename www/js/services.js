@@ -723,10 +723,10 @@ angular.module('starter.services', [])
       var dd = date.getDate();
 
       var hour = date.getHours();
-      hour = hour > 10 ? hour : "0"+hour;
+      hour = hour >= 10 ? hour : "0"+hour;
 
       var minute = date.getMinutes();
-      minute = minute > 10 ? minute : "0"+minute;
+      minute = minute >= 10 ? minute : "0"+minute;
 
       var yyyymmdd = yyyy + "" + mm + ""+ dd;
 
