@@ -36,9 +36,15 @@ angular.module('starter.services', [])
     add : function(jsonObj, friendFlag){
       var loginUserId = Sign.getUser().userId;
 
-      var query =
-        "INSERT OR REPLACE INTO TB_USER "+
-        "(user_id, user_name, message, image, chosung, owner_id ";
+      var query = "INSERT OR ";
+
+      if(jsonObj.friendFlag){
+        query +="REPLACE ";
+      } else {
+        query +="IGNORE ";
+      }
+
+      query += "INTO TB_USER (user_id, user_name, message, image, chosung, owner_id ";
 
       if(jsonObj.friendFlag){
         query += ", friend_flag ";
@@ -76,16 +82,30 @@ angular.module('starter.services', [])
     }  
   }
 })
-.factory('Friends', function(SocketManager, Sign, UTIL, UserDao) {
+.factory('Cache', function(){
+  var cache = {};
+
+  return {
+    all : function(){
+      return cache;
+    },
+    add : function(key, value){
+      cache[key] = value;
+    },
+    remove : function(key){
+      delete cache[key];
+    },
+    get : function(key){
+      return cache[key];
+    }
+  }
+})
+.factory('Friends', function(SocketManager, Sign, UTIL, UserDao, Cache) {
   // Might use a resource here that returns a JSON array
-  var friends = {};
   var loginUserId;
   var scope;
 
   return {
-    all: function() {
-      return friends;
-    },
     add: function(userIds, callback) {
       loginUserId = Sign.getUser().userId;
       SocketManager.get( function( socket ){
@@ -94,23 +114,19 @@ angular.module('starter.services', [])
           callback( data );
         });
       });      
-    },    
-    get: function(friendId) {
-      // Simple index lookup
-      return friends[friendId];
     },
     list : function(callback){
       UserDao.list( { 'friendFlag' : 'Y'} ).then( function ( result ){
         friends = {};
         for( var key in result ){
-          friends[ result[key].user_id ] = { 'userName' : result[key].user_name, 'image': result[key].image, 'chosung' : result[key].chosung };
+          Cache.add( result[key].user_id, { 'NM' : result[key].user_name, 'I': result[key].image });
         }
+
         callback( result );
       });
     },
     refresh : function(callback){
-      var loginUserId = Sign.getUser().userId;
-
+      var loginUserId = Sign.getUser().userId;    
       SocketManager.get( function( socket ){        
         socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
           if( data.status == 'ok' ){
@@ -135,13 +151,15 @@ angular.module('starter.services', [])
 
       var userArray = angular.copy( userIds );
 
+      var friends = Cache.all();
+
       // Room with 2 people
       if( userArray.length == 2 && userArray.indexOf( loginUserId ) > -1 ){
         userArray.splice( userArray.indexOf( loginUserId ), 1 );
 
         var name = userArray[0];
         if( friends[ userArray[0] ] != undefined ){
-          name = friends[ userArray[0] ].userName;
+          name = friends[ userArray[0] ].NM;
         }
 
         userNames.push( name );
@@ -152,7 +170,7 @@ angular.module('starter.services', [])
           if( userArray[inx] == loginUserId ){
             name = loginUserName;
           }else if( friends[ userArray[inx] ] != undefined ){
-            name = friends[ userArray[inx] ].userName;
+            name = friends[ userArray[inx] ].NM;
           }
 
           userNames.push( name );
@@ -163,7 +181,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Users', function(SocketManager, Sign, UserDao, UTIL) {
+.factory('Users', function(SocketManager, Sign, UserDao, UTIL, Cache) {
   // Might use a resource here that returns a JSON array
   var loginUserId;
 
@@ -184,6 +202,7 @@ angular.module('starter.services', [])
                 var user = { 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image,
                   'message' : userArray[inx].datas.message, 'image': userArray[inx].datas.image, 'chosung' : UTIL.getChosung( userArray[inx].datas.name ) };
                 UserDao.add( user );
+                Cache.add( userArray[inx].userId, { 'NM' : userArray[inx].datas.name, 'I': userArray[inx].datas.image } );
               }
             }
           }
@@ -379,7 +398,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Messages', function(DB, Sign) {
+.factory('Messages', function(DB, Sign, Cache) {file:///D:/ionic/workspace/messengerX/www/index.html#/tab/
   // Might use a resource here that returns a JSON array
   var scope;
 
@@ -409,6 +428,9 @@ angular.module('starter.services', [])
         jsonObj.timestamp,
         loginUserId
       ];
+
+      // Add to Cache
+      Cache.add( jsonObj.sender, {'NM':jsonObj.user.userName, 'I':jsonObj.user.image} );
 
       return DB.query(query, cond).then(function(result) {
         return result;
@@ -482,7 +504,7 @@ angular.module('starter.services', [])
             }
             
             $rootScope.totalUnreadCount++;
-            Channels.add( channel );
+            Channels.add( channel );          
           });
         }
       });
@@ -498,8 +520,8 @@ angular.module('starter.services', [])
     unreadMessage : function(channels, callback){
       var loginUser = Sign.getUser();
       sessionSocket.emit( "message-unread", function(resultObject) {
-        try {
         var messageArray = resultObject.result;
+
         for( var inx = 0 ; inx < messageArray.length ; inx++ ){
           var data = messageArray[inx].message.data;
           data = JSON.parse(data);
@@ -511,9 +533,6 @@ angular.module('starter.services', [])
 
           Channels.add( channel );
           Messages.add( data );
-        }
-        } catch( e ){
-          console.log( e );
         }
 
         callback({'status':'ok'});
@@ -536,7 +555,6 @@ angular.module('starter.services', [])
 
           channels[ data.channel ] =  channel;
         }
-
         callback(channels);
       });
     }   
@@ -592,7 +610,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Chat', function($http, $rootScope, BASE_URL, Channels, Messages, UTIL ) {
+.factory('Chat', function($http, $rootScope, BASE_URL, Channels, Messages, UTIL, Cache ) {
   var channelSocket;
   var CONF = {};
 
@@ -626,7 +644,7 @@ angular.module('starter.services', [])
               data.message = decodeURIComponent( data.message );              
               data.type = data.user.userId == loginUser.userId ? 'me' : 'you';
 
-              Messages.add( data );             
+              Messages.add( data );
             }
 
             //message received complete
@@ -651,7 +669,7 @@ angular.module('starter.services', [])
                 if(data.type == 'you'){                
                   content = '<div class="small">'+ data.sender_name+'</div>' ;
                   content += '<div class="from">'
-                  content += '<img src="'+ data.sender_image+'" class="profile"/>';
+                  content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
                   content += '<span class="from">'+data.message+'</span>';
                   content += '<span class="time">'+ UTIL.timeToString( data.time )+'</span>';
                   content += '</div>'
@@ -682,8 +700,9 @@ angular.module('starter.services', [])
           if(data.type == 'you'){
 
             content = '<div class="small">'+ data.user.userName+'</div>' ;
-            content += '<div class="from">'
-            content += '<img src="'+ data.user.image+'" class="profile"/>';
+            content += '<div class="from">';
+            content += '<img src="'+ data.user.datas.image+'" class="profile"/>';
+            //content += '<img profile-image user-id="'+data.user.userId+'" class="profile"></img>';
             content += '<span >'+decodeURIComponent( data.message )+'</span>';
             content += '<span class="time">'+UTIL.timeToString( data.timestamp )+'</span>';
             content += '</div>'
@@ -779,7 +798,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( !changeDBFlag ){
+      if( changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }

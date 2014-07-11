@@ -32,7 +32,7 @@ angular.module('starter.controllers', [])
       Friends.list(function(friends){
         if( friends != undefined ){
           $scope.friends = [];
-          $scope.friends = angular.copy( friends );
+          $scope.friends = friends;
           $scope.friendCount = $scope.friends.length;
         }
       });
@@ -51,7 +51,7 @@ angular.module('starter.controllers', [])
     Friends.list(function(friends){
       if( friends != undefined ){
         $scope.friends = [];
-        $scope.friends = angular.copy( friends );
+        $scope.friends = friends;
         $scope.friendCount = $scope.friends.length;
       }
     });
@@ -62,18 +62,26 @@ angular.module('starter.controllers', [])
   };
 
   $scope.searchByKey = function( searchKey ){
-    var friends = angular.copy(  Friends.all() ) ;
-
-    if( searchKey != '' ){     
-      for( var key in friends ){
-        if( friends[key].chosung.indexOf( searchKey ) < 0 ){
-          delete friends[key]
+    
+    if( searchKey != '' ){
+      var friends = [];
+      for( var key in $scope.friends ){
+        if( $scope.friends[key].chosung.indexOf( searchKey ) > -1 ){
+          friends.push( $scope.friends[key] );
         }
       }
 
+      $scope.friends = [];
       $scope.friends = friends;
+      $scope.friendCount = friends.length;
     } else {
-      $scope.friends = Friends.all();
+      Friends.list(function(friends){
+        if( friends != undefined ){
+          $scope.friends = [];
+          $scope.friends = friends;
+          $scope.friendCount = $scope.friends.length;
+        }
+      });
     }
   }
 
@@ -180,7 +188,7 @@ angular.module('starter.controllers', [])
     });
   }
 })
-.controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, Sign) {
+.controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, Sign, Cache) {
   $scope.signIn = function(user) {
 		var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic' };
 
@@ -194,6 +202,7 @@ angular.module('starter.controllers', [])
       $rootScope.loginUser = loginUser;
       Sign.setUser( loginUser );
 
+      Cache.add( user.userid, { 'NM' : loginUser.datas.nm, 'I': loginUser.datas.image });
       $state.go('tab.friends');
     });
   };

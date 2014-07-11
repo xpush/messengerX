@@ -13,11 +13,12 @@ angular.module('starter.directives', [])
     });
   };
 })
-.directive('channelImage', function(Friends, Sign) {
+.directive('profileImage', function(Cache, Sign) {
   return {
     restrict: 'A',
     scope: {
-       rowChannelId: '=id',
+       channelId: '=channelId',
+       userId:'=userId',
        image: '&'
     },    
     replace: true,
@@ -25,12 +26,20 @@ angular.module('starter.directives', [])
     controller: function($scope) {
       var loginUserId = Sign.getUser().userId;
       var image = "../img/default_image.jpg";
-      var rowChannelId = $scope.rowChannelId;
-      if( rowChannelId.indexOf( "$" ) > -1  ){
-        var friendId = rowChannelId.split( "^" )[0].replace("$", "" ).replace( loginUserId, "" );
-        if( Friends.get( friendId ) != undefined ){
-          image = Friends.get( friendId ).image;
+      var channelId = $scope.channelId;
+      var userId = $scope.userId;
+
+      var friendId;
+      if( channelId != undefined ){
+        if( channelId.indexOf( "$" ) > -1  ){
+          friendId = channelId.split( "^" )[0].replace("$", "" ).replace( loginUserId, "" );
         }
+      } else {
+        friendId = userId;
+      }
+
+      if( Cache.get( friendId ) != undefined ){
+        image = Cache.get( friendId ).I;
       }
 
       $scope.image = image;
