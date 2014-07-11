@@ -33,7 +33,7 @@ angular.module('starter.constants', [])
           {name: 'channel_id',   type: 'text'},
           {name: 'channel_name',  type: 'text'},
           {name: 'channel_users',    type: 'text'},
-          {name: 'channel_image', type: 'text'},
+          {name: 'channel_image', type: 'text DEFAULT "" '},
           {name: 'unread_count', type: 'integer'},
           {name: 'latest_message', type: 'text'},
           {name: 'channel_updated', type: 'integer'},

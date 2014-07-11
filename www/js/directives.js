@@ -13,36 +13,45 @@ angular.module('starter.directives', [])
     });
   };
 })
-.directive('profileImage', function(Cache, Sign) {
+.directive('channelImage', function(Cache, Sign) {
   return {
     restrict: 'A',
     scope: {
-       channelId: '=channelId',
-       userId:'=userId',
-       image: '&'
+       users: '=users',
+       channelImage : '=image',
+       channelName : '=channelName',
+       result: '&'
     },    
     replace: true,
     transclude: false,
     controller: function($scope) {
       var loginUserId = Sign.getUser().userId;
-      var image = "../img/default_image.jpg";
-      var channelId = $scope.channelId;
-      var userId = $scope.userId;
+      var result = "../img/channel_image.jpg";
+      var users = $scope.users;
 
-      var friendId;
-      if( channelId != undefined ){
-        if( channelId.indexOf( "$" ) > -1  ){
-          friendId = channelId.split( "^" )[0].replace("$", "" ).replace( loginUserId, "" );
+      var friendId = '';
+
+      var channelImage = $scope.channelImage;
+      var channelName = $scope.channelName;
+
+      if( users != undefined ){
+        var userArray = users.split( "," );
+        if( userArray.length == 2  ){
+          friendId = users.replace(",", "" ).replace( loginUserId, "" );
         }
-      } else {
-        friendId = userId;
       }
 
-      if( Cache.get( friendId ) != undefined ){
-        image = Cache.get( friendId ).I;
-      }
+      if( channelImage != '' ){
+        result = channelImage;
+        if( friendId != '' ){
+          Cache.add( friendId, { 'NM':channelName , 'I': result } );
+        }
 
-      $scope.image = image;
+      } else if( Cache.get( friendId ) != undefined ){
+        result = Cache.get( friendId ).I;
+      } 
+
+      $scope.image = result;
     },
     template: '<img ng-src="{{image}}" />'
   };

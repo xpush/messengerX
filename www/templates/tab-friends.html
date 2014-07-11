@@ -14,8 +14,7 @@
         Profile
       </div>
       <ion-item class="item item-avatar" ng-click="goProfile()">
-        <img profile-image user-id="loginUser.userId" />
-        <!--<img profile-image user-id="" ng-src="{{loginUser.datas.image}}" /> -->
+      <img ng-src="{{loginUser.datas.image}}" />
         <h2>{{loginUser.datas.name}}</h2>
         <p>{{loginUser.datas.message}}</p>
       </ion-item>

@@ -26,6 +26,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.totalUnreadCount = 0;
       Sign.logout();
       SocketManager.close();
+
+      $rootScope.firstFlag = true;
     };
 
     $rootScope.totalUnreadCount = 0;

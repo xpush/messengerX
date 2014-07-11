@@ -224,7 +224,7 @@ angular.module('starter.services', [])
     get : function( channelId ){
       loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT channel_id, channel_name, channel_users, latest_message, unread_count, channel_updated FROM TB_CHANNEL where channel_id = ? and owner_id = ? ', [channelId,loginUserId]
+        'SELECT channel_id, channel_name, channel_users, channel_image, latest_message, unread_count, channel_updated FROM TB_CHANNEL where channel_id = ? and owner_id = ? ', [channelId,loginUserId]
       ).then(function(result) {
           return DB.fetch(result);
         });
@@ -234,7 +234,7 @@ angular.module('starter.services', [])
       loginUserId = Sign.getUser().userId;
 
       return DB.query(
-        'SELECT channel_id, channel_name, channel_users, latest_message, unread_count, channel_updated FROM TB_CHANNEL where owner_id = ? ORDER BY channel_updated DESC', [loginUserId]
+        'SELECT channel_id, channel_name, channel_users, channel_image, latest_message, unread_count, channel_updated FROM TB_CHANNEL where owner_id = ? ORDER BY channel_updated DESC', [loginUserId]
       ).then(function(result) {
         return DB.fetchAll(result);
       });
@@ -341,13 +341,13 @@ angular.module('starter.services', [])
 
       var query =
         "INSERT OR REPLACE INTO TB_CHANNEL "+
-        "(channel_id, channel_name, channel_users, latest_message, unread_count, channel_updated, owner_id) "+
-        "SELECT new.channel_id, new.channel_name, new.channel_users, new.latest_message, IFNULL( old.unread_count, new.unread_count) as unread_count, new.channel_updated, new.owner_id "+
+        "(channel_id, channel_name, channel_users, channel_image, latest_message, unread_count, channel_updated, owner_id) "+
+        "SELECT new.channel_id, new.channel_name, new.channel_users, new.channel_image, new.latest_message, IFNULL( old.unread_count, new.unread_count) as unread_count, new.channel_updated, new.owner_id "+
         "FROM ( "+
-        "  SELECT ? as channel_id, ? as channel_name, ? as channel_users, ? as latest_message, 1 as unread_count, ? as channel_updated, ? as owner_id " +
+        "  SELECT ? as channel_id, ? as channel_name, ? as channel_users, ? as channel_image, ? as latest_message, 1 as unread_count, ? as channel_updated, ? as owner_id " +
         ") as new " +
         " LEFT JOIN ( " +
-        "   SELECT channel_id, channel_name, channel_users, unread_count + 1 as unread_count, channel_updated, owner_id " +
+        "   SELECT channel_id, channel_name, channel_users, channel_image, unread_count + 1 as unread_count, channel_updated, owner_id " +
         "   FROM TB_CHANNEL " +
         " ) AS old ON new.channel_id = old.channel_id AND old.owner_id = new.owner_id ; ";      
 
@@ -356,6 +356,7 @@ angular.module('starter.services', [])
         jsonObj.channel,
         jsonObj.name,
         jsonObj.users,
+        jsonObj.image,
         jsonObj.message,
         currentTimestamp,
         loginUserId
@@ -377,7 +378,7 @@ angular.module('starter.services', [])
           scope.channelArray.splice(searchIndex, 1);
         }
         
-        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message, 'channel_updated': currentTimestamp};
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message, 'channel_image':jsonObj.image, 'channel_updated': currentTimestamp};
         scope.channelArray.unshift( channel );
         scope.$apply();     
       }
@@ -493,14 +494,18 @@ angular.module('starter.services', [])
         if( messageObject.event == 'NOTIFICATION' ){
           var data = messageObject.data;
 
+          console.log( data );
+
           socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
-            var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users };
+            var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users};
             channel.message = decodeURIComponent( data.message );
 
             if( channelJson.result.datas.users_cnt > 2 ){
               channel.name = channelJson.result.datas.name;
+              channel.image = '';
             } else {
               channel.name = data.user.userName;
+              channel.image = data.user.image;  
             }
             
             $rootScope.totalUnreadCount++;
@@ -525,11 +530,19 @@ angular.module('starter.services', [])
         for( var inx = 0 ; inx < messageArray.length ; inx++ ){
           var data = messageArray[inx].message.data;
           data = JSON.parse(data);
+
           data.message = decodeURIComponent( data.message );          
           data.type = data.user.userId == loginUser.userId ? 'me' : 'you';
 
           var channel = channels[data.channel];
           channel.message = data.message;
+
+          if( channel.users.length > 2 ){
+            channel.name = channelJson.result.datas.name;
+          } else {
+            channel.name = data.user.userName;
+            channel.image = data.user.image;
+          }
 
           Channels.add( channel );
           Messages.add( data );
@@ -690,19 +703,17 @@ angular.module('starter.services', [])
         });         
 
         channelSocket.on('message', function (data) {
+          console.log( data );
 
           data.message = decodeURIComponent(data.message);          
           data.type = data.user.userId == loginUser.userId ? 'me': 'you' ;
-
-          console.log( data );
 
           var content;
           if(data.type == 'you'){
 
             content = '<div class="small">'+ data.user.userName+'</div>' ;
             content += '<div class="from">';
-            content += '<img src="'+ data.user.datas.image+'" class="profile"/>';
-            //content += '<img profile-image user-id="'+data.user.userId+'" class="profile"></img>';
+            content += '<img src="'+ data.user.image+'" class="profile"/>';
             content += '<span >'+decodeURIComponent( data.message )+'</span>';
             content += '<span class="time">'+UTIL.timeToString( data.timestamp )+'</span>';
             content += '</div>'
@@ -715,6 +726,9 @@ angular.module('starter.services', [])
 
           // Add to DB
           Messages.add( data );
+
+          var param = { 'channel' :  params.channel, 'reset' : true }
+          Channels.update( param );
           $scope.add( nextMessage );          
         });
       })
