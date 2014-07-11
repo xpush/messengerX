@@ -103,7 +103,7 @@ angular.module('starter.services', [])
       UserDao.list( { 'friendFlag' : 'Y'} ).then( function ( result ){
         friends = {};
         for( var key in result ){
-          friends[ result[key].user_id ] = { 'image': result[key].image, 'chosung' : result[key].chosung };
+          friends[ result[key].user_id ] = { 'userName' : result[key].user_name, 'image': result[key].image, 'chosung' : result[key].chosung };
         }
         callback( result );
       });
@@ -115,29 +115,55 @@ angular.module('starter.services', [])
         socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
           if( data.status == 'ok' ){
             var users = data.result;
-            friends = {};
-            try {
             for( var inx = 0 ; inx < users.length ; inx++ ){              
               if( users[inx].userId != loginUserId ){
                 var user = { 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
                   'message' : users[inx].datas.message, 'image': users[inx].datas.image, 'chosung' : UTIL.getChosung( users[inx].datas.name ), 'friendFlag' : 'Y' };
-
-                friends[ users[inx].userId ] = { 'image': users[inx].datas.image };
                 UserDao.add( user, true );
               }
             }
-            } catch ( e ){
-              console.log( e );
-            }
-
             callback( {'status':'ok'} );
           }
         });
       });
+    },
+    getNames : function( userIds ){
+      var loginUserId = Sign.getUser().userId;
+      var loginUserName = Sign.getUser().datas.name;
+      var result;      
+      var userNames = [];
+
+      var userArray = angular.copy( userIds );
+
+      // Room with 2 people
+      if( userArray.length == 2 && userArray.indexOf( loginUserId ) > -1 ){
+        userArray.splice( userArray.indexOf( loginUserId ), 1 );
+
+        var name = userArray[0];
+        if( friends[ userArray[0] ] != undefined ){
+          name = friends[ userArray[0] ].userName;
+        }
+
+        userNames.push( name );
+      } else {
+
+        for( var inx = 0 ; inx < userArray.length ; inx++ ){
+          var name = userArray[inx];
+          if( userArray[inx] == loginUserId ){
+            name = loginUserName;
+          }else if( friends[ userArray[inx] ] != undefined ){
+            name = friends[ userArray[inx] ].userName;
+          }
+
+          userNames.push( name );
+        }
+      }
+
+      return userNames.join(",");
     }
   }
 })
-.factory('Users', function(SocketManager, Sign, UserDao, Friends, UTIL) {
+.factory('Users', function(SocketManager, Sign, UserDao, UTIL) {
   // Might use a resource here that returns a JSON array
   var loginUserId;
 
@@ -145,8 +171,6 @@ angular.module('starter.services', [])
     list : function(callback){
 
       loginUserId = Sign.getUser().userId;
-
-      var friends = Friends.all();
 
       SocketManager.get( function( socket ){        
         socket.emit( 'user-list', {}, function( data ){
@@ -156,7 +180,7 @@ angular.module('starter.services', [])
             for( var inx = 0 ; inx < userArray.length ; inx++ ){             
               var cUserId = userArray[inx].userId;
 
-              if( friends[ cUserId ] == undefined && cUserId != loginUserId ){
+              if( cUserId != loginUserId ){
                 var user = { 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image,
                   'message' : userArray[inx].datas.message, 'image': userArray[inx].datas.image, 'chosung' : UTIL.getChosung( userArray[inx].datas.name ) };
                 UserDao.add( user );
@@ -168,7 +192,7 @@ angular.module('starter.services', [])
             callback( result );
           });
         });
-      })
+      });
     }
   }
 })
@@ -230,19 +254,32 @@ angular.module('starter.services', [])
       ).then(function(result) {
         return DB.fetch(result);
       });
+    },
+    updateUsers : function(param){
+      loginUserId = Sign.getUser().userId;
+
+      var query = "UPDATE TB_CHANNEL ";
+      query += "SET channel_name = ? , channel_users = ? ";
+      query += "WHERE channel_id = ? and owner_id = ? ";     
+
+      var cond = [ param.name , param.users, param.channel, loginUserId ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
     },    
     update : function(param){
       loginUserId = Sign.getUser().userId;
 
-      var query = "UPDATE TB_CHANNEL ";
+      var query = "UPDATE TB_CHANNEL SET ";
       if( param.reset ){
-        query += "SET unread_count = 0, channel_updated = ? ";
+        query += "unread_count = 0, channel_updated = ? ";
       } else {
-        query += "SET unread_count = unread_count + 1, channel_updated = ? ";
+        query += "unread_count = unread_count + 1, channel_updated = ? ";
       }
 
       if( param.message != undefined ){
-         query += ", latest_message = ? "
+         query += ", latest_message = ? ";
       }
 
       query += "WHERE channel_id = ? and owner_id = ? ";     
@@ -379,7 +416,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('SocketManager', function($http, $rootScope, Sign, Channels, Messages) {
+.factory('SocketManager', function($http, $rootScope, Sign, Channels, Messages, UTIL ) {
   var sessionSocket;
   var initFlag = false;
   var self;
@@ -418,11 +455,14 @@ angular.module('starter.services', [])
         initFlag = true;
         sessionSocket = socket;
 
-        self.channelList(function(result){
-          //callback( socket );
-          self.unreadMessage( function(result){
+        self.channelList(function( channels ){
+          self.unreadMessage( channels, function(result){
             socket.emit("message-received");
-            callback( socket );
+
+            Channels.getAllCount().then( function ( result ){
+              $rootScope.totalUnreadCount = result.total_count;
+              callback( socket );
+            });
           });
         });
       });
@@ -433,12 +473,13 @@ angular.module('starter.services', [])
 
           socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
             var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users };
-            channel.message = decodeURIComponent( data.message ); 
+            channel.message = decodeURIComponent( data.message );
+
             if( channelJson.result.datas.users_cnt > 2 ){
-              channel.name = channelJson.result.datas.name;               
+              channel.name = channelJson.result.datas.name;
             } else {
-              channel.name = channelJson.result.datas.from;
-            } 
+              channel.name = data.user.userName;
+            }
             
             $rootScope.totalUnreadCount++;
             Channels.add( channel );
@@ -454,9 +495,10 @@ angular.module('starter.services', [])
       initFlag = false;
       sessionSocket.disconnect();
     },
-    unreadMessage : function(callback){
+    unreadMessage : function(channels, callback){
       var loginUser = Sign.getUser();
       sessionSocket.emit( "message-unread", function(resultObject) {
+        try {
         var messageArray = resultObject.result;
         for( var inx = 0 ; inx < messageArray.length ; inx++ ){
           var data = messageArray[inx].message.data;
@@ -464,18 +506,25 @@ angular.module('starter.services', [])
           data.message = decodeURIComponent( data.message );          
           data.type = data.user.userId == loginUser.userId ? 'me' : 'you';
 
-          var channel = {'channel': data.channel, 'message':data.message };
-          Channels.update( channel );
+          var channel = channels[data.channel];
+          channel.message = data.message;
+
+          Channels.add( channel );
           Messages.add( data );
-        }      
+        }
+        } catch( e ){
+          console.log( e );
+        }
 
         callback({'status':'ok'});
       });
     },
     channelList : function(callback){
-      var loginUser = Sign.getUser();
+      var loginUser = Sign.getUser();      
       sessionSocket.emit( "channel-list", function(resultObject) {            
         var channelArray = resultObject.result;
+
+        var channels = {};
         for( var inx = 0 ; inx < channelArray.length ; inx++ ){
           var data = channelArray[inx];
           var channel = {'channel': data.channel, 'users' : data.datas.users };
@@ -483,11 +532,12 @@ angular.module('starter.services', [])
             channel.name = data.datas.name; 
           } else {
             channel.name = data.datas.from;
-          }           
-          Channels.insert( channel );
+          }
+
+          channels[ data.channel ] =  channel;
         }
 
-        callback({'status':'ok'});
+        callback(channels);
       });
     }   
   }
@@ -826,6 +876,6 @@ angular.module('starter.services', [])
         if(code>-1 && code<11172) result += cho[Math.floor(code/588)];
       }
       return result;      
-    }    
+    }   
   }
 });

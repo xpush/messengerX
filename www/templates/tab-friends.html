@@ -14,7 +14,7 @@
         Profile
       </div>
       <ion-item class="item item-avatar" ng-click="goProfile()">
-        <img src="{{loginUser.datas.image}}" />
+        <img ng-src="{{loginUser.datas.image}}" />
         <h2>{{loginUser.datas.name}}</h2>
         <p>{{loginUser.datas.message}}</p>
       </ion-item>
@@ -24,7 +24,7 @@
         </button>
       </div>
     	<ion-item ng-repeat="friend in friends" class="item item-avatar" ng-click="goChat('{{friend.user_id}}')">
-        <img src="{{friend.image}}" />
+        <img ng-src="{{friend.image}}" />
         <h2>{{friend.user_name}}</h2>
         <p>{{friend.message}}</p>
       </ion-item>

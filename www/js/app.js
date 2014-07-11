@@ -29,6 +29,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     };
 
     $rootScope.totalUnreadCount = 0;
+    $rootScope.firstFlag = true;
   });
 })
 

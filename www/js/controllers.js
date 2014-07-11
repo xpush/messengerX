@@ -24,41 +24,38 @@ angular.module('starter.controllers', [])
       $state.go( 'chat' );
     });
   };
-
-  $scope.getImage = function( channelId ){
-
-    var image = "../www/img/default_image.jpg";
-    if( channelId.indexOf( "$" ) > -1  ){
-      var friendId = channelId.split( "^" )[0].replace("$").replace( loginUserId );
-      console.log( friendId );
-      if( Friends.get[friendId] != undefined ){
-        console.log( Friends.get[friendId] );
-        image = Friends.get[friendId].datas.image;
-      }
-    }
-
-    return image;
-  }
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, Channels) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, Channels) {    
 
-  Channels.getAllCount().then( function ( result ){
-    $rootScope.totalUnreadCount = result.total_count;
-  });
+  $scope.syncFriends = function(){
+    Friends.refresh( function(result){
+      Friends.list(function(friends){
+        if( friends != undefined ){
+          $scope.friends = [];
+          $scope.friends = angular.copy( friends );
+          $scope.friendCount = $scope.friends.length;
+        }
+      });
+    });
+  }  
 
   $scope.friends = [];
   $scope.datas = [];
   $scope.friendCount = 0;
   $scope.searchKey = "";
 
-  Friends.list(function(friends){
-    if( friends != undefined ){
-      $scope.friends = [];
-      $scope.friends = angular.copy( friends );
-      $scope.friendCount = $scope.friends.length;
-      //$scope.$apply();
-    }
-  });
+  if( $rootScope.firstFlag ){
+    $scope.syncFriends();
+    $rootScope.firstFlag = false;
+  } else {
+    Friends.list(function(friends){
+      if( friends != undefined ){
+        $scope.friends = [];
+        $scope.friends = angular.copy( friends );
+        $scope.friendCount = $scope.friends.length;
+      }
+    });
+  }
 
   $scope.goProfile = function(){
     $state.go( 'tab.account' );
@@ -97,19 +94,6 @@ angular.module('starter.controllers', [])
       $scope.selection.push( friendId );
     }
   };
-
-  $scope.syncFriends = function(){
-    console.log( "syncFriends" );
-    Friends.refresh( function(result){
-      Friends.list(function(friends){
-        if( friends != undefined ){
-          $scope.friends = [];
-          $scope.friends = angular.copy( friends );
-          $scope.friendCount = $scope.friends.length;
-        }
-      });
-    });
-  }
 
   $scope.showPopup = function() {
 
@@ -225,14 +209,6 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager, Channels) {
-  $scope.datas = [];
-
-  Friends.list(function(friends){
-    if( friends != undefined ){
-      $scope.datas = friends;
-      $scope.$apply();
-    }
-  });
 
   initChat = function(){
     var param = {};
@@ -271,16 +247,24 @@ angular.module('starter.controllers', [])
     var friendIds = stateParams.friendIds.split("$");
     
     channelUsers = channelUsers.concat( friendIds );
+
+    /**
     if( channelUsers.length == 1 ){
-      channelName = channelUsers.join(',');
+      //channelName = Friends.getName( channelUsers );
       channelUsers.push( loginUser.userId );
     } else {
       if( channelUsers.indexOf( loginUser.userId ) < 0 ){
         channelUsers.push( loginUser.userId );
-      }
-      channelUsers.sort();
-      channelName = channelUsers.join(',');
+      }    
+      //channelName = Friends.getName( channelUsers );
     }
+    */
+
+    if( channelUsers.indexOf( loginUser.userId ) < 0 ){
+      channelUsers.push( loginUser.userId );
+    }    
+
+    channelName = Friends.getNames( channelUsers );
 
     var createObject = {};
     createObject.users = channelUsers;
@@ -335,9 +319,15 @@ angular.module('starter.controllers', [])
   };
 
   $scope.showPopup = function() {    
-    $scope.data = {};
+    $scope.datas = [];
     $scope.selection = [];
     $scope.channelUsers = channelUsers;
+
+    Friends.list(function(friends){
+      if( friends != undefined ){
+        $scope.datas = friends;
+      }
+    });    
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
@@ -373,16 +363,22 @@ angular.module('starter.controllers', [])
 
         // channel with 2 people
         if( channelId.indexOf( "$" ) > -1 ){
+
+          // Init Controller To Create New Channel
           $rootScope.$stateParams.friendIds = channelUsers.join( "$" );
 
           var current = $state.current;
           $state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
         } else {
-          channelName = channelUsers.sort().join(",");
+          channelName = $scope.channelName + ","+Friends.getNames( joinUsers );
           $scope.channelName = channelName;
+
           var joinObject = { 'users' : joinUsers, 'datas' : { 'name' : channelName,'users' : channelUsers,  'from' : loginUser.datas.name, 'users_cnt': channelUsers.length } };
           Chat.join( joinObject, function(data){
             console.log( data );
+            if( data.status == 'ok' ){
+              Channels.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );
+            }
           });
         }
       }

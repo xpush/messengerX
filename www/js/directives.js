@@ -24,7 +24,7 @@ angular.module('starter.directives', [])
     transclude: false,
     controller: function($scope) {
       var loginUserId = Sign.getUser().userId;
-      var image = "../www/img/default_image.jpg";      
+      var image = "../img/default_image.jpg";
       var rowChannelId = $scope.rowChannelId;
       if( rowChannelId.indexOf( "$" ) > -1  ){
         var friendId = rowChannelId.split( "^" )[0].replace("$", "" ).replace( loginUserId, "" );
@@ -35,7 +35,7 @@ angular.module('starter.directives', [])
 
       $scope.image = image;
     },
-    template: '<img src="{{image}}" />'
+    template: '<img ng-src="{{image}}" />'
   };
 })
 .directive('setCaret', function() {
