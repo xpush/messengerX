@@ -25,19 +25,23 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, Channels) {    
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, Channels, UTIL) {    
+
+  $scope.listFriend = function(){
+    Friends.list(function(friends){
+      if( friends != undefined ){
+        $scope.friends = [];
+        $scope.friends = friends;
+        $scope.friendCount = $scope.friends.length;
+      }
+    });
+  };
 
   $scope.syncFriends = function(){
     Friends.refresh( function(result){
-      Friends.list(function(friends){
-        if( friends != undefined ){
-          $scope.friends = [];
-          $scope.friends = friends;
-          $scope.friendCount = $scope.friends.length;
-        }
-      });
+      $scope.listFriend();
     });
-  }  
+  };
 
   $scope.friends = [];
   $scope.datas = [];
@@ -48,13 +52,7 @@ angular.module('starter.controllers', [])
     $scope.syncFriends();
     $rootScope.firstFlag = false;
   } else {
-    Friends.list(function(friends){
-      if( friends != undefined ){
-        $scope.friends = [];
-        $scope.friends = friends;
-        $scope.friendCount = $scope.friends.length;
-      }
-    });
+    $scope.listFriend();
   }
 
   $scope.goProfile = function(){
@@ -62,11 +60,14 @@ angular.module('starter.controllers', [])
   };
 
   $scope.searchByKey = function( searchKey ){
-    
+
     if( searchKey != '' ){
       var friends = [];
+      var spelled = UTIL.getMorpheme( searchKey );
+
       for( var key in $scope.friends ){
-        if( $scope.friends[key].chosung.indexOf( searchKey ) > -1 ){
+
+        if( UTIL.getMorpheme( $scope.friends[key].user_name ).indexOf( spelled ) > -1 ){
           friends.push( $scope.friends[key] );
         }
       }
@@ -75,13 +76,7 @@ angular.module('starter.controllers', [])
       $scope.friends = friends;
       $scope.friendCount = friends.length;
     } else {
-      Friends.list(function(friends){
-        if( friends != undefined ){
-          $scope.friends = [];
-          $scope.friends = friends;
-          $scope.friendCount = $scope.friends.length;
-        }
-      });
+      $scope.listFriend();
     }
   }
 
