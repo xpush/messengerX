@@ -909,6 +909,34 @@ angular.module('starter.services', [])
         if(code>-1 && code<11172) result += cho[Math.floor(code/588)];
       }
       return result;      
-    }   
+    },
+    getMorpheme : function(str){
+      var font_cho = Array(
+      'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ',
+      'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ',
+      'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' );
+
+      var font_jung = Array(
+      'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ',
+      'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ',
+      'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ',
+      'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ' );
+
+      var font_jong = Array(
+      '', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ',
+      'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ',
+      'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' );
+
+      var CompleteCode = str.charCodeAt(0);
+      var UniValue = CompleteCode - 0xAC00;
+
+      var Jong = UniValue % 28;
+      var Jung = ( ( UniValue - Jong ) / 28 ) % 21;
+      var Cho = parseInt (( ( UniValue - Jong ) / 28 ) / 21);
+
+      console.log( font_cho[Jong] );
+      console.log( font_jung[Jung] );
+      console.log( font_jong[Cho] );
+    }      
   }
 });
