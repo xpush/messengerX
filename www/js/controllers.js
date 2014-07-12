@@ -25,7 +25,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, Channels, UTIL) {    
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, SocketManager, UTIL) {
 
   $scope.listFriend = function(){
     Friends.list(function(friends){
@@ -48,38 +48,50 @@ angular.module('starter.controllers', [])
   $scope.friendCount = 0;
   $scope.searchKey = "";
 
-  if( $rootScope.firstFlag ){
-    $scope.syncFriends();
-    $rootScope.firstFlag = false;
-  } else {
+  // Init Socket
+  SocketManager.get( function(socket){
     $scope.listFriend();
-  }
+    $rootScope.firstFlag = false;
+  });
 
   $scope.goProfile = function(){
     $state.go( 'tab.account' );
   };
 
-  $scope.searchByKey = function( searchKey ){
-
-    if( searchKey != '' ){
-      var friends = [];
-      var separated = UTIL.getMorphemes( searchKey );
-
-      for( var key in $scope.friends ){
-        var tUser = $scope.friends[key];
-        if( UTIL.getMorphemes( tUser.user_name ).indexOf( separated ) > -1
-        || tUser.chosung.indexOf( searchKey ) > -1 ){
-          friends.push( tUser );
-        }
-      }
-
+  $scope.postFriends = function(friends){
+    if( friends != undefined ){
       $scope.friends = [];
       $scope.friends = friends;
       $scope.friendCount = friends.length;
-    } else {
-      $scope.listFriend();
     }
-  }
+  };
+
+  $scope.resetFriends = function(){
+    Friends.list(function(friends){
+      if( friends != undefined ){
+        $scope.friends = [];
+        $scope.friends = friends;
+        //callback( friends );
+        $scope.friendCount = friends.length;
+      }
+    });
+  };
+
+  $scope.postDatas = function(users){
+    if( users != undefined ){
+      $scope.datas = [];
+      $scope.datas = users;
+    }
+  };
+
+  $scope.resetDatas = function(){
+    Users.list(function(users){
+      if( users != undefined ){
+        $scope.datas = [];
+        $scope.datas = users;
+      }
+    });
+  };
 
   $scope.goChat = function( friendIds ) {
     $stateParams.friendIds = friendIds;
@@ -103,7 +115,7 @@ angular.module('starter.controllers', [])
 
     $scope.selection = [];
 
-    Users.list(function(users){
+    Users.refresh(function(users){
       if( users != undefined ){
         $scope.datas = [];
         $scope.datas = users;
@@ -147,6 +159,7 @@ angular.module('starter.controllers', [])
               if( friends != undefined ){
                 $scope.friends = [];
                 $scope.friends = friends;
+                $scope.friendCount = friends.length;
                 //var current = $state.current;
                 //$state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
               }
@@ -402,4 +415,20 @@ angular.module('starter.controllers', [])
       }
     }
   });
+
+  $scope.postDatas = function(users){
+    if( users != undefined ){
+      $scope.datas = [];
+      $scope.datas = users;
+    }
+  };
+
+  $scope.resetDatas = function(){
+    Friends.list(function(users){
+      if( users != undefined ){
+        $scope.datas = [];
+        $scope.datas = users;
+      }
+    });
+  };
 });

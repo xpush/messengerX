@@ -222,6 +222,7 @@ paper-input {
 */
 .popup-body {
 	padding: 10px;
-	max-height: 338px;
+	max-height: 373px;
+	min-height: 294px;
 	overflow-y: auto;
 }

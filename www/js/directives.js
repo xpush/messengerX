@@ -56,23 +56,6 @@ angular.module('starter.directives', [])
     template: '<img ng-src="{{image}}" />'
   };
 })
-.directive('setCaret', function() {
-
-  return {
-    restrict: 'A',
-    link: function(scope,element,attrs) {
-      var changed = false;
-      element.bind('keypress', function() {
-        if(element[0].selectionStart > 3 && !changed) {
-          changed = true;
-          element[0].selectionEnd = parseInt(attrs.position, 10);
-        }
-      })
-
-    },
-  }
-
-})
 .directive('updatedTime', function(UTIL) {
   return {
     restrict: 'A',
@@ -88,7 +71,7 @@ angular.module('starter.directives', [])
     template: '<span class="channel-time">{{timeString}}</span>'
   };
 })
-.directive('keyboardPoster', function($parse, $timeout){
+.directive('keyboardPoster', function($parse, $timeout, UTIL){
   var DELAY_TIME_BEFORE_POSTING = 100;
   return function(scope, elem, attrs) {
 
@@ -99,11 +82,32 @@ angular.module('starter.directives', [])
       var model = $parse(attrs.postFunction);
       var poster = model(scope);
 
+      var reseter = $parse(attrs.resetFunction)(scope);
+
       if(currentTimeout) {
         $timeout.cancel(currentTimeout)
       }
       currentTimeout = $timeout(function(){
-        poster(angular.element(element).val());
+
+        var searchKey = angular.element(element).val();
+
+        if( searchKey != '' ){
+          var newArrays = [];
+          var separated = UTIL.getMorphemes( searchKey );
+
+          for( var key in scope[attrs.postArray] ){
+            var tUser = scope[attrs.postArray][key];
+            if( UTIL.getMorphemes( tUser.user_name ).indexOf( separated ) > -1
+              || tUser.chosung.indexOf( searchKey ) > -1 ){
+              newArrays.push( tUser );
+            }
+          }
+
+          poster( newArrays );
+        } else {
+          reseter();
+        }
+
       }, DELAY_TIME_BEFORE_POSTING)
     }
   }

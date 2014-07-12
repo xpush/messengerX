@@ -110,6 +110,8 @@ angular.module('starter.services', [])
       loginUserId = Sign.getUser().userId;
       SocketManager.get( function( socket ){
         socket.emit( 'group-add', {'userIds':userIds, 'groupId' : loginUserId}, function( data ){
+          
+          // Multi Add Friend
           UserDao.addFriend( userIds );
           callback( data );
         });
@@ -186,7 +188,7 @@ angular.module('starter.services', [])
   var loginUserId;
 
   return {
-    list : function(callback){
+    refresh : function(callback){
 
       loginUserId = Sign.getUser().userId;
 
@@ -211,6 +213,11 @@ angular.module('starter.services', [])
             callback( result );
           });
         });
+      });
+    },
+    list : function(callback){
+      UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
+        callback( result );
       });
     }
   }
@@ -297,7 +304,7 @@ angular.module('starter.services', [])
         query += "unread_count = unread_count + 1, channel_updated = ? ";
       }
 
-      if( param.message != undefined ){
+      if( param.message != undefined && param.message != '' ){
          query += ", latest_message = ? ";
       }
 
@@ -305,7 +312,7 @@ angular.module('starter.services', [])
 
       var cond = [Date.now()];
 
-      if( param.message != undefined ){
+      if( param.message != undefined && param.message != '' ){
         cond.push( param.message );
       }
 
@@ -478,6 +485,7 @@ angular.module('starter.services', [])
         initFlag = true;
         sessionSocket = socket;
 
+        // Sync Channel && Read Message
         self.channelList(function( channels ){
           self.unreadMessage( channels, function(result){
             socket.emit("message-received");

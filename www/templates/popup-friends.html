@@ -1,4 +1,8 @@
 <ul class="list">
+  <div class="item item-input">
+    <i class="icon ion-search placeholder-icon"></i>
+    <input type="text" placeholder="Search" keyboard-poster post-function="postDatas" reset-function="resetDatas" post-array="datas">
+  </div>
   <li class="item item-checkbox item-users" ng-repeat="data in datas" >	
     <label class="checkbox" >
       <input type="checkbox" ng-click="toggleSelection('{{data.user_id}}')" ng-checked="selection.indexOf('{{data.user_id}}') > -1 || channelUsers.indexOf('{{data.user_id}}') > -1 " ng-disabled="channelUsers.indexOf('{{data.user_id}}') > -1"/>
