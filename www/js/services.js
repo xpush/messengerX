@@ -494,8 +494,6 @@ angular.module('starter.services', [])
         if( messageObject.event == 'NOTIFICATION' ){
           var data = messageObject.data;
 
-          console.log( data );
-
           socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
             var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users};
             channel.message = decodeURIComponent( data.message );
@@ -532,13 +530,13 @@ angular.module('starter.services', [])
           data = JSON.parse(data);
 
           data.message = decodeURIComponent( data.message );          
-          data.type = data.user.userId == loginUser.userId ? 'me' : 'you';
+          data.type = data.user.userId == loginUser.userId ? 'S':'R';
 
           var channel = channels[data.channel];
           channel.message = data.message;
 
           if( channel.users.length > 2 ){
-            channel.name = channelJson.result.datas.name;
+            channel.name = channel.name;
           } else {
             channel.name = data.user.userName;
             channel.image = data.user.image;
@@ -632,6 +630,8 @@ angular.module('starter.services', [])
       $http.get("http://"+BASE_URL+":8000/node/"+ encodeURIComponent( params.app ) + "/"+ encodeURIComponent( params.channel )+'?1=1' )
       .success(function( data ) {
 
+        var latestDate;
+
         var socketServerUrl = data.result.server.url;
 
         CONF._app = params.app;
@@ -652,11 +652,13 @@ angular.module('starter.services', [])
           channelSocket.emit( 'message-unread', function(jsonObj){
             var unreadMessages = jsonObj.result;
             
+            var latestMessage = '';
             for( var inx = 0 ; inx < unreadMessages.length ; inx++ ){
               var data = JSON.parse( unreadMessages[inx].message.data );
               data.message = decodeURIComponent( data.message );              
-              data.type = data.user.userId == loginUser.userId ? 'me' : 'you';
+              data.type = data.user.userId == loginUser.userId ? 'S':'R';
 
+              latestMessage = data.message;
               Messages.add( data );
             }
 
@@ -668,29 +670,43 @@ angular.module('starter.services', [])
             /*
             *Reset Count Start
             */      
-            var param = { 'channel' :  params.channel, 'reset' : true }
+            var param = { 'channel' :  params.channel, 'reset' : true, 'message': latestMessage };
             Channels.update( param );
 
             /*
             *Reset Count End
             */
             var messages = [];
+            var messageCount = 0;
             Messages.list( params.channel ).then(function(messageArray) {
               for( var inx = 0 ; inx < messageArray.length ; inx++ ){
                 var data = messageArray[inx];
+                var dateStrs = UTIL.timeToString( data.time );
+
                 var content;
-                if(data.type == 'you'){                
+                if( inx > 0 && messages[ messageCount-1 ].date != dateStrs[1] ){
+                  content = '<span class="date">'+dateStrs[1]+'</span>';
+                  messages.push( { content : content, from : 'T', date : dateStrs[1] } );
+                  messageCount++;
+                }
+
+                if(data.type == 'R'){                
                   content = '<div class="small">'+ data.sender_name+'</div>' ;
                   content += '<div class="from">'
                   content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
                   content += '<span class="from">'+data.message+'</span>';
-                  content += '<span class="time">'+ UTIL.timeToString( data.time )+'</span>';
-                  content += '</div>'
+                  content += '<span class="time">'+ dateStrs[2]+'</span>';
+                  content += '</div>';
                 } else {
-                  content = '<span>'+data.message+'</span>' 
+                  content = '<span>'+data.message+'</span>';
                 }
 
-                messages.push( { content : content, from : data.type } );
+                messages.push( { content : content, from : data.type, date : dateStrs[1] } );
+                messageCount++;
+
+                if( inx == messageArray.length-1 ) {
+                  latestDate = dateStrs[1];
+                }
               }
 
               callback(messages);
@@ -699,37 +715,44 @@ angular.module('starter.services', [])
         }); 
 
         channelSocket.on('connect_error', function(data) {
-          console.log( data );
+          console.log( data );[]
         });         
 
         channelSocket.on('message', function (data) {
-          console.log( data );
 
           data.message = decodeURIComponent(data.message);          
-          data.type = data.user.userId == loginUser.userId ? 'me': 'you' ;
+          data.type = data.user.userId == loginUser.userId ? 'S':'R' ;
 
           var content;
-          if(data.type == 'you'){
+          var dateStrs = UTIL.timeToString( data.timestamp );
+
+          if( latestDate != dateStrs[1] ){
+            content = '<span class="date">'+dateStrs[1]+'</span>';
+            $scope.add( { content : content, from : 'T', date : dateStrs[1] } );
+            latestDate = dateStrs[1];
+          }
+
+          if(data.type == 'R'){
 
             content = '<div class="small">'+ data.user.userName+'</div>' ;
             content += '<div class="from">';
             content += '<img src="'+ data.user.image+'" class="profile"/>';
             content += '<span >'+decodeURIComponent( data.message )+'</span>';
-            content += '<span class="time">'+UTIL.timeToString( data.timestamp )+'</span>';
+            content += '<span class="time">'+dateStrs[2]+'</span>';
             content += '</div>'
             
           } else {
             content = '<span>'+data.message+'</span>' 
           }
 
-          var nextMessage = { content : content, from : data.type };
+          var nextMessage = { content : content, from : data.type, date : dateStrs[1] };
 
           // Add to DB
           Messages.add( data );
 
-          var param = { 'channel' :  params.channel, 'reset' : true }
+          var param = { 'channel' :  params.channel, 'reset' : true, 'message':data.message };
           Channels.update( param );
-          $scope.add( nextMessage );          
+          $scope.add( nextMessage );         
         });
       })
       .error(function(data, status, headers, config) {
@@ -878,7 +901,7 @@ angular.module('starter.services', [])
 
       return s.join('');
     },
-    timeToString : function( timestamp, dateFlag ){
+    timeToString : function( timestamp ){
       var cDate = new Date();
 
       var cYyyymmdd = cDate.getFullYear()+""+(cDate.getMonth()+1)+""+cDate.getDate();
@@ -896,11 +919,17 @@ angular.module('starter.services', [])
 
       var yyyymmdd = yyyy + "" + mm + ""+ dd;
 
-      if ( dateFlag && cYyyymmdd != yyyymmdd  ) {
-        return yyyy + "." + mm + "."+ dd;;
+      var result = [];
+      if ( cYyyymmdd != yyyymmdd  ) {
+        result.push( yyyy + "." + mm + "."+ dd );
       } else {
-        return hour + ":" + minute;
+        result.push( hour + ":" + minute );
       }
+
+      result.push( yyyy + "." + mm + "."+ dd );
+      result.push( hour + ":" + minute );
+
+      return result;
     },
     getChosung : function(str) {
       result = "";
@@ -910,25 +939,20 @@ angular.module('starter.services', [])
       }
       return result;      
     },
-    getMorpheme : function(str){
+    getMorphemes : function(str){
 
-      var font_eng = Array(
+      var choArray = Array(
       'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ',
       'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ',
       'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' );
 
-      var font_cho = Array(
-      'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ',
-      'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ',
-      'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' );
-
-      var font_jung = Array(
+      var jungArray = Array(
       'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ',
       'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ',
       'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ',
       'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ' );
 
-      var font_jong = Array(
+      var jongArray = Array(
       '', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ',
       'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ',
       'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' );
@@ -940,19 +964,19 @@ angular.module('starter.services', [])
         if (ch.search(/[^a-zA-Z]+/) === -1) {
           result += ch;
           continue;
-        } else if( font_cho.indexOf( ch ) > -1 ){
+        } else if( choArray.indexOf( ch ) > -1 ){
           result += ch;
           continue;
         }
 
-        var CompleteCode = str.charCodeAt(inx);
-        var UniValue = CompleteCode - 0xAC00;
+        var code = str.charCodeAt(inx);
+        var uniValue = code - 0xAC00;
 
-        var Jong = UniValue % 28;
-        var Jung = ( ( UniValue - Jong ) / 28 ) % 21;
-        var Cho = parseInt (( ( UniValue - Jong ) / 28 ) / 21);
+        var jong = uniValue % 28;
+        var jung = ( ( uniValue - jong ) / 28 ) % 21;
+        var cho = parseInt (( ( uniValue - jong ) / 28 ) / 21);
 
-        result += font_cho[Cho]+font_jung[Jung]+font_jong[Jong];
+        result += choArray[cho]+jungArray[jung]+jongArray[jong];
       }
 
       return result;

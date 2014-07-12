@@ -63,12 +63,13 @@ angular.module('starter.controllers', [])
 
     if( searchKey != '' ){
       var friends = [];
-      var spelled = UTIL.getMorpheme( searchKey );
+      var separated = UTIL.getMorphemes( searchKey );
 
       for( var key in $scope.friends ){
-
-        if( UTIL.getMorpheme( $scope.friends[key].user_name ).indexOf( spelled ) > -1 ){
-          friends.push( $scope.friends[key] );
+        var tUser = $scope.friends[key];
+        if( UTIL.getMorphemes( tUser.user_name ).indexOf( separated ) > -1
+        || tUser.chosung.indexOf( searchKey ) > -1 ){
+          friends.push( tUser );
         }
       }
 

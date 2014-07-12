@@ -83,13 +83,13 @@ angular.module('starter.directives', [])
     replace: true,
     transclude: false,
     controller: function($scope) {
-      $scope.timeString = UTIL.timeToString( $scope.timestamp, true );
+      $scope.timeString = UTIL.timeToString( $scope.timestamp )[0];
     },
     template: '<span class="channel-time">{{timeString}}</span>'
   };
 })
 .directive('keyboardPoster', function($parse, $timeout){
-  var DELAY_TIME_BEFORE_POSTING = 0;
+  var DELAY_TIME_BEFORE_POSTING = 100;
   return function(scope, elem, attrs) {
 
     var element = angular.element(elem)[0];

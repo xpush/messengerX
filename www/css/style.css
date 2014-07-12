@@ -17,11 +17,17 @@ body {
 	padding:0;
 }
 
-.messages li.me {
+.messages li.T {
+	clear:both;
+	float: none;
+	max-width:100%;
+}
+
+.messages li.S {
 	float:right;
 }
 
-.messages li.me img {
+.messages li.S img {
 	float:right;
 }
 
@@ -65,7 +71,20 @@ body {
 	max-width:90%;
 }
 
-.messages li.me span {
+.messages span.date {
+	display: table;
+	position: relative;
+	min-width: 200px;
+	margin: 0px auto;
+	padding: 0px;
+	text-align: center;
+	font-size:1.125rem;
+	background:#00d449;
+	color:#ffffff;
+	font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+}
+
+.messages li.S span {
 	background:#158ffe;
 	color:#fff;
 }
