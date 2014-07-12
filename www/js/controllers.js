@@ -49,10 +49,10 @@ angular.module('starter.controllers', [])
   $scope.searchKey = "";
 
   // Init Socket
-  SocketManager.get( function(socket){
-    $scope.listFriend();
+  if( $rootScope.firstFlag ){
+    $scope.syncFriends();
     $rootScope.firstFlag = false;
-  });
+  }
 
   $scope.goProfile = function(){
     $state.go( 'tab.account' );
@@ -71,7 +71,6 @@ angular.module('starter.controllers', [])
       if( friends != undefined ){
         $scope.friends = [];
         $scope.friends = friends;
-        //callback( friends );
         $scope.friendCount = friends.length;
       }
     });

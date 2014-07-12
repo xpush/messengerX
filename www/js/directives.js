@@ -71,18 +71,17 @@ angular.module('starter.directives', [])
     template: '<span class="channel-time">{{timeString}}</span>'
   };
 })
-.directive('keyboardPoster', function($parse, $timeout, UTIL){
+.directive('searchByKey', function($parse, $timeout, UTIL){
   var DELAY_TIME_BEFORE_POSTING = 100;
   return function(scope, elem, attrs) {
 
     var element = angular.element(elem)[0];
     var currentTimeout = null;
 
-    element.oninput = function() {
-      var model = $parse(attrs.postFunction);
-      var poster = model(scope);
+    var poster = $parse(attrs.post)(scope);
+    var reseter = $parse(attrs.reset)(scope);
 
-      var reseter = $parse(attrs.resetFunction)(scope);
+    element.oninput = function() {
 
       if(currentTimeout) {
         $timeout.cancel(currentTimeout)
@@ -92,18 +91,18 @@ angular.module('starter.directives', [])
         var searchKey = angular.element(element).val();
 
         if( searchKey != '' ){
-          var newArrays = [];
+          matches = [];
           var separated = UTIL.getMorphemes( searchKey );
 
-          for( var key in scope[attrs.postArray] ){
-            var tUser = scope[attrs.postArray][key];
-            if( UTIL.getMorphemes( tUser.user_name ).indexOf( separated ) > -1
-              || tUser.chosung.indexOf( searchKey ) > -1 ){
-              newArrays.push( tUser );
+          for( var key in scope[attrs.items] ){
+            var data = scope[attrs.items][key];
+            if( UTIL.getMorphemes( data.user_name ).indexOf( separated ) > -1
+              || data.chosung.indexOf( searchKey ) > -1 ){
+              matches.push( data );
             }
           }
 
-          poster( newArrays );
+          poster( matches );
         } else {
           reseter();
         }

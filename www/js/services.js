@@ -140,6 +140,15 @@ angular.module('starter.services', [])
                 UserDao.add( user, true );
               }
             }
+            /**
+            for( var inx = 0 ; inx < users.length ; inx++ ){              
+              if( users[inx].U != loginUserId ){
+                var user = { 'userId' : users[inx].U, 'userName': users[inx].DT.NM, 
+                  'message' : users[inx].DT.MG, 'image': users[inx].DT.I, 'chosung' : UTIL.getChosung( users[inx].DT.NM ), 'friendFlag' : 'Y' };
+                UserDao.add( user, true );
+              }
+            }
+            */
             callback( {'status':'ok'} );
           }
         });
@@ -202,10 +211,21 @@ angular.module('starter.services', [])
 
               if( cUserId != loginUserId ){
                 var user = { 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image,
-                  'message' : userArray[inx].datas.message, 'image': userArray[inx].datas.image, 'chosung' : UTIL.getChosung( userArray[inx].datas.name ) };
+                  'message' : userArray[inx].datas.message, 'chosung' : UTIL.getChosung( userArray[inx].datas.name ) };
                 UserDao.add( user );
                 Cache.add( userArray[inx].userId, { 'NM' : userArray[inx].datas.name, 'I': userArray[inx].datas.image } );
               }
+
+              /**
+              var cUserId = userArray[inx].U;
+
+              if( cUserId != loginUserId ){
+                var user = { 'userId' : userArray[inx].U, 'userName': userArray[inx].DT.NM, 'image': userArray[inx].DT.I,
+                  'message' : userArray[inx].DT.MG, 'chosung' : UTIL.getChosung( userArray[inx].DT.NM ) };
+                UserDao.add( user );
+                Cache.add( userArray[inx].U, { 'NM' : userArray[inx].DT.NM, 'I': userArray[inx].DT.I } );
+              }
+              */
             }
           }
 
@@ -513,7 +533,20 @@ angular.module('starter.services', [])
               channel.name = data.user.userName;
               channel.image = data.user.image;  
             }
-            
+
+            /**
+            var channel = {'channel': data.C, 'users' : channelJson.result.DT.users};
+            channel.message = decodeURIComponent( data.message );
+
+            if( channelJson.result.DT.users_cnt > 2 ){
+              channel.name = channelJson.result.DT.name;
+              channel.image = '';
+            } else {
+              channel.name = data.user.userName;
+              channel.image = data.user.image;  
+            }
+            */
+
             $rootScope.totalUnreadCount++;
             Channels.add( channel );          
           });
