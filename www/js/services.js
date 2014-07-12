@@ -564,27 +564,30 @@ angular.module('starter.services', [])
     unreadMessage : function(channels, callback){
       var loginUser = Sign.getUser();
       sessionSocket.emit( "message-unread", function(resultObject) {
-        var messageArray = resultObject.result;
+        try { 
+          var messageArray = resultObject.result;
+          for( var inx = 0 ; inx < messageArray.length ; inx++ ){
+            var data = messageArray[inx].message.data;
+            data = JSON.parse(data);
 
-        for( var inx = 0 ; inx < messageArray.length ; inx++ ){
-          var data = messageArray[inx].message.data;
-          data = JSON.parse(data);
+            data.message = decodeURIComponent( data.message );          
+            data.type = data.user.userId == loginUser.userId ? 'S':'R';
 
-          data.message = decodeURIComponent( data.message );          
-          data.type = data.user.userId == loginUser.userId ? 'S':'R';
+            var channel = channels[data.channel];
+            channel.message = data.message;
 
-          var channel = channels[data.channel];
-          channel.message = data.message;
+            if( channel.users.length > 2 ){
+              channel.name = channel.name;
+            } else {
+              channel.name = data.user.userName;
+              channel.image = data.user.image;
+            }
 
-          if( channel.users.length > 2 ){
-            channel.name = channel.name;
-          } else {
-            channel.name = data.user.userName;
-            channel.image = data.user.image;
+            Channels.add( channel );
+            Messages.add( data );
           }
-
-          Channels.add( channel );
-          Messages.add( data );
+        } catch(e){
+          console.log( e );
         }
 
         callback({'status':'ok'});
@@ -592,20 +595,24 @@ angular.module('starter.services', [])
     },
     channelList : function(callback){
       var loginUser = Sign.getUser();      
-      sessionSocket.emit( "channel-list", function(resultObject) {            
-        var channelArray = resultObject.result;
+      sessionSocket.emit( "channel-list", function(resultObject) {    
+        try {        
+          var channelArray = resultObject.result;
 
-        var channels = {};
-        for( var inx = 0 ; inx < channelArray.length ; inx++ ){
-          var data = channelArray[inx];
-          var channel = {'channel': data.channel, 'users' : data.datas.users };
-          if( data.datas.users_cnt > 2 ){
-            channel.name = data.datas.name; 
-          } else {
-            channel.name = data.datas.from;
+          var channels = {};
+          for( var inx = 0 ; inx < channelArray.length ; inx++ ){
+            var data = channelArray[inx];
+            var channel = {'channel': data.channel, 'users' : data.datas.users };
+            if( data.datas.users_cnt > 2 ){
+              channel.name = data.datas.name; 
+            } else {
+              channel.name = data.datas.from;
+            }
+
+            channels[ data.channel ] =  channel;
           }
-
-          channels[ data.channel ] =  channel;
+        } catch(e){
+          console.log( e );
         }
         callback(channels);
       });

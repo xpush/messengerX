@@ -52,6 +52,8 @@ angular.module('starter.controllers', [])
   if( $rootScope.firstFlag ){
     $scope.syncFriends();
     $rootScope.firstFlag = false;
+  } else {
+    $scope.listFriend();
   }
 
   $scope.goProfile = function(){
