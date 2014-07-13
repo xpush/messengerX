@@ -5,8 +5,8 @@ angular.module('starter.constants', [])
     feedVersion: 'V1',
     appKey : 'messengerx'
   })
-  //.constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
-  .constant('BASE_URL', 'localhost')
+  .constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
+  //.constant('BASE_URL', 'localhost')
   .constant('DEFAULT_IMAGE', 'stalk-front-s01.cloudapp.net')  
   .constant('DB_CONFIG', {
     name: 'stalk.db',
