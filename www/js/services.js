@@ -109,7 +109,7 @@ angular.module('starter.services', [])
     add: function(userIds, callback) {
       loginUserId = Sign.getUser().userId;
       SocketManager.get( function( socket ){
-        socket.emit( 'group-add', {'userIds':userIds, 'groupId' : loginUserId}, function( data ){
+        socket.emit( 'group-add', {'U':userIds, 'GR' : loginUserId}, function( data ){
           
           // Multi Add Friend
           UserDao.addFriend( userIds );
@@ -130,25 +130,17 @@ angular.module('starter.services', [])
     refresh : function(callback){
       var loginUserId = Sign.getUser().userId;    
       SocketManager.get( function( socket ){        
-        socket.emit( 'group-list', {'groupId':loginUserId}, function( data ){
+        socket.emit( 'group-list', {'GR':loginUserId}, function( data ){
           if( data.status == 'ok' ){
             var users = data.result;
+
             for( var inx = 0 ; inx < users.length ; inx++ ){              
               if( users[inx].userId != loginUserId ){
-                var user = { 'userId' : users[inx].userId, 'userName': users[inx].datas.name, 
-                  'message' : users[inx].datas.message, 'image': users[inx].datas.image, 'chosung' : UTIL.getChosung( users[inx].datas.name ), 'friendFlag' : 'Y' };
-                UserDao.add( user, true );
-              }
-            }
-            /**
-            for( var inx = 0 ; inx < users.length ; inx++ ){              
-              if( users[inx].U != loginUserId ){
                 var user = { 'userId' : users[inx].U, 'userName': users[inx].DT.NM, 
                   'message' : users[inx].DT.MG, 'image': users[inx].DT.I, 'chosung' : UTIL.getChosung( users[inx].DT.NM ), 'friendFlag' : 'Y' };
                 UserDao.add( user, true );
               }
             }
-            */
             callback( {'status':'ok'} );
           }
         });
@@ -156,7 +148,7 @@ angular.module('starter.services', [])
     },
     getNames : function( userIds ){
       var loginUserId = Sign.getUser().userId;
-      var loginUserName = Sign.getUser().datas.name;
+      var loginUserName = Sign.getUser().userName;
       var result;      
       var userNames = [];
 
@@ -193,7 +185,6 @@ angular.module('starter.services', [])
   }
 })
 .factory('Users', function(SocketManager, Sign, UserDao, UTIL, Cache) {
-  // Might use a resource here that returns a JSON array
   var loginUserId;
 
   return {
@@ -207,16 +198,6 @@ angular.module('starter.services', [])
           if( data.status == 'ok' ){
             var userArray = data.result;
             for( var inx = 0 ; inx < userArray.length ; inx++ ){             
-              var cUserId = userArray[inx].userId;
-
-              if( cUserId != loginUserId ){
-                var user = { 'userId' : userArray[inx].userId, 'userName': userArray[inx].datas.name, 'image': userArray[inx].datas.image,
-                  'message' : userArray[inx].datas.message, 'chosung' : UTIL.getChosung( userArray[inx].datas.name ) };
-                UserDao.add( user );
-                Cache.add( userArray[inx].userId, { 'NM' : userArray[inx].datas.name, 'I': userArray[inx].datas.image } );
-              }
-
-              /**
               var cUserId = userArray[inx].U;
 
               if( cUserId != loginUserId ){
@@ -225,7 +206,6 @@ angular.module('starter.services', [])
                 UserDao.add( user );
                 Cache.add( userArray[inx].U, { 'NM' : userArray[inx].DT.NM, 'I': userArray[inx].DT.I } );
               }
-              */
             }
           }
 
@@ -351,9 +331,9 @@ angular.module('starter.services', [])
         "(?, ?, ?, 0, ?, ?)";
 
       var cond = [
-        jsonObj.channel,
-        jsonObj.name,
-        jsonObj.users,
+        jsonObj.C,
+        jsonObj.NM,
+        jsonObj.U,
         Date.now(),
         loginUserId
       ];
@@ -416,11 +396,10 @@ angular.module('starter.services', [])
     },
     generateId : function(jsonObj){
       var channelId;
-      if( jsonObj.users.length > 2 ){
+      if( jsonObj.U.length > 2 ){
         channelId = UTIL.getUniqueKey()+"^"+APP_INFO.appKey;;
       } else {
-        jsonObj.users.sort();
-        channelId = jsonObj.users.join( "$" )+"^"+APP_INFO.appKey;
+        channelId = jsonObj.U.sort().join( "$" )+"^"+APP_INFO.appKey;
       }
       return channelId;
     }
@@ -447,18 +426,18 @@ angular.module('starter.services', [])
         "(?, ?, ?, ?, ?, ?, ?, ?)";
 
       var cond = [
-        jsonObj.channel,
-        jsonObj.sender,
-        jsonObj.user.userName,
-        jsonObj.user.image,
-        jsonObj.message,
+        jsonObj.C,
+        jsonObj.S,
+        jsonObj.UO.NM,
+        jsonObj.UO.I,
+        jsonObj.MG,
         jsonObj.type,
-        jsonObj.timestamp,
+        jsonObj.TS,
         loginUserId
       ];
 
       // Add to Cache
-      Cache.add( jsonObj.sender, {'NM':jsonObj.user.userName, 'I':jsonObj.user.image} );
+      Cache.add( jsonObj.S, {'NM':jsonObj.UO.NM, 'I':jsonObj.UO.I} );
 
       return DB.query(query, cond).then(function(result) {
         return result;
@@ -492,11 +471,10 @@ angular.module('starter.services', [])
       };      
 
       var query =
-        'app='+loginUser.app+'&'+
-        'userId='+encodeURIComponent(loginUser.userId)+'&'+
-        'deviceId='+loginUser.deviceId+'&'+
-        'token='+loginUser.userToken;
-
+        'A='+loginUser.app+'&'+
+        'U='+encodeURIComponent(loginUser.userId)+'&'+
+        'D='+loginUser.deviceId+'&'+
+        'TK='+loginUser.userToken;
       // Session Socket
       var socket = io.connect(loginUser.sessionServer+'/session?'+query, socketOptions);
 
@@ -520,32 +498,21 @@ angular.module('starter.services', [])
 
       socket.on('_event', function (messageObject) {
         if( messageObject.event == 'NOTIFICATION' ){
-          var data = messageObject.data;
 
-          socket.emit( 'channel-get', { 'channel' : data.channel }, function( channelJson ){
-            var channel = {'channel': data.channel, 'users' : channelJson.result.datas.users};
-            channel.message = decodeURIComponent( data.message );
+          var data = messageObject.DT;
 
-            if( channelJson.result.datas.users_cnt > 2 ){
-              channel.name = channelJson.result.datas.name;
+          socket.emit( 'channel-get', { 'C' : data.C }, function( channelJson ){
+            console.log( channelJson );
+            var channel = {'channel': data.C, 'users' : channelJson.result.DT.US};
+            channel.message = decodeURIComponent( data.MG );
+
+            if( channelJson.result.DT.UC > 2 ){
+              channel.name = channelJson.result.DT.NM;
               channel.image = '';
             } else {
-              channel.name = data.user.userName;
-              channel.image = data.user.image;  
+              channel.name = data.UO.NM;
+              channel.image = data.UO.I;
             }
-
-            /**
-            var channel = {'channel': data.C, 'users' : channelJson.result.DT.users};
-            channel.message = decodeURIComponent( data.message );
-
-            if( channelJson.result.DT.users_cnt > 2 ){
-              channel.name = channelJson.result.DT.name;
-              channel.image = '';
-            } else {
-              channel.name = data.user.userName;
-              channel.image = data.user.image;  
-            }
-            */
 
             $rootScope.totalUnreadCount++;
             Channels.add( channel );          
@@ -564,31 +531,34 @@ angular.module('starter.services', [])
     unreadMessage : function(channels, callback){
       var loginUser = Sign.getUser();
       sessionSocket.emit( "message-unread", function(resultObject) {
-        try { 
           var messageArray = resultObject.result;
+          console.log( messageArray );
+
           for( var inx = 0 ; inx < messageArray.length ; inx++ ){
-            var data = messageArray[inx].message.data;
+            try {
+            var data = messageArray[inx].MG.DT;
             data = JSON.parse(data);
 
-            data.message = decodeURIComponent( data.message );          
-            data.type = data.user.userId == loginUser.userId ? 'S':'R';
+            data.MG = decodeURIComponent( data.MG );          
+            data.type = data.UO.U == loginUser.userId ? 'S':'R';
 
-            var channel = channels[data.channel];
-            channel.message = data.message;
+            var channel = channels[data.C];
+            channel.message = data.MG;
 
             if( channel.users.length > 2 ){
               channel.name = channel.name;
             } else {
-              channel.name = data.user.userName;
-              channel.image = data.user.image;
+              channel.name = data.UO.NM;
+              channel.image = data.UO.I;
             }
+
 
             Channels.add( channel );
             Messages.add( data );
+            } catch(e){
+              console.log( e );
+            }
           }
-        } catch(e){
-          console.log( e );
-        }
 
         callback({'status':'ok'});
       });
@@ -596,24 +566,25 @@ angular.module('starter.services', [])
     channelList : function(callback){
       var loginUser = Sign.getUser();      
       sessionSocket.emit( "channel-list", function(resultObject) {    
-        try {        
+        try { 
           var channelArray = resultObject.result;
 
           var channels = {};
           for( var inx = 0 ; inx < channelArray.length ; inx++ ){
             var data = channelArray[inx];
-            var channel = {'channel': data.channel, 'users' : data.datas.users };
-            if( data.datas.users_cnt > 2 ){
-              channel.name = data.datas.name; 
+            var channel = {'channel': data.C, 'users' : data.DT.US };
+            if( data.DT.UC > 2 ){
+              channel.name = data.DT.NM;
             } else {
-              channel.name = data.datas.from;
+              channel.name = data.DT.F;
             }
 
-            channels[ data.channel ] =  channel;
+            channels[ data.C ] =  channel;
           }
         } catch(e){
           console.log( e );
         }
+
         callback(channels);
       });
     }   
@@ -684,10 +655,10 @@ angular.module('starter.services', [])
 
         CONF._app = params.app;
         CONF._channel = params.channel;
-        CONF._user = { userId : loginUser.userId, userName : loginUser.datas.name, url :'', image : loginUser.datas.image};
+        CONF._user = { U : loginUser.userId, NM : loginUser.userName, I : loginUser.image};
 
-        var query = "app=" + params.app + "&channel=" + params.channel + "&userId=" + params.userId + "&deviceId=" + params.deviceId
-         + "&server=" + data.result.server.name;
+        var query = "A=" + params.app + "&C=" + params.channel + "&U=" + params.userId + "&D=" + params.deviceId
+         + "&S=" + data.result.server.name;
          
         var socketOptions ={
           'force new connection': true
@@ -702,11 +673,11 @@ angular.module('starter.services', [])
             
             var latestMessage = '';
             for( var inx = 0 ; inx < unreadMessages.length ; inx++ ){
-              var data = JSON.parse( unreadMessages[inx].message.data );
-              data.message = decodeURIComponent( data.message );              
-              data.type = data.user.userId == loginUser.userId ? 'S':'R';
+              var data = JSON.parse( unreadMessages[inx].MG.DT );
+              data.MG = decodeURIComponent( data.MG );              
+              data.type = data.UO.U == loginUser.userId ? 'S':'R';
 
-              latestMessage = data.message;
+              latestMessage = data.MG;
               Messages.add( data );
             }
 
@@ -766,13 +737,15 @@ angular.module('starter.services', [])
           console.log( data );[]
         });         
 
-        channelSocket.on('message', function (data) {
+        channelSocket.on('MG', function (data) {
 
-          data.message = decodeURIComponent(data.message);          
-          data.type = data.user.userId == loginUser.userId ? 'S':'R' ;
+          try {
+
+          data.MG = decodeURIComponent(data.MG); 
+          data.type = data.UO.U == loginUser.userId ? 'S':'R' ;
 
           var content;
-          var dateStrs = UTIL.timeToString( data.timestamp );
+          var dateStrs = UTIL.timeToString( data.TS );
 
           if( latestDate != dateStrs[1] ){
             content = '<span class="date">'+dateStrs[1]+'</span>';
@@ -782,15 +755,15 @@ angular.module('starter.services', [])
 
           if(data.type == 'R'){
 
-            content = '<div class="small">'+ data.user.userName+'</div>' ;
+            content = '<div class="small">'+ data.UO.NM+'</div>' ;
             content += '<div class="from">';
-            content += '<img src="'+ data.user.image+'" class="profile"/>';
-            content += '<span >'+decodeURIComponent( data.message )+'</span>';
+            content += '<img src="'+ data.UO.I+'" class="profile"/>';
+            content += '<span >'+decodeURIComponent( data.MG )+'</span>';
             content += '<span class="time">'+dateStrs[2]+'</span>';
             content += '</div>'
             
           } else {
-            content = '<span>'+data.message+'</span>' 
+            content = '<span>'+data.MG+'</span>' 
           }
 
           var nextMessage = { content : content, from : data.type, date : dateStrs[1] };
@@ -798,9 +771,13 @@ angular.module('starter.services', [])
           // Add to DB
           Messages.add( data );
 
-          var param = { 'channel' :  params.channel, 'reset' : true, 'message':data.message };
+          var param = { 'channel' :  params.channel, 'reset' : true, 'message':data.MG };
           Channels.update( param );
-          $scope.add( nextMessage );         
+          $scope.add( nextMessage );
+
+          } catch ( e ){
+            console.log( e );
+          } 
         });
       })
       .error(function(data, status, headers, config) {
@@ -811,13 +788,13 @@ angular.module('starter.services', [])
     },
     send : function(msg){
       var param = {
-        app:      CONF._app,
-        channel:  CONF._channel,
-        name:     'message',
-        data:     {
-          user:     CONF._user,
-          message:  msg,
-          sender : CONF._user.userId
+        A:      CONF._app,
+        C:  CONF._channel,
+        NM:     'MG',
+        DT:     {
+          UO:     CONF._user,
+          MG:  msg,
+          S : CONF._user.U
         }
       };
 
@@ -883,7 +860,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( changeDBFlag ){
+      if( !changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }

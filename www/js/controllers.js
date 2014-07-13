@@ -179,12 +179,15 @@ angular.module('starter.controllers', [])
 
   $scope.changeImage = function(newImage){
     if( newImage != '' ){
-      $scope.loginUser.datas.image = newImage;
+      $scope.loginUser.image = newImage;
     }
 
-    var params = { 'app' : 'messengerx', 'userId' : $scope.loginUser.userId, 'password' : $scope.loginUser.password, 'deviceId' : 'ionic',  datas : { 'name' : $scope.loginUser.datas.name,
-                 'image': $scope.loginUser.datas.image, 'message' : $scope.loginUser.datas.message } };
+    var params = { 'A' : 'messengerx', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : 'ionic',
+               DT : { 'NM' : $scope.loginUser.userName, 'I': $scope.loginUser.image, 'MG' : $scope.loginUser.message } };
+
+    console.log( params );
     Sign.update( params, function(data){
+      console.log( data );
       if( data.status == 'ok' ){
         Sign.setUser( $scope.loginUser );
       }
@@ -200,27 +203,34 @@ angular.module('starter.controllers', [])
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, Sign, Cache) {
   $scope.signIn = function(user) {
-		var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic' };
+		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : 'ionic' };
 
     Sign.login( params, function(data){
-      var loginUser = data.result.user;
+
+      var loginUser = {};
+      loginUser.app = params.A;
+      loginUser.userId = user.userId;
       loginUser.userToken = data.result.token;
       loginUser.sessionServer = data.result.serverUrl;
-      loginUser.password = user.password;
+      loginUser.password = params.PW;
       loginUser.deviceId = 'ionic';
+
+      loginUser.image = data.result.user.DT.I;
+      loginUser.userName = data.result.user.DT.NM;
+      loginUser.message = data.result.user.DT.MG;
 
       $rootScope.loginUser = loginUser;
       Sign.setUser( loginUser );
 
-      Cache.add( user.userid, { 'NM' : loginUser.datas.nm, 'I': loginUser.datas.image });
+      Cache.add(user.userId, {'NM':loginUser.userName, 'I':loginUser.image});
       $state.go('tab.friends');
     });
   };
 })
 .controller('SignUpCtrl', function($scope, $state, $stateParams, $http, Sign) {
   $scope.signUp = function(user) {
-    var params = { 'app' : 'messengerx', 'userId' : user.userid, 'password' : user.password, 'deviceId' : 'ionic', datas : {'name' : user.username,
-                 'image':'../img/default_image.jpg', 'message':'' } };
+    var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : 'ionic', 'DT' : {'NM' : user.userName,
+                 'I':'../img/default_image.jpg', 'MG':'' } };
     //var params = { 'app' : 'messengerx', 'userId' : 'F100002531861340', 'password' : '100002531861340', 'deviceId' : 'WEB' };
     Sign.register( params, function(data){
       $state.go('signin');
@@ -267,18 +277,6 @@ angular.module('starter.controllers', [])
     
     channelUsers = channelUsers.concat( friendIds );
 
-    /**
-    if( channelUsers.length == 1 ){
-      //channelName = Friends.getName( channelUsers );
-      channelUsers.push( loginUser.userId );
-    } else {
-      if( channelUsers.indexOf( loginUser.userId ) < 0 ){
-        channelUsers.push( loginUser.userId );
-      }    
-      //channelName = Friends.getName( channelUsers );
-    }
-    */
-
     if( channelUsers.indexOf( loginUser.userId ) < 0 ){
       channelUsers.push( loginUser.userId );
     }    
@@ -286,15 +284,16 @@ angular.module('starter.controllers', [])
     channelName = Friends.getNames( channelUsers );
 
     var createObject = {};
-    createObject.users = channelUsers;
-    createObject.name = channelName;
-    createObject.datas = { 'name' : channelName, 'users' : channelUsers, 'from' : loginUser.datas.name, 'users_cnt': channelUsers.length };
+    createObject.U = channelUsers;
+    createObject.NM = channelName;
+    createObject.DT = { 'NM' : channelName, 'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length };
 
     var channelId = Channels.generateId(createObject);
-    createObject.channel = channelId;
+    createObject.C = channelId;
 
     SocketManager.get( function(socket){
       socket.emit("channel-create", createObject, function(data){
+        console.log( data );
         console.log( "channel-create success" );
 
         createObject.unreadCount = 0;

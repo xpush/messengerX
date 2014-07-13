@@ -2,13 +2,14 @@
   <ion-content class="has-header padding">
 		<div class="list card">
 	    <a class="item item-thumbnail-left" >
-	      <img ng-src="{{loginUser.datas.image}}" />
-	      <h2>{{loginUser.datas.id}}</h2>
+	    	<div class="account-profile">
+	      	<img ng-src="{{loginUser.image}}" />
+	    	</div>
 	      <label class="item item-input">
-    			<input type="text" placeholder="Name" ng-model="loginUser.datas.name" />
+    			<input type="text" placeholder="Name" ng-model="loginUser.userName" />
   			</label>	      
 	      <label class="item item-input">
-    			<input type="text" placeholder="Status Message" ng-model="loginUser.datas.message" />
+    			<input type="text" placeholder="Status Message" ng-model="loginUser.message" />
   			</label>
 	  	</a>
 			<div class="item item-input-inset">

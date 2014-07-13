@@ -216,6 +216,17 @@ paper-input {
 	width: 100%;
  }
 
+ .account-profile {
+   position: absolute;
+   left:13px;
+   top:21px;
+ }
+
+ .account-profile img {
+	max-width: 80px;
+	max-height: 80px;
+	display:block;
+ }
 
 /*
 * override ionic css
