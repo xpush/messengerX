@@ -239,7 +239,7 @@ angular.module('starter.controllers', [])
 })
 .controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager, Channels, UTIL) {
 
-  initChat = function( channelUsers ){
+  initChat = function( inviteMsg ){
     var param = {};
     param.app = loginUser.app;
     param.channel = channelId;
@@ -247,7 +247,7 @@ angular.module('starter.controllers', [])
     param.deviceId = loginUser.deviceId;
 
     // Channel Init
-    Chat.init( param, loginUser, channelUsers, $scope, function( messages ){
+    Chat.init( param, loginUser, inviteMsg, $scope, function( messages ){
       if( messages != undefined ){
         $scope.messages = $scope.messages.concat(messages);
         $ionicScrollDelegate.scrollBottom(true);
@@ -271,7 +271,7 @@ angular.module('starter.controllers', [])
     channelUsers.sort();
     channelName = stateParams.channelName;
 
-    initChat( channelUsers );
+    initChat( '' );
   } else {
     var friendIds = stateParams.friendIds.split("$");
     
@@ -297,7 +297,13 @@ angular.module('starter.controllers', [])
 
         createObject.unreadCount = 0;
         Channels.insert( createObject );
-        initChat( channelUsers );
+
+        var inviteMsg = "";
+        if( channelUsers.length > 2 ){
+          inviteMsg = UTIL.getInviteMessage( loginUser, channelUsers );
+        }
+        
+        initChat( inviteMsg );
       });
     });
   }
@@ -392,7 +398,6 @@ angular.module('starter.controllers', [])
 
           var joinObject = { 'U' : joinUsers, 'DT' : { 'NM' : channelName,'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length } };
           Chat.join( joinObject, function(data){
-            console.log( data );
             if( data.status == 'ok' ){
               var iMsg = UTIL.getInviteMessage( loginUser, joinUsers );
 

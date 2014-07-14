@@ -17,7 +17,7 @@ body {
 	padding:0;
 }
 
-.messages li.T {
+.messages li.T, .messages li.I {
 	clear:both;
 	float: none;
 	max-width:100%;
