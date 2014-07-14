@@ -862,7 +862,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( !changeDBFlag ){
+      if( changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }
