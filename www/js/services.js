@@ -706,6 +706,7 @@ angular.module('starter.services', [])
                 if( latestDate != dateStrs[1] ){
                   content = '<span class="date">'+dateStrs[1]+'</span>';
                   messages.push( { content : content, from : 'T', date : dateStrs[1] } );
+                  latestDate = dateStrs[1];
                 }
 
                 if(data.type == 'R'){                
@@ -861,7 +862,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( changeDBFlag ){
+      if( !changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }
