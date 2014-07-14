@@ -349,14 +349,22 @@ angular.module('starter.services', [])
       var query =
         "INSERT OR REPLACE INTO TB_CHANNEL "+
         "(channel_id, channel_name, channel_users, channel_image, latest_message, unread_count, channel_updated, owner_id) "+
-        "SELECT new.channel_id, new.channel_name, new.channel_users, new.channel_image, new.latest_message, IFNULL( old.unread_count, new.unread_count) as unread_count, new.channel_updated, new.owner_id "+
+        "SELECT new.channel_id, new.channel_name, new.channel_users ";
+
+        if( jsonObj.image != undefined ){
+          query += ", new.channel_image ";
+        } else {
+          query += ", old.channel_image ";
+        }
+
+        query += ", new.latest_message, IFNULL( old.unread_count, new.unread_count) as unread_count, new.channel_updated, new.owner_id "+
         "FROM ( "+
         "  SELECT ? as channel_id, ? as channel_name, ? as channel_users, ? as channel_image, ? as latest_message, 1 as unread_count, ? as channel_updated, ? as owner_id " +
         ") as new " +
         " LEFT JOIN ( " +
         "   SELECT channel_id, channel_name, channel_users, channel_image, unread_count + 1 as unread_count, channel_updated, owner_id " +
         "   FROM TB_CHANNEL " +
-        " ) AS old ON new.channel_id = old.channel_id AND old.owner_id = new.owner_id ; ";      
+        " ) AS old ON new.channel_id = old.channel_id AND old.owner_id = new.owner_id ; ";    
 
       var currentTimestamp = Date.now();
       var cond = [

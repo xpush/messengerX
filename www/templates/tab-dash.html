@@ -1,4 +1,9 @@
 <ion-view title="Channels">
+  <ion-nav-buttons side="right">
+    <button class="button" ng-click="logout()">
+      LogOut
+    </button>
+  </ion-nav-buttons>
   <ion-content class="has-header">
     <ion-list>
       <ion-item ng-repeat="channel in channelArray" ng-click="goChat('{{channel.channel_id}}')" class="item item-channel">

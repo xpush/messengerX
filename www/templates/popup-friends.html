@@ -7,7 +7,7 @@
     <label class="checkbox" >
       <input type="checkbox" ng-click="toggleSelection('{{data.user_id}}')" ng-checked="selection.indexOf('{{data.user_id}}') > -1 || channelUsers.indexOf('{{data.user_id}}') > -1 " ng-disabled="channelUsers.indexOf('{{data.user_id}}') > -1"/>
     </label>
-  	<img src="{{data.image}}"></img>
+  	<img ng-src="{{data.image}}"></img>
     <p>{{data.user_name}}</p>    
   </li>
   <li class="item item-checkbox" ng-if="datas.length == 0">

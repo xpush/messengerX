@@ -391,9 +391,8 @@ angular.module('starter.controllers', [])
           channelName = $scope.channelName + ","+Friends.getNames( joinUsers );
           $scope.channelName = channelName;
 
-          var joinObject = { 'users' : joinUsers, 'datas' : { 'name' : channelName,'users' : channelUsers,  'from' : loginUser.datas.name, 'users_cnt': channelUsers.length } };
+          var joinObject = { 'U' : joinUsers, 'DT' : { 'NM' : channelName,'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length } };
           Chat.join( joinObject, function(data){
-            console.log( data );
             if( data.status == 'ok' ){
               Channels.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );
             }
