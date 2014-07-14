@@ -297,24 +297,24 @@ angular.module('starter.services', [])
     update : function(param){
       loginUserId = Sign.getUser().userId;
 
-      var query = "UPDATE TB_CHANNEL SET ";
-      if( param.reset ){
-        query += "unread_count = 0, channel_updated = ? ";
-      } else {
-        query += "unread_count = unread_count + 1, channel_updated = ? ";
-      }
-
-      if( param.message != undefined && param.message != '' ){
-         query += ", latest_message = ? ";
-      }
-
-      query += "WHERE channel_id = ? and owner_id = ? ";     
-
       var cond = [Date.now()];
 
-      if( param.message != undefined && param.message != '' ){
+      var query = "UPDATE TB_CHANNEL ";
+      query += "SET unread_count = 0, channel_updated = ? ";
+
+      if( param.message != undefined && param.message != '' && param.image != undefined && param.image != '' ){
+        query += ", latest_message = ?, channel_image = ? ";
         cond.push( param.message );
+        cond.push( param.image );
+      } else if ( param.message != undefined && param.message != '' ){
+        query += ", latest_message = ? ";
+        cond.push( param.message );
+      } else  if ( param.image != undefined && param.image != '' ){
+        query += ", channel_image = ? ";
+        cond.push( param.image );
       }
+
+      query += "WHERE channel_id = ? and owner_id = ? ";    
 
       cond.push( param.channel );
       cond.push( loginUserId );
@@ -532,7 +532,6 @@ angular.module('starter.services', [])
       var loginUser = Sign.getUser();
       sessionSocket.emit( "message-unread", function(resultObject) {
           var messageArray = resultObject.result;
-          console.log( messageArray );
 
           for( var inx = 0 ; inx < messageArray.length ; inx++ ){
             try {
@@ -551,8 +550,6 @@ angular.module('starter.services', [])
               channel.name = data.UO.NM;
               channel.image = data.UO.I;
             }
-
-
             Channels.add( channel );
             Messages.add( data );
             } catch(e){
@@ -696,17 +693,19 @@ angular.module('starter.services', [])
             *Reset Count End
             */
             var messages = [];
-            var messageCount = 0;
             Messages.list( params.channel ).then(function(messageArray) {
               for( var inx = 0 ; inx < messageArray.length ; inx++ ){
                 var data = messageArray[inx];
                 var dateStrs = UTIL.timeToString( data.time );
 
                 var content;
-                if( inx > 0 && messages[ messageCount-1 ].date != dateStrs[1] ){
+                if( inx > 0 ){
+                  latestDate =  UTIL.timeToString( messageArray[inx-1].time )[1];
+                }
+
+                if( latestDate != dateStrs[1] ){
                   content = '<span class="date">'+dateStrs[1]+'</span>';
                   messages.push( { content : content, from : 'T', date : dateStrs[1] } );
-                  messageCount++;
                 }
 
                 if(data.type == 'R'){                
@@ -721,11 +720,6 @@ angular.module('starter.services', [])
                 }
 
                 messages.push( { content : content, from : data.type, date : dateStrs[1] } );
-                messageCount++;
-
-                if( inx == messageArray.length-1 ) {
-                  latestDate = dateStrs[1];
-                }
               }
 
               callback(messages);
@@ -751,7 +745,7 @@ angular.module('starter.services', [])
             content = '<span class="date">'+dateStrs[1]+'</span>';
             $scope.add( { content : content, from : 'T', date : dateStrs[1] } );
             latestDate = dateStrs[1];
-          }
+          }          
 
           if(data.type == 'R'){
 
@@ -771,7 +765,14 @@ angular.module('starter.services', [])
           // Add to DB
           Messages.add( data );
 
-          var param = { 'channel' :  params.channel, 'reset' : true, 'message':data.MG };
+          // 2 people Channel
+
+          var param = { 'channel':data.C, 'reset' : true, 'message':data.MG };
+
+          if( data.type == 'R' && data.C.indexOf( "$" ) > -1 ){
+            param.image = data.UO.I
+          }
+
           Channels.update( param );
           $scope.add( nextMessage );
 
@@ -860,7 +861,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( !changeDBFlag ){
+      if( changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }
