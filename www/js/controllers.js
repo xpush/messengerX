@@ -237,17 +237,17 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager, Channels) {
+.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager, Channels, UTIL) {
 
-  initChat = function(){
+  initChat = function( channelUsers ){
     var param = {};
     param.app = loginUser.app;
     param.channel = channelId;
     param.userId = loginUser.userId;
-    param.deviceId = loginUser.deviceId;  
+    param.deviceId = loginUser.deviceId;
 
     // Channel Init
-    Chat.init( param, loginUser, $scope, function( messages ){
+    Chat.init( param, loginUser, channelUsers, $scope, function( messages ){
       if( messages != undefined ){
         $scope.messages = $scope.messages.concat(messages);
         $ionicScrollDelegate.scrollBottom(true);
@@ -271,7 +271,7 @@ angular.module('starter.controllers', [])
     channelUsers.sort();
     channelName = stateParams.channelName;
 
-    initChat();
+    initChat( channelUsers );
   } else {
     var friendIds = stateParams.friendIds.split("$");
     
@@ -293,12 +293,11 @@ angular.module('starter.controllers', [])
 
     SocketManager.get( function(socket){
       socket.emit("channel-create", createObject, function(data){
-        console.log( data );
         console.log( "channel-create success" );
 
         createObject.unreadCount = 0;
         Channels.insert( createObject );
-        initChat();
+        initChat( channelUsers );
       });
     });
   }
@@ -393,7 +392,11 @@ angular.module('starter.controllers', [])
 
           var joinObject = { 'U' : joinUsers, 'DT' : { 'NM' : channelName,'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length } };
           Chat.join( joinObject, function(data){
+            console.log( data );
             if( data.status == 'ok' ){
+              var iMsg = UTIL.getInviteMessage( loginUser, joinUsers );
+
+              Chat.send( iMsg, 'I' );
               Channels.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );
             }
           });

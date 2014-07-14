@@ -650,11 +650,12 @@ angular.module('starter.services', [])
   var CONF = {};
 
   return {
-    init : function( params, loginUser, $scope, callback ){
+    init : function( params, loginUser, channelUsers, $scope, callback ){
       $http.get("http://"+BASE_URL+":8000/node/"+ encodeURIComponent( params.app ) + "/"+ encodeURIComponent( params.channel )+'?1=1' )
       .success(function( data ) {
 
         var latestDate;
+        var inviteMessage = '';
 
         var socketServerUrl = data.result.server.url;
 
@@ -673,9 +674,9 @@ angular.module('starter.services', [])
 
         channelSocket.on('connect', function() {
           console.log( 'channel connect' );
+
           channelSocket.emit( 'message-unread', function(jsonObj){
             var unreadMessages = jsonObj.result;
-            
             var latestMessage = '';
             for( var inx = 0 ; inx < unreadMessages.length ; inx++ ){
               var data = JSON.parse( unreadMessages[inx].MG.DT );
@@ -717,6 +718,12 @@ angular.module('starter.services', [])
                   latestDate = dateStrs[1];
                 }
 
+                if( inx == 0 && inviteMessage != '' ){
+                  content = '<span class="date">'+inviteMessage+'</span>';
+                  messages.push( { content : content, from : 'T', date : dateStrs[1] } );
+                  inviteMessage = '';
+                }
+
                 if(data.type == 'R'){                
                   content = '<div class="small">'+ data.sender_name+'</div>' ;
                   content += '<div class="from">'
@@ -741,11 +748,17 @@ angular.module('starter.services', [])
         });         
 
         channelSocket.on('MG', function (data) {
+          console.log( data );
 
           try {
 
-          data.MG = decodeURIComponent(data.MG); 
-          data.type = data.UO.U == loginUser.userId ? 'S':'R' ;
+          data.MG = decodeURIComponent(data.MG);
+
+          if( data.type == 'I' ){
+            inviteMessage = data.MG;
+          } else {
+            data.type = data.UO.U == loginUser.userId ? 'S':'R' ;
+          }
 
           var content;
           var dateStrs = UTIL.timeToString( data.TS );
@@ -754,7 +767,13 @@ angular.module('starter.services', [])
             content = '<span class="date">'+dateStrs[1]+'</span>';
             $scope.add( { content : content, from : 'T', date : dateStrs[1] } );
             latestDate = dateStrs[1];
-          }          
+          }
+
+          if( inviteMessage != '' ){
+            content = '<span class="date">'+inviteMessage+'</span>';
+            $scope.add( { content : content, from : 'T', date : dateStrs[1] } );
+            inviteMessage = '';
+          }
 
           if(data.type == 'R'){
 
@@ -765,7 +784,7 @@ angular.module('starter.services', [])
             content += '<span class="time">'+dateStrs[2]+'</span>';
             content += '</div>'
             
-          } else {
+          } else if( data.type == 'S' ) {
             content = '<span>'+data.MG+'</span>' 
           }
 
@@ -782,8 +801,10 @@ angular.module('starter.services', [])
             param.image = data.UO.I
           }
 
-          Channels.update( param );
-          $scope.add( nextMessage );
+          if( data.type != 'I' ){
+            Channels.update( param );
+            $scope.add( nextMessage );
+          }
 
           } catch ( e ){
             console.log( e );
@@ -796,7 +817,7 @@ angular.module('starter.services', [])
         // or server returns response with an error status.
       });
     },
-    send : function(msg){
+    send : function(msg, type){
       var param = {
         A:      CONF._app,
         C:  CONF._channel,
@@ -808,6 +829,11 @@ angular.module('starter.services', [])
         }
       };
 
+      if( type !=undefined ){
+        param.type = type;
+      }
+
+      console.log( param );
       channelSocket.emit('send', param, function (data) {
       });
     },
@@ -922,7 +948,7 @@ angular.module('starter.services', [])
 
   return self;
 })
-.factory('UTIL', function(){
+.factory('UTIL', function(Cache){
   var cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
   return {          
     getUniqueKey : function () {
@@ -1012,6 +1038,22 @@ angular.module('starter.services', [])
         var cho = parseInt (( ( uniValue - jong ) / 28 ) / 21);
 
         result += choArray[cho]+jungArray[jung]+jongArray[jong];
+      }
+
+      return result;
+    },
+    getInviteMessage: function(loginUser, userArray){
+      var result = '';
+
+      var users =angular.copy( userArray.splice( userArray.indexOf(loginUser.userId), 1 ) );
+
+      result = loginUser.userName+" invite ";
+      for( var jnx = 0 ; jnx < users.length ; jnx++ ){
+        result += Cache.get( users[jnx] ).NM;
+
+        if( jnx != users.length - 1 ){
+          result += ",";
+        }
       }
 
       return result;
