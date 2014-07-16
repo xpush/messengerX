@@ -55,7 +55,8 @@ body {
 	text-overflow: ellipsis;
 	overflow-x: hidden;
 	word-wrap: break-word;
-	max-width:calc(100% - 84px);
+	max-width:100%;
+	/**max-width:calc(100% - 84px);*/
 }
 
 .messages .from span.time {

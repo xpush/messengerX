@@ -281,7 +281,7 @@ angular.module('starter.controllers', [])
       channelUsers.push( loginUser.userId );
     }    
 
-    channelName = Friends.getNames( channelUsers );
+    channelName = UTIL.getNames( channelUsers );
 
     var createObject = {};
     createObject.U = channelUsers;
@@ -300,7 +300,7 @@ angular.module('starter.controllers', [])
 
         var inviteMsg = "";
         if( channelUsers.length > 2 ){
-          inviteMsg = UTIL.getInviteMessage( loginUser, channelUsers );
+          inviteMsg = UTIL.getInviteMessage( channelUsers );
         }
         
         initChat( inviteMsg );
@@ -393,13 +393,13 @@ angular.module('starter.controllers', [])
           var current = $state.current;
           $state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
         } else {
-          channelName = $scope.channelName + ","+Friends.getNames( joinUsers );
+          channelName = $scope.channelName + ","+UTIL.getNames( joinUsers );
           $scope.channelName = channelName;
 
           var joinObject = { 'U' : joinUsers, 'DT' : { 'NM' : channelName,'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length } };
           Chat.join( joinObject, function(data){
             if( data.status == 'ok' ){
-              var iMsg = UTIL.getInviteMessage( loginUser, joinUsers );
+              var iMsg = UTIL.getInviteMessage( joinUsers );
 
               Chat.send( iMsg, 'I' );
               Channels.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );

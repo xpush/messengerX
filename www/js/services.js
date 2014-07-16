@@ -145,42 +145,6 @@ angular.module('starter.services', [])
           }
         });
       });
-    },
-    getNames : function( userIds ){
-      var loginUserId = Sign.getUser().userId;
-      var loginUserName = Sign.getUser().userName;
-      var result;      
-      var userNames = [];
-
-      var userArray = angular.copy( userIds );
-
-      var friends = Cache.all();
-
-      // Room with 2 people
-      if( userArray.length == 2 && userArray.indexOf( loginUserId ) > -1 ){
-        userArray.splice( userArray.indexOf( loginUserId ), 1 );
-
-        var name = userArray[0];
-        if( friends[ userArray[0] ] != undefined ){
-          name = friends[ userArray[0] ].NM;
-        }
-
-        userNames.push( name );
-      } else {
-
-        for( var inx = 0 ; inx < userArray.length ; inx++ ){
-          var name = userArray[inx];
-          if( userArray[inx] == loginUserId ){
-            name = loginUserName;
-          }else if( friends[ userArray[inx] ] != undefined ){
-            name = friends[ userArray[inx] ].NM;
-          }
-
-          userNames.push( name );
-        }
-      }
-
-      return userNames.join(",");
     }
   }
 })
@@ -541,31 +505,34 @@ angular.module('starter.services', [])
     unreadMessage : function(channels, callback){
       var loginUser = Sign.getUser();
       sessionSocket.emit( "message-unread", function(resultObject) {
-          var messageArray = resultObject.result;
+        var messageArray = resultObject.result;
 
-          for( var inx = 0 ; inx < messageArray.length ; inx++ ){
-            try {
-            var data = messageArray[inx].MG.DT;
-            data = JSON.parse(data);
+        for( var inx = 0 ; inx < messageArray.length ; inx++ ){
+          var data = messageArray[inx].MG.DT;
+          data = JSON.parse(data);
 
-            data.MG = decodeURIComponent( data.MG );          
+          data.MG = decodeURIComponent( data.MG );
+          if( data.T != undefined ){
+            data.type = data.T;
+          } else {
             data.type = data.UO.U == loginUser.userId ? 'S':'R';
+          }            
 
-            var channel = channels[data.C];
-            channel.message = data.MG;
+          var channel = channels[data.C];
+          channel.message = data.MG;
 
-            if( channel.users.length > 2 ){
-              channel.name = channel.name;
-            } else {
-              channel.name = data.UO.NM;
-              channel.image = data.UO.I;
-            }
-            Channels.add( channel );
-            Messages.add( data );
-            } catch(e){
-              console.log( e );
-            }
+          if( channel.users.length > 2 ){
+            channel.name = channel.name;
+          } else {
+            channel.name = data.UO.NM;
+            channel.image = data.UO.I;
           }
+
+          if( data.type != 'I' ){
+            Channels.add( channel );
+          }
+          Messages.add( data );
+        }
 
         callback({'status':'ok'});
       });
@@ -573,23 +540,19 @@ angular.module('starter.services', [])
     channelList : function(callback){
       var loginUser = Sign.getUser();      
       sessionSocket.emit( "channel-list", function(resultObject) {    
-        try { 
-          var channelArray = resultObject.result;
+        var channelArray = resultObject.result;
 
-          var channels = {};
-          for( var inx = 0 ; inx < channelArray.length ; inx++ ){
-            var data = channelArray[inx];
-            var channel = {'channel': data.C, 'users' : data.DT.US };
-            if( data.DT.UC > 2 ){
-              channel.name = data.DT.NM;
-            } else {
-              channel.name = data.DT.F;
-            }
-
-            channels[ data.C ] =  channel;
+        var channels = {};
+        for( var inx = 0 ; inx < channelArray.length ; inx++ ){
+          var data = channelArray[inx];
+          var channel = {'channel': data.C, 'users' : data.DT.US };
+          if( data.DT.UC > 2 ){
+            channel.name = data.DT.NM;
+          } else {
+            channel.name = data.DT.F;
           }
-        } catch(e){
-          console.log( e );
+
+          channels[ data.C ] =  channel;
         }
 
         callback(channels);
@@ -718,13 +681,13 @@ angular.module('starter.services', [])
 
                   var content;
                   if( inx > 0 ){
-                    latestDate =  UTIL.timeToString( messageArray[inx-1].time )[1];
+                    latestDate =  UTIL.timeToString( messageArray[inx-1].time )[3];
                   }
 
-                  if( latestDate != dateStrs[1] ){
-                    content = '<span class="date">'+dateStrs[1]+'</span>';
+                  if( latestDate != dateStrs[3] ){
+                    content = '<span class="date">'+dateStrs[1]+" "+dateStrs[2]+'</span>';
                     messages.push( { content : content, from : 'T', date : dateStrs[1] } );
-                    latestDate = dateStrs[1];
+                    latestDate = dateStrs[3];
                   }
 
                   if(data.type == 'R'){                
@@ -732,7 +695,7 @@ angular.module('starter.services', [])
                     content += '<div class="from">'
                     content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
                     content += '<span class="from">'+data.message+'</span>';
-                    content += '<span class="time">'+ dateStrs[2]+'</span>';
+                    //content += '<span class="time">'+ dateStrs[2]+'</span>';
                     content += '</div>';
                   } else if( data.type =='I' ) {
                     content = '<span class="date">'+data.message+'</span>';
@@ -756,9 +719,6 @@ angular.module('starter.services', [])
         });         
 
         channelSocket.on('MG', function (data) {
-          console.log( data );
-
-          try {
 
           data.MG = decodeURIComponent(data.MG);
 
@@ -772,19 +732,11 @@ angular.module('starter.services', [])
           var content;
           var dateStrs = UTIL.timeToString( data.TS );
 
-          if( latestDate != dateStrs[1] ){
-            content = '<span class="date">'+dateStrs[1]+'</span>';
+          if( latestDate != dateStrs[3] ){
+            content = '<span class="date">'+dateStrs[1]+" "+dateStrs[2]+'</span>';
             $scope.add( { content : content, from : 'T', date : dateStrs[1] } );
-            latestDate = dateStrs[1];
+            latestDate = dateStrs[3];
           }
-
-          /**
-          if( inviteMessage != '' ){
-            content = '<span class="date">'+inviteMessage+'</span>';
-            $scope.add( { content : content, from : 'T', date : dateStrs[1] } );
-            inviteMessage = '';
-          }
-          */
 
           if(data.type == 'R'){
 
@@ -792,7 +744,7 @@ angular.module('starter.services', [])
             content += '<div class="from">';
             content += '<img src="'+ data.UO.I+'" class="profile"/>';
             content += '<span >'+decodeURIComponent( data.MG )+'</span>';
-            content += '<span class="time">'+dateStrs[2]+'</span>';
+            //content += '<span class="time">'+dateStrs[2]+'</span>';
             content += '</div>'
             
           } else if( data.type == 'I' ) {
@@ -819,10 +771,6 @@ angular.module('starter.services', [])
           }
 
           $scope.add( nextMessage );
-
-          } catch ( e ){
-            console.log( e );
-          } 
         });
       })
       .error(function(data, status, headers, config) {
@@ -866,8 +814,6 @@ angular.module('starter.services', [])
   var changeDBFlag = false;
 
   self.init = function() {
-    // Use self.db = window.sqlitePlugin.openDatabase({name: DB_CONFIG.name}); in production
-
 
     try {
       if (!window.openDatabase) {
@@ -961,7 +907,7 @@ angular.module('starter.services', [])
 
   return self;
 })
-.factory('UTIL', function(Cache){
+.factory('UTIL', function(Cache, Sign){
   var cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
   return {          
     getUniqueKey : function () {
@@ -989,7 +935,7 @@ angular.module('starter.services', [])
       hour = hour >= 10 ? hour : "0"+hour;
 
       var minute = date.getMinutes();
-      minute = minute >= 10 ? minute : "0"+minute;
+      minute = minute >= 10 ? ""+minute : "0"+minute;
 
       var yyyymmdd = yyyy + "" + mm + ""+ dd;
 
@@ -1002,6 +948,7 @@ angular.module('starter.services', [])
 
       result.push( yyyy + "." + mm + "."+ dd );
       result.push( hour + ":" + minute );
+      result.push( yyyy+mm+dd+hour+minute.charAt(0) );
 
       return result;
     },
@@ -1055,7 +1002,8 @@ angular.module('starter.services', [])
 
       return result;
     },
-    getInviteMessage: function(loginUser, userArray){
+    getInviteMessage: function(userArray){
+      var loginUser = Sign.getUser();
       var result = '';
 
       var users = angular.copy( userArray );
@@ -1074,6 +1022,42 @@ angular.module('starter.services', [])
       }
 
       return result;
-    }      
+    },
+    getNames : function( userIds ){
+      var loginUserId = Sign.getUser().userId;
+      var loginUserName = Sign.getUser().userName;
+      var result;      
+      var userNames = [];
+
+      var userArray = angular.copy( userIds );
+
+      var friends = Cache.all();
+
+      // Room with 2 people
+      if( userArray.length == 2 && userArray.indexOf( loginUserId ) > -1 ){
+        userArray.splice( userArray.indexOf( loginUserId ), 1 );
+
+        var name = userArray[0];
+        if( friends[ userArray[0] ] != undefined ){
+          name = friends[ userArray[0] ].NM;
+        }
+
+        userNames.push( name );
+      } else {
+
+        for( var inx = 0 ; inx < userArray.length ; inx++ ){
+          var name = userArray[inx];
+          if( userArray[inx] == loginUserId ){
+            name = loginUserName;
+          }else if( friends[ userArray[inx] ] != undefined ){
+            name = friends[ userArray[inx] ].NM;
+          }
+
+          userNames.push( name );
+        }
+      }
+
+      return userNames.join(",");
+    }       
   }
 });
