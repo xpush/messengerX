@@ -56,6 +56,28 @@ angular.module('starter.directives', [])
     template: '<img ng-src="{{image}}" />'
   };
 })
+.directive('channelUsers', function(UTIL) {
+  return {
+    restrict: 'A',
+    scope: {
+       users: '=users',
+       count: '&',
+       className : '&'
+    },    
+    replace: true,
+    transclude: false,
+    controller: function($scope) {
+
+      $scope.count = $scope.users.split( "," ).length;
+      if( $scope.count > 2 ){
+        $scope.className = "users";
+      } else {
+        $scope.className = "hidden";
+      }
+    },
+    template: '<span class="{{className}}"><img src="../img/user-icon.png"></img>&nbsp;{{count}}</span>'
+  };
+})
 .directive('updatedTime', function(UTIL) {
   return {
     restrict: 'A',

@@ -208,6 +208,37 @@ paper-input {
 	min-height: 70px;
 }
 
+.item-channel h2{
+	float: left;
+}
+
+.clear {
+	clear: both;
+}
+
+.item-channel .users {
+	display: inline;
+	position: absolute;
+	margin-left: 10px;
+	font-size: 13px;
+}
+
+.item-channel .users {
+	display: inline;
+	position: absolute;
+	margin-left: 10px;
+	font-size: 13px;
+}
+
+.item-channel .users img{
+	width:16px;
+	height:16px;
+}
+
+.item-channel .hidden {
+	display: none;
+}
+
 .item-channel > img:first-child, .item-channel .item-image, .item-channel .item-content > img:first-child, .item-channel .item-content .item-image, .item-channel-left > img:first-child, .item-channel-left .item-image, .item-channel-left .item-content > img:first-child, .item-channel-left .item-content .item-image {
  	position: absolute;
 	top: 15px;

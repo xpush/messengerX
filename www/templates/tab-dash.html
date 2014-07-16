@@ -8,8 +8,12 @@
     <ion-list>
       <ion-item ng-repeat="channel in channelArray" ng-click="goChat('{{channel.channel_id}}')" class="item item-channel">
         <img channel-image users="channel.channel_users" channel-name="channel.channel_name" image="channel.channel_image" ></img>
-        <h2>{{channel.channel_name}}</h2>
-        <p>{{channel.latest_message}}&nbsp;</p>
+        <div>
+          <h2 class="name">{{channel.channel_name}}</h2>
+          <span channel-users users="channel.channel_users">
+          </span>
+        </div>
+        <p class="clear">{{channel.latest_message}}&nbsp;</p>
         <span ng-if="channel.unread_count > 0" class="channel-message-unread">{{channel.unread_count}}</span>
         <span updated-time timestamp="channel.channel_updated"></span>
       </ion-item>
