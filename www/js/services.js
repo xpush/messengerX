@@ -161,7 +161,7 @@ angular.module('starter.services', [])
           console.log( 'user-list' );
           if( data.status == 'ok' ){
             var userArray = data.result;
-            for( var inx = 0 ; inx < userArray.length ; inx++ ){             
+            for( var inx = 0 ; inx < userArray.length ; inx++ ){
               var cUserId = userArray[inx].U;
 
               if( cUserId != loginUserId ){
