@@ -67,7 +67,6 @@ angular.module('starter.directives', [])
     replace: true,
     transclude: false,
     controller: function($scope) {
-
       $scope.count = $scope.users.split( "," ).length;
       if( $scope.count > 2 ){
         $scope.className = "users";

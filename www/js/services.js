@@ -357,7 +357,8 @@ angular.module('starter.services', [])
           scope.channelArray.splice(searchIndex, 1);
         }
         
-        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message, 'channel_image':jsonObj.image, 'channel_updated': currentTimestamp};
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message, 'channel_users':jsonObj.users.join(','), 'channel_image':jsonObj.image, 'channel_updated': currentTimestamp};
+        
         scope.channelArray.unshift( channel );
         scope.$apply();     
       }
@@ -523,6 +524,7 @@ angular.module('starter.services', [])
 
           if( channel.users.length > 2 ){
             channel.name = channel.name;
+            channel.image = '';
           } else {
             channel.name = data.UO.NM;
             channel.image = data.UO.I;
