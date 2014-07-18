@@ -25,7 +25,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, SocketManager, UTIL, Manager) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, UTIL, Manager) {
 
   $scope.listFriend = function(){
     Friends.list(function(friends){
@@ -40,8 +40,6 @@ angular.module('starter.controllers', [])
   $scope.syncFriends = function(){
     Friends.refresh( function(result){
       $scope.listFriend();
-
-      Manager.init();
     });
   };
 
@@ -53,6 +51,7 @@ angular.module('starter.controllers', [])
   // Init Socket
   if( $rootScope.firstFlag ){
     $scope.syncFriends();
+    Manager.init();
     $rootScope.firstFlag = false;
   } else {
     $scope.listFriend();
@@ -157,17 +156,15 @@ angular.module('starter.controllers', [])
         }
 
         Friends.add( addUsers, function( data ){
-          if( data.status == 'ok' ){
-            Friends.list(function(friends){
-              if( friends != undefined ){
-                $scope.friends = [];
-                $scope.friends = friends;
-                $scope.friendCount = friends.length;
-                //var current = $state.current;
-                //$state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
-              }
-            });
-          }
+          Friends.list(function(friends){
+            if( friends != undefined ){
+              $scope.friends = [];
+              $scope.friends = friends;
+              $scope.friendCount = friends.length;
+              //var current = $state.current;
+              //$state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
+            }
+          });
         });
       }
     });
@@ -187,9 +184,7 @@ angular.module('starter.controllers', [])
     var params = { 'A' : 'messengerx', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : 'ionic',
                DT : { 'NM' : $scope.loginUser.userName, 'I': $scope.loginUser.image, 'MG' : $scope.loginUser.message } };
 
-    console.log( params );
     Sign.update( params, function(data){
-      console.log( data );
       if( data.status == 'ok' ){
         Sign.setUser( $scope.loginUser );
       }
@@ -197,7 +192,6 @@ angular.module('starter.controllers', [])
   };
 
   $scope.syncFriends = function(){
-    console.log( "syncFriends" );
     Friends.refresh( function(result){
       console.log( result );
     });
@@ -206,14 +200,11 @@ angular.module('starter.controllers', [])
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, Sign, Cache) {
   $scope.signIn = function(user) {
 		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : 'ionic' };
-
     $rootScope.xpush.login( user.userId, user.password, 'ionic', function(message, result){
 
       var loginUser = {};
       loginUser.app = params.A;
       loginUser.userId = user.userId;
-      loginUser.userToken = result.token;
-      loginUser.sessionServer = result.serverUrl;
       loginUser.password = params.PW;
       loginUser.deviceId = 'ionic';
 
@@ -239,10 +230,9 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager, Channels, UTIL) {
+.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, Channels, UTIL) {
   $rootScope.currentScope = $scope;
 
-  console.log( 'AAAAAA : ' + '1111111111111111' );  
   var loginUser = Sign.getUser();
 
   initChat = function( inviteMsg ){
@@ -297,7 +287,7 @@ angular.module('starter.controllers', [])
     var channelId = Channels.generateId(createObject);
     createObject.C = channelId;
 
-    $rootScope.xpush.createChannel(channelUsers, channelId, function(data){
+    $rootScope.xpush.createChannel(channelUsers, channelId, createObject.DT, function(data){
       createObject.unreadCount = 0;
       Channels.insert( createObject );
 

@@ -100,7 +100,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Friends', function($rootScope,SocketManager, Sign, UTIL, UserDao, Cache) {
+.factory('Friends', function($rootScope, Sign, UTIL, UserDao, Cache) {
   // Might use a resource here that returns a JSON array
   var loginUserId;
   var scope;
@@ -108,14 +108,12 @@ angular.module('starter.services', [])
   return {
     add: function(userIds, callback) {
       loginUserId = Sign.getUser().userId;
-      SocketManager.get( function( socket ){
-        socket.emit( 'group-add', {'U':userIds, 'GR' : loginUserId}, function( data ){
-          
-          // Multi Add Friend
-          UserDao.addFriend( userIds );
-          callback( data );
-        });
-      });      
+      $rootScope.xpush.addUserToGroup( loginUserId, userIds, function( err, data ){
+        console.log( data );
+        // Multi Add Friend
+        UserDao.addFriend( userIds );
+        callback( data );
+      }); 
     },
     list : function(callback){
       UserDao.list( { 'friendFlag' : 'Y'} ).then( function ( result ){
@@ -143,34 +141,30 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Users', function(SocketManager, Sign, UserDao, UTIL, Cache) {
+.factory('Users', function($rootScope, Sign, UserDao, UTIL, Cache) {
   var loginUserId;
 
   return {
     refresh : function(callback){
 
       loginUserId = Sign.getUser().userId;
+     
+      $rootScope.xpush.getUserList({}, function( err, userArray ){
+        console.log( 'user-list' );
 
-      SocketManager.get( function( socket ){        
-        socket.emit( 'user-list', {}, function( data ){
-          console.log( 'user-list' );
-          if( data.status == 'ok' ){
-            var userArray = data.result;
-            for( var inx = 0 ; inx < userArray.length ; inx++ ){
-              var cUserId = userArray[inx].U;
+        for( var inx = 0 ; inx < userArray.length ; inx++ ){
+          var cUserId = userArray[inx].U;
 
-              if( cUserId != loginUserId ){
-                var user = { 'userId' : userArray[inx].U, 'userName': userArray[inx].DT.NM, 'image': userArray[inx].DT.I,
-                  'message' : userArray[inx].DT.MG, 'chosung' : UTIL.getChosung( userArray[inx].DT.NM ) };
-                UserDao.add( user );
-                Cache.add( userArray[inx].U, { 'NM' : userArray[inx].DT.NM, 'I': userArray[inx].DT.I } );
-              }
-            }
+          if( cUserId != loginUserId ){
+            var user = { 'userId' : userArray[inx].U, 'userName': userArray[inx].DT.NM, 'image': userArray[inx].DT.I,
+              'message' : userArray[inx].DT.MG, 'chosung' : UTIL.getChosung( userArray[inx].DT.NM ) };
+            UserDao.add( user );
+            Cache.add( userArray[inx].U, { 'NM' : userArray[inx].DT.NM, 'I': userArray[inx].DT.I } );
           }
+        }
 
-          UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
-            callback( result );
-          });
+        UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
+          callback( result );
         });
       });
     },
@@ -419,19 +413,16 @@ angular.module('starter.services', [])
     init : function(callback){
       self = this;
       var loginUser = Sign.getUser();
-      console.log( 'Manager initFlag ' + initFlag );
       if( !initFlag ){
-        console.log( 'Manager Init ');
         self.channelList(function( channels ){
           self.unreadMessage( channels, function(result){
 
-            Channels.getAllCount().then( function ( result ){              
+            Channels.getAllCount().then( function ( result ){
+
               $rootScope.totalUnreadCount = result.total_count;
 
               $rootScope.xpush.on('message', function (ch,name,data) {
                 data.MG = decodeURIComponent(data.MG);
-                console.log( ch );
-                console.log( data );
 
                 if( ch == $rootScope.currentChannel ){
                   var latestDate = $rootScope.currentChannelLatestDate;
@@ -487,32 +478,28 @@ angular.module('starter.services', [])
                   $rootScope.currentScope.add( nextMessage );
 
                 } else {
-                  var data = messageObject.DT;
-
-                  $rootScope.xpush.getChannel( data.C, function( channel ){
-                    console.log( channel );
-                  });
                   
-                  /**
-                  socket.emit( 'channel-get', { 'C' : data.C }, function( channelJson ){
-                    var channel = {'channel': data.C, 'users' : channelJson.result.DT.US};
+                  $rootScope.xpush.getChannelData( data.C, function( err, channelJson ){
+                    var channel = {'channel': data.C, 'users' : channelJson.DT.US};
                     channel.message = decodeURIComponent( data.MG );
 
-                    if( channelJson.result.DT.UC > 2 ){
-                      channel.name = channelJson.result.DT.NM;
+                    if( channelJson.DT.UC > 2 ){
+                      channel.name = channelJson.DT.NM;
                       channel.image = '';
                     } else {
                       channel.name = data.UO.NM;
                       channel.image = data.UO.I;
                     }
 
+                    // Add to DB
+                    Messages.add( data );
+
                     $rootScope.totalUnreadCount++;
 
                     if( data.T != 'I' ){
                       Channels.add( channel );
                     }         
-                  });
-                  */            
+                  });         
                 }
               });
 
@@ -577,131 +564,6 @@ angular.module('starter.services', [])
         callback({'status':'ok'});
       });
     }
-  }
-})
-.factory('SocketManager', function($http, $rootScope, Sign, Channels, Messages, UTIL ) {
-  var sessionSocket;
-  var initFlag = false;
-  var self;
-  return {
-    get : function(callback){
-      if( !initFlag ){
-        this.init( function( socket ) {
-          sessionSocket = socket;
-          callback( sessionSocket );
-        });
-      } else {
-        callback( sessionSocket );
-      }
-    },
-    init : function(callback){
-      self = this;
-
-      var loginUser = Sign.getUser();
-
-      var socketOptions ={
-        transports: ['websocket'],
-        'force new connection': true
-      };      
-
-      var query =
-        'A='+loginUser.app+'&'+
-        'U='+encodeURIComponent(loginUser.userId)+'&'+
-        'D='+loginUser.deviceId+'&'+
-        'TK='+loginUser.userToken;
-      // Session Socket
-      var socket = io.connect(loginUser.sessionServer+'/session?'+query, socketOptions);
-
-      socket.on('connect', function() {
-        console.log( 'session socket connect');
-        initFlag = true;
-        sessionSocket = socket;
-
-        // Sync Channel && Read Message
-        self.channelList(function( channels ){
-          self.unreadMessage( channels, function(result){
-            socket.emit("message-received");
-
-            Channels.getAllCount().then( function ( result ){
-              $rootScope.totalUnreadCount = result.total_count;
-              callback( socket );
-            });
-          });
-        });
-      });
-
-      socket.on('_event', function (messageObject) {
-        if( messageObject.event == 'NOTIFICATION' ){
-
-
-        }
-      });
-
-      socket.on('disconnect', function (data) {
-        console.info('session socket disconnect');
-      });
-    },
-    close : function(){
-      initFlag = false;
-      sessionSocket.disconnect();
-    },
-    unreadMessage : function(channels, callback){
-      var loginUser = Sign.getUser();
-      sessionSocket.emit( "message-unread", function(resultObject) {
-        var messageArray = resultObject.result;
-
-        for( var inx = 0 ; inx < messageArray.length ; inx++ ){
-          var data = messageArray[inx].MG.DT;
-          data = JSON.parse(data);
-
-          data.MG = decodeURIComponent( data.MG );
-          if( data.T != undefined ){
-            data.type = data.T;
-          } else {
-            data.type = data.UO.U == loginUser.userId ? 'S':'R';
-          }            
-
-          var channel = channels[data.C];
-          channel.message = data.MG;
-
-          if( channel.users.length > 2 ){
-            channel.name = channel.name;
-            channel.image = '';
-          } else {
-            channel.name = data.UO.NM;
-            channel.image = data.UO.I;
-          }
-
-          if( data.type != 'I' ){
-            Channels.add( channel );
-          }
-          Messages.add( data );
-        }
-
-        callback({'status':'ok'});
-      });
-    },
-    channelList : function(callback){
-      var loginUser = Sign.getUser();      
-      sessionSocket.emit( "channel-list", function(resultObject) {    
-        var channelArray = resultObject.result;
-
-        var channels = {};
-        for( var inx = 0 ; inx < channelArray.length ; inx++ ){
-          var data = channelArray[inx];
-          var channel = {'channel': data.C, 'users' : data.DT.US };
-          if( data.DT.UC > 2 ){
-            channel.name = data.DT.NM;
-          } else {
-            channel.name = data.DT.F;
-          }
-
-          channels[ data.C ] =  channel;
-        }
-
-        callback(channels);
-      });
-    }   
   }
 })
 .factory('Sign', function($http, $state, $rootScope, BASE_URL) {
@@ -769,8 +631,6 @@ angular.module('starter.services', [])
       CONF._channel = params.channel;
       CONF._user = { U : loginUser.userId, NM : loginUser.userName, I : loginUser.image };
 
-      console.log( 'init : ' +  inviteMessage );
-
       $rootScope.currentChannel = params.channel;
 
       if( inviteMessage == '' ){
@@ -787,7 +647,6 @@ angular.module('starter.services', [])
         */
         var messages = [];
         Messages.list( params.channel ).then(function(messageArray) {
-          console.log( messageArray );
 
           for( var inx = 0 ; inx < messageArray.length ; inx++ ){
             var data = messageArray[inx];
@@ -905,7 +764,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( changeDBFlag ){
+      if( !changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }
