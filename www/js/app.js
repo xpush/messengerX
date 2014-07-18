@@ -21,6 +21,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
     DB.init();
 
+    var HOST = "http://stalk-front-s01.cloudapp.net:8000";
+    var APPID = 'messengerx';
+
+    $rootScope.xpush = new XPush(HOST, APPID);
+
     // tootScope function
     $rootScope.logout = function(){
       $rootScope.totalUnreadCount = 0;

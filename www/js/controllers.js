@@ -1,7 +1,7 @@
 angular.module('starter.controllers', [])
 
 .controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels, Friends, Sign ) {
-
+  
   var loginUserId = Sign.getUser().userId;
 
   Channels.getAllCount().then( function ( result ){
@@ -25,7 +25,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, SocketManager, UTIL) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, SocketManager, UTIL, Manager) {
 
   $scope.listFriend = function(){
     Friends.list(function(friends){
@@ -40,6 +40,8 @@ angular.module('starter.controllers', [])
   $scope.syncFriends = function(){
     Friends.refresh( function(result){
       $scope.listFriend();
+
+      Manager.init();
     });
   };
 
@@ -205,19 +207,19 @@ angular.module('starter.controllers', [])
   $scope.signIn = function(user) {
 		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : 'ionic' };
 
-    Sign.login( params, function(data){
+    $rootScope.xpush.login( user.userId, user.password, 'ionic', function(message, result){
 
       var loginUser = {};
       loginUser.app = params.A;
       loginUser.userId = user.userId;
-      loginUser.userToken = data.result.token;
-      loginUser.sessionServer = data.result.serverUrl;
+      loginUser.userToken = result.token;
+      loginUser.sessionServer = result.serverUrl;
       loginUser.password = params.PW;
       loginUser.deviceId = 'ionic';
 
-      loginUser.image = data.result.user.DT.I;
-      loginUser.userName = data.result.user.DT.NM;
-      loginUser.message = data.result.user.DT.MG;
+      loginUser.image = result.user.DT.I;
+      loginUser.userName = result.user.DT.NM;
+      loginUser.message = result.user.DT.MG;
 
       $rootScope.loginUser = loginUser;
       Sign.setUser( loginUser );
@@ -238,8 +240,13 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, SocketManager, Channels, UTIL) {
+  $rootScope.currentScope = $scope;
+
+  console.log( 'AAAAAA : ' + '1111111111111111' );  
+  var loginUser = Sign.getUser();
 
   initChat = function( inviteMsg ){
+
     var param = {};
     param.app = loginUser.app;
     param.channel = channelId;
@@ -253,9 +260,8 @@ angular.module('starter.controllers', [])
         $ionicScrollDelegate.scrollBottom(true);
       }
     });
-  };  
+  };
 
-  var loginUser = Sign.getUser();
   $scope.messages = [];
 
   var stateParams = $rootScope.$stateParams;
@@ -279,7 +285,7 @@ angular.module('starter.controllers', [])
 
     if( channelUsers.indexOf( loginUser.userId ) < 0 ){
       channelUsers.push( loginUser.userId );
-    }    
+    }
 
     channelName = UTIL.getNames( channelUsers );
 
@@ -291,20 +297,16 @@ angular.module('starter.controllers', [])
     var channelId = Channels.generateId(createObject);
     createObject.C = channelId;
 
-    SocketManager.get( function(socket){
-      socket.emit("channel-create", createObject, function(data){
-        console.log( "channel-create success" );
+    $rootScope.xpush.createChannel(channelUsers, channelId, function(data){
+      createObject.unreadCount = 0;
+      Channels.insert( createObject );
 
-        createObject.unreadCount = 0;
-        Channels.insert( createObject );
+      var inviteMsg = "";    
+      if( channelUsers.length > 2 ){
+        inviteMsg = UTIL.getInviteMessage( channelUsers );
+      }
 
-        var inviteMsg = "";
-        if( channelUsers.length > 2 ){
-          inviteMsg = UTIL.getInviteMessage( channelUsers );
-        }
-        
-        initChat( inviteMsg );
-      });
+      initChat( inviteMsg );
     });
   }
 
@@ -418,7 +420,7 @@ angular.module('starter.controllers', [])
       if(!confirm("Are you sure you want to leave this page?")) {
         event.preventDefault();
       } else {
-        Chat.exit();
+        $rootScope.currentChannel = '';
       }
     }
   });

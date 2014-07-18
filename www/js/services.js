@@ -100,7 +100,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Friends', function(SocketManager, Sign, UTIL, UserDao, Cache) {
+.factory('Friends', function($rootScope,SocketManager, Sign, UTIL, UserDao, Cache) {
   // Might use a resource here that returns a JSON array
   var loginUserId;
   var scope;
@@ -128,22 +128,17 @@ angular.module('starter.services', [])
       });
     },
     refresh : function(callback){
-      var loginUserId = Sign.getUser().userId;    
-      SocketManager.get( function( socket ){        
-        socket.emit( 'group-list', {'GR':loginUserId}, function( data ){
-          if( data.status == 'ok' ){
-            var users = data.result;
+      var loginUserId = Sign.getUser().userId;
 
-            for( var inx = 0 ; inx < users.length ; inx++ ){              
-              if( users[inx].userId != loginUserId ){
-                var user = { 'userId' : users[inx].U, 'userName': users[inx].DT.NM, 
-                  'message' : users[inx].DT.MG, 'image': users[inx].DT.I, 'chosung' : UTIL.getChosung( users[inx].DT.NM ), 'friendFlag' : 'Y' };
-                UserDao.add( user, true );
-              }
-            }
-            callback( {'status':'ok'} );
+      $rootScope.xpush.getGroupUsers( loginUserId, function( err, users ){
+        for( var inx = 0 ; inx < users.length ; inx++ ){              
+          if( users[inx].userId != loginUserId ){
+            var user = { 'userId' : users[inx].U, 'userName': users[inx].DT.NM, 
+              'message' : users[inx].DT.MG, 'image': users[inx].DT.I, 'chosung' : UTIL.getChosung( users[inx].DT.NM ), 'friendFlag' : 'Y' };
+            UserDao.add( user, true );
           }
-        });
+        }
+        callback( {'status':'ok'} );
       });
     }
   }
@@ -418,6 +413,172 @@ angular.module('starter.services', [])
     }
   }
 })
+.factory('Manager', function($http, $rootScope, Sign, Channels, Messages, UTIL ) {
+  var initFlag = false;
+  return {
+    init : function(callback){
+      self = this;
+      var loginUser = Sign.getUser();
+      console.log( 'Manager initFlag ' + initFlag );
+      if( !initFlag ){
+        console.log( 'Manager Init ');
+        self.channelList(function( channels ){
+          self.unreadMessage( channels, function(result){
+
+            Channels.getAllCount().then( function ( result ){              
+              $rootScope.totalUnreadCount = result.total_count;
+
+              $rootScope.xpush.on('message', function (ch,name,data) {
+                data.MG = decodeURIComponent(data.MG);
+                console.log( ch );
+                console.log( data );
+
+                if( ch == $rootScope.currentChannel ){
+                  var latestDate = $rootScope.currentChannelLatestDate;
+                  if( data.T != undefined && data.T == 'I' ){
+                    data.type ='I';
+                    inviteMessage = data.MG;
+                  } else {
+                    data.type = data.UO.U == loginUser.userId ? 'S':'R' ;
+                  }
+
+                  var content;
+                  var dateStrs = UTIL.timeToString( data.TS );
+
+                  if( latestDate != dateStrs[3] ){
+                    content = '<span class="date">'+dateStrs[1]+" "+dateStrs[2]+'</span>';
+                    $rootScope.currentScope.add( { content : content, from : 'T', date : dateStrs[1] } );
+                    latestDate = dateStrs[3];
+                    $rootScope.currentChannelLatestDate = latestDate;
+                  }
+
+                  if(data.type == 'R'){
+
+                    content = '<div class="small">'+ data.UO.NM+'</div>' ;
+                    content += '<div class="from">';
+                    content += '<img src="'+ data.UO.I+'" class="profile"/>';
+                    content += '<span >'+decodeURIComponent( data.MG )+'</span>';
+                    //content += '<span class="time">'+dateStrs[2]+'</span>';
+                    content += '</div>'
+                    
+                  } else if( data.type == 'I' ) {
+                    content = '<span class="date">'+inviteMessage+'</span>'; 
+                  } else {
+                    content = '<span>'+data.MG+'</span>';
+                  }
+
+                  var nextMessage = { content : content, from : data.type, date : dateStrs[1] };
+
+                  // Add to DB
+                  Messages.add( data );
+
+                  // 2 people Channel
+
+                  var param = { 'channel':data.C, 'reset' : true, 'message':data.MG };
+
+                  if( data.type == 'R' && data.C.indexOf( "$" ) > -1 ){
+                    param.image = data.UO.I;
+                  }
+
+                  if( data.type != 'I' ){
+                    Channels.update( param );
+                  }
+
+                  $rootScope.currentScope.add( nextMessage );
+
+                } else {
+                  var data = messageObject.DT;
+
+                  $rootScope.xpush.getChannel( data.C, function( channel ){
+                    console.log( channel );
+                  });
+                  
+                  /**
+                  socket.emit( 'channel-get', { 'C' : data.C }, function( channelJson ){
+                    var channel = {'channel': data.C, 'users' : channelJson.result.DT.US};
+                    channel.message = decodeURIComponent( data.MG );
+
+                    if( channelJson.result.DT.UC > 2 ){
+                      channel.name = channelJson.result.DT.NM;
+                      channel.image = '';
+                    } else {
+                      channel.name = data.UO.NM;
+                      channel.image = data.UO.I;
+                    }
+
+                    $rootScope.totalUnreadCount++;
+
+                    if( data.T != 'I' ){
+                      Channels.add( channel );
+                    }         
+                  });
+                  */            
+                }
+              });
+
+              initFlag = true;                       
+            });
+          });
+        });
+      }
+    },
+    channelList : function(callback){
+      $rootScope.xpush.getChannels( function(err, channelArray){        
+        var channels = {};
+        for( var inx = 0 ; inx < channelArray.length ; inx++ ){
+          var data = channelArray[inx];
+          var channel = {'channel': data.channel, 'users' : data.DT.US };
+          if( data.DT.UC > 2 ){
+            channel.name = data.DT.NM;
+          } else {
+            channel.name = data.DT.F;
+          }
+
+          channels[ data.channel ] =  channel;
+        }
+
+        callback(channels);    
+      });
+    },
+    unreadMessage : function(channels, callback){
+      var loginUser = Sign.getUser();
+
+      $rootScope.xpush.getUnreadMessage( function(err, messageArray) {
+
+        for( var inx = 0 ; inx < messageArray.length ; inx++ ){
+          var data = messageArray[inx].MG.DT;
+          data = JSON.parse(data);
+
+          data.MG = decodeURIComponent( data.MG );
+          if( data.T != undefined ){
+            data.type = data.T;
+          } else {
+            data.type = data.UO.U == loginUser.userId ? 'S':'R';
+          }            
+
+          var channel = channels[data.C];
+          channel.message = data.MG;
+
+          if( channel.users.length > 2 ){
+            channel.name = channel.name;
+            channel.image = '';
+          } else {
+            channel.name = data.UO.NM;
+            channel.image = data.UO.I;
+          }
+
+          if( data.type != 'I' ){
+            Channels.add( channel );
+          }
+          Messages.add( data );
+        }
+
+        $rootScope.xpush.isExistUnread = false;
+        callback({'status':'ok'});
+      });
+    }
+  }
+})
 .factory('SocketManager', function($http, $rootScope, Sign, Channels, Messages, UTIL ) {
   var sessionSocket;
   var initFlag = false;
@@ -472,26 +633,7 @@ angular.module('starter.services', [])
       socket.on('_event', function (messageObject) {
         if( messageObject.event == 'NOTIFICATION' ){
 
-          var data = messageObject.DT;
 
-          socket.emit( 'channel-get', { 'C' : data.C }, function( channelJson ){
-            var channel = {'channel': data.C, 'users' : channelJson.result.DT.US};
-            channel.message = decodeURIComponent( data.MG );
-
-            if( channelJson.result.DT.UC > 2 ){
-              channel.name = channelJson.result.DT.NM;
-              channel.image = '';
-            } else {
-              channel.name = data.UO.NM;
-              channel.image = data.UO.I;
-            }
-
-            $rootScope.totalUnreadCount++;
-
-            if( data.T != 'I' ){
-              Channels.add( channel );
-            }         
-          });
         }
       });
 
@@ -618,168 +760,73 @@ angular.module('starter.services', [])
   var self;
 
   return {
-    init : function( params, loginUser, inviteMessage, $scope, callback ){
+   init : function( params, loginUser, inviteMessage, $scope, callback ){
       self = this;
 
-      $http.get("http://"+BASE_URL+":8000/node/"+ encodeURIComponent( params.app ) + "/"+ encodeURIComponent( params.channel )+'?1=1' )
-      .success(function( data ) {
+      var latestDate;
 
-        var latestDate;
-        var socketServerUrl = data.result.server.url;
+      CONF._app = params.app;
+      CONF._channel = params.channel;
+      CONF._user = { U : loginUser.userId, NM : loginUser.userName, I : loginUser.image };
 
-        CONF._app = params.app;
-        CONF._channel = params.channel;
-        CONF._user = { U : loginUser.userId, NM : loginUser.userName, I : loginUser.image};
+      console.log( 'init : ' +  inviteMessage );
 
-        var query = "A=" + params.app + "&C=" + params.channel + "&U=" + params.userId + "&D=" + params.deviceId
-         + "&S=" + data.result.server.name;
-         
-        var socketOptions ={
-          'force new connection': true
-        };
+      $rootScope.currentChannel = params.channel;
 
-        channelSocket = io.connect(socketServerUrl+'/channel?'+query, socketOptions);
+      if( inviteMessage == '' ){
+        var latestMessage = '';
 
-        channelSocket.on('connect', function() {
-          console.log( 'channel connect' );
+        /*
+        *Reset Count Start
+        */      
+        var param = { 'channel' :  params.channel, 'reset' : true, 'message': latestMessage };
+        Channels.update( param );
 
-          if( inviteMessage == '' ){
-            channelSocket.emit( 'message-unread', function(jsonObj){
-              var unreadMessages = jsonObj.result;
-              var latestMessage = '';
-              for( var inx = 0 ; inx < unreadMessages.length ; inx++ ){
-                var data = JSON.parse( unreadMessages[inx].MG.DT );
-                data.MG = decodeURIComponent( data.MG );
+        /*
+        *Reset Count End
+        */
+        var messages = [];
+        Messages.list( params.channel ).then(function(messageArray) {
+          console.log( messageArray );
 
-                if( data.T != undefined ){
-                  data.type = data.T;
-                } else {
-                  data.type = data.UO.U == loginUser.userId ? 'S':'R';
-                }
+          for( var inx = 0 ; inx < messageArray.length ; inx++ ){
+            var data = messageArray[inx];
+            var dateStrs = UTIL.timeToString( data.time );
 
-                latestMessage = data.MG;
-                Messages.add( data );
-              }
+            var content;
+            if( inx > 0 ){
+              latestDate =  UTIL.timeToString( messageArray[inx-1].time )[3];
+            }
 
-              //message received complete
-              if( unreadMessages != undefined && unreadMessages.length > 0 ){
-                channelSocket.emit("message-received");
-              }
+            if( latestDate != dateStrs[3] ){
+              content = '<span class="date">'+dateStrs[1]+" "+dateStrs[2]+'</span>';
+              messages.push( { content : content, from : 'T', date : dateStrs[1] } );
+              latestDate = dateStrs[3];
+            }
 
-              /*
-              *Reset Count Start
-              */      
-              var param = { 'channel' :  params.channel, 'reset' : true, 'message': latestMessage };
-              Channels.update( param );
+            if(data.type == 'R'){                
+              content = '<div class="small">'+ data.sender_name+'</div>' ;
+              content += '<div class="from">'
+              content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
+              content += '<span class="from">'+data.message+'</span>';
+              //content += '<span class="time">'+ dateStrs[2]+'</span>';
+              content += '</div>';
+            } else if( data.type =='I' ) {
+              content = '<span class="date">'+data.message+'</span>';
+            } else {
+              content = '<span>'+data.message+'</span>';
+            }
 
-              /*
-              *Reset Count End
-              */
-              var messages = [];
-              Messages.list( params.channel ).then(function(messageArray) {
-                for( var inx = 0 ; inx < messageArray.length ; inx++ ){
-                  var data = messageArray[inx];
-                  var dateStrs = UTIL.timeToString( data.time );
-
-                  var content;
-                  if( inx > 0 ){
-                    latestDate =  UTIL.timeToString( messageArray[inx-1].time )[3];
-                  }
-
-                  if( latestDate != dateStrs[3] ){
-                    content = '<span class="date">'+dateStrs[1]+" "+dateStrs[2]+'</span>';
-                    messages.push( { content : content, from : 'T', date : dateStrs[1] } );
-                    latestDate = dateStrs[3];
-                  }
-
-                  if(data.type == 'R'){                
-                    content = '<div class="small">'+ data.sender_name+'</div>' ;
-                    content += '<div class="from">'
-                    content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
-                    content += '<span class="from">'+data.message+'</span>';
-                    //content += '<span class="time">'+ dateStrs[2]+'</span>';
-                    content += '</div>';
-                  } else if( data.type =='I' ) {
-                    content = '<span class="date">'+data.message+'</span>';
-                  } else {
-                    content = '<span>'+data.message+'</span>';
-                  }
-
-                  messages.push( { content : content, from : data.type, date : dateStrs[1] } );
-                }
-
-                callback(messages);
-              });
-            });
-          } else {
-            self.send( inviteMessage, 'I' );
+            messages.push( { content : content, from : data.type, date : dateStrs[1] } );
           }
+
+          $rootScope.currentChannelLatestDate = latestDate;
+
+          callback(messages);
         });
-
-        channelSocket.on('connect_error', function(data) {
-          console.log( data );
-        });         
-
-        channelSocket.on('MG', function (data) {
-
-          data.MG = decodeURIComponent(data.MG);
-
-          if( data.T != undefined && data.T == 'I' ){
-            data.type ='I';
-            inviteMessage = data.MG;
-          } else {
-            data.type = data.UO.U == loginUser.userId ? 'S':'R' ;
-          }
-
-          var content;
-          var dateStrs = UTIL.timeToString( data.TS );
-
-          if( latestDate != dateStrs[3] ){
-            content = '<span class="date">'+dateStrs[1]+" "+dateStrs[2]+'</span>';
-            $scope.add( { content : content, from : 'T', date : dateStrs[1] } );
-            latestDate = dateStrs[3];
-          }
-
-          if(data.type == 'R'){
-
-            content = '<div class="small">'+ data.UO.NM+'</div>' ;
-            content += '<div class="from">';
-            content += '<img src="'+ data.UO.I+'" class="profile"/>';
-            content += '<span >'+decodeURIComponent( data.MG )+'</span>';
-            //content += '<span class="time">'+dateStrs[2]+'</span>';
-            content += '</div>'
-            
-          } else if( data.type == 'I' ) {
-            content = '<span class="date">'+inviteMessage+'</span>'; 
-          } else {
-            content = '<span>'+data.MG+'</span>';
-          }
-
-          var nextMessage = { content : content, from : data.type, date : dateStrs[1] };
-
-          // Add to DB
-          Messages.add( data );
-
-          // 2 people Channel
-
-          var param = { 'channel':data.C, 'reset' : true, 'message':data.MG };
-
-          if( data.type == 'R' && data.C.indexOf( "$" ) > -1 ){
-            param.image = data.UO.I;
-          }
-
-          if( data.type != 'I' ){
-            Channels.update( param );
-          }
-
-          $scope.add( nextMessage );
-        });
-      })
-      .error(function(data, status, headers, config) {
-        console.log( status );
-        // called asynchronously if an error occurs
-        // or server returns response with an error status.
-      });
+      } else {
+        self.send( inviteMessage, 'I' );
+      }
     },
     send : function(msg, type){
       var param = {
@@ -793,14 +840,15 @@ angular.module('starter.services', [])
         }
       };
 
+      var DT = {UO:CONF._user,MG:msg,S : CONF._user.U};
+
       if( type !=undefined ){
-        param.DT.T = type;
+        DT.T = type;
       }
 
-      channelSocket.emit('send', param, function (data) {
-      });
+      $rootScope.xpush.send(CONF._channel, 'message', DT );
     },
-    join : function( param, callback){
+    join : function(param, callback){
       channelSocket.emit('join', param, function (data) {
         callback( data );
       });
