@@ -412,17 +412,20 @@ angular.module('starter.services', [])
   return {
     init : function(callback){
       self = this;
-      var loginUser = Sign.getUser();
+
       if( !initFlag ){
         self.channelList(function( channels ){
           self.unreadMessage( channels, function(result){
 
             Channels.getAllCount().then( function ( result ){
+              var loginUser = Sign.getUser();
 
               $rootScope.totalUnreadCount = result.total_count;
 
               $rootScope.xpush.on('message', function (ch,name,data) {
                 data.MG = decodeURIComponent(data.MG);
+
+                console.log( data );
 
                 if( ch == $rootScope.currentChannel ){
                   var latestDate = $rootScope.currentChannelLatestDate;
@@ -764,7 +767,7 @@ angular.module('starter.services', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( !changeDBFlag ){
+      if( changeDBFlag ){
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }
