@@ -425,16 +425,14 @@ angular.module('starter.services', [])
               $rootScope.xpush.on('message', function (ch,name,data) {
                 data.MG = decodeURIComponent(data.MG);
 
-                console.log( data );
+                if( data.T != undefined && data.T == 'I' ){
+                  data.type ='I';
+                } else {
+                  data.type = data.UO.U == loginUser.userId ? 'S':'R' ;
+                }
 
                 if( ch == $rootScope.currentChannel ){
                   var latestDate = $rootScope.currentChannelLatestDate;
-                  if( data.T != undefined && data.T == 'I' ){
-                    data.type ='I';
-                    inviteMessage = data.MG;
-                  } else {
-                    data.type = data.UO.U == loginUser.userId ? 'S':'R' ;
-                  }
 
                   var content;
                   var dateStrs = UTIL.timeToString( data.TS );
@@ -451,12 +449,12 @@ angular.module('starter.services', [])
                     content = '<div class="small">'+ data.UO.NM+'</div>' ;
                     content += '<div class="from">';
                     content += '<img src="'+ data.UO.I+'" class="profile"/>';
-                    content += '<span >'+decodeURIComponent( data.MG )+'</span>';
+                    content += '<span >'+ data.MG +'</span>';
                     //content += '<span class="time">'+dateStrs[2]+'</span>';
                     content += '</div>'
                     
                   } else if( data.type == 'I' ) {
-                    content = '<span class="date">'+inviteMessage+'</span>'; 
+                    content = '<span class="date">'+data.MG+'</span>'; 
                   } else {
                     content = '<span>'+data.MG+'</span>';
                   }
