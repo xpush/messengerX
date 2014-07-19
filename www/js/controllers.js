@@ -170,7 +170,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('AccountCtrl', function($scope, Sign) {
+.controller('AccountCtrl', function($scope, $rootScope, Sign) {
 
   $scope.loginUser = Sign.getUser();
 
@@ -181,7 +181,7 @@ angular.module('starter.controllers', [])
       $scope.loginUser.image = newImage;
     }
 
-    var params = { 'A' : 'messengerx', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : 'ionic',
+    var params = { 'A' : 'messengerx', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
                DT : { 'NM' : $scope.loginUser.userName, 'I': $scope.loginUser.image, 'MG' : $scope.loginUser.message } };
 
     Sign.update( params, function(data){
@@ -199,14 +199,14 @@ angular.module('starter.controllers', [])
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, Sign, Cache) {
   $scope.signIn = function(user) {
-		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : 'ionic' };
-    $rootScope.xpush.login( user.userId, user.password, 'ionic', function(message, result){
+		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
+    $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, function(message, result){
 
       var loginUser = {};
       loginUser.app = params.A;
       loginUser.userId = user.userId;
       loginUser.password = params.PW;
-      loginUser.deviceId = 'ionic';
+      loginUser.deviceId = $rootScope.deviceId;
 
       loginUser.image = result.user.DT.I;
       loginUser.userName = result.user.DT.NM;
@@ -220,11 +220,10 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('SignUpCtrl', function($scope, $state, $stateParams, $http, Sign) {
+.controller('SignUpCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
   $scope.signUp = function(user) {
-    var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : 'ionic', 'DT' : {'NM' : user.userName,
-                 'I':'../img/default_image.jpg', 'MG':'' } };
-    //var params = { 'app' : 'messengerx', 'userId' : 'F100002531861340', 'password' : '100002531861340', 'deviceId' : 'WEB' };
+    var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
+     'DT' : {'NM' : user.userName, 'I':'../img/default_image.jpg', 'MG':'' } };
     Sign.register( params, function(data){
       $state.go('signin');
     });

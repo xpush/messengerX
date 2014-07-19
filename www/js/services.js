@@ -499,7 +499,11 @@ angular.module('starter.services', [])
 
                     if( data.T != 'I' ){
                       Channels.add( channel );
-                    }         
+                    }
+
+                    $rootScope.localNoti( { id : data.TS, message : data.MG, title : channel.name}, function(){
+                      console.log( '========= local noti callback =========');
+                    });   
                   });         
                 }
               });
