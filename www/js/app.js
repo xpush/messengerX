@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'ionic', 'ionic.contrib.frostedGlass'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass'])
 
 .run(function($ionicPlatform, $rootScope, DB, Sign ) {
   $ionicPlatform.ready(function() {
@@ -19,7 +19,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       StatusBar.styleDefault();
     }
 
-    console.log( "==========device==========" );
     if( window.device ){
       $rootScope.deviceId = device.uuid;
 
@@ -35,8 +34,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
 
     $rootScope.localNoti = function(param, callback){
-      if( window.plugin.notification.local ){
-        console.log( '========= local noti =========');
+      if( window.plugin && window.plugin.notification.local ){
         window.plugin.notification.local.add({
             id: param.id,  // A unique id of the notifiction
             //date:,    // This expects a date object
@@ -160,11 +158,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }) 
 
     // Each tab has its own nav history stack:
-    .state('tab.dash', {
-      url: '/dash',
+    .state('tab.channel', {
+      url: '/channel',
       views: {
-        'tab-dash': {
-          templateUrl: 'templates/tab-dash.html',
+        'tab-channel': {
+          templateUrl: 'templates/tab-channel.html',
           controller: 'ChannelCtrl'
         }
       }
@@ -190,7 +188,5 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     })
 
-  // if none of the above states are matched, use this as the fallback
-  //$urlRouterProvider.otherwise('/tab/dash');
   $urlRouterProvider.otherwise('/sign-in');
 });

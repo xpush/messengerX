@@ -1,22 +1,22 @@
 angular.module('starter.controllers', [])
 
-.controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, Channels, Friends, Sign ) {
+.controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, ChannelDao, Friends, Sign ) {
   
   var loginUserId = Sign.getUser().userId;
 
-  Channels.getAllCount().then( function ( result ){
+  ChannelDao.getAllCount().then( function ( result ){
     $rootScope.totalUnreadCount = result.total_count;
   });  
 
   $scope.channelArray = [];
 
-  Channels.list( $scope ).then(function(channels) {
+  ChannelDao.list( $scope ).then(function(channels) {
     $scope.channelArray = [];
     $scope.channelArray = channels;
   });
 
   $scope.goChat = function( channelId ) {
-    Channels.get( channelId ).then(function(data) {
+    ChannelDao.get( channelId ).then(function(data) {
       $stateParams.channelId = channelId;
       $stateParams.channelUsers = data.channel_users;
       $stateParams.channelName = data.channel_name;
@@ -143,7 +143,6 @@ angular.module('starter.controllers', [])
     });
 
     myPopup.then(function(res) {
-      console.log('Tapped!', res);
       if( res != undefined ){
 
         var addUsers = [];
@@ -229,7 +228,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, Channels, UTIL) {
+.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, ChannelDao, UTIL) {
   $rootScope.currentScope = $scope;
 
   var loginUser = Sign.getUser();
@@ -283,12 +282,12 @@ angular.module('starter.controllers', [])
     createObject.NM = channelName;
     createObject.DT = { 'NM' : channelName, 'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length };
 
-    var channelId = Channels.generateId(createObject);
+    var channelId = ChannelDao.generateId(createObject);
     createObject.C = channelId;
 
     $rootScope.xpush.createChannel(channelUsers, channelId, createObject.DT, function(data){
       createObject.unreadCount = 0;
-      Channels.insert( createObject );
+      ChannelDao.insert( createObject );
 
       var inviteMsg = "";    
       if( channelUsers.length > 2 ){
@@ -393,7 +392,7 @@ angular.module('starter.controllers', [])
               var iMsg = UTIL.getInviteMessage( joinUsers );
 
               Chat.send( iMsg, 'I' );
-              Channels.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );
+              ChannelDao.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );
             }
           });
         }
