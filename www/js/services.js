@@ -109,10 +109,14 @@ angular.module('starter.services', [])
               $rootScope.xpush.on('message', function (ch,name,data) {
                 data.MG = decodeURIComponent(data.MG);
 
-                if( data.T != undefined && data.T == 'I' ){
-                  data.type ='I';
+                var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
+                if( data.T != undefined ){
+                  data.type = data.T;
+                  if( data.T == "I" ){
+                    data.type = sr + data.T;
+                  }
                 } else {
-                  data.type = data.UO.U == loginUser.userId ? 'S':'R' ;
+                  data.type = sr;
                 }
 
                 if( ch == $rootScope.currentChannel ){
@@ -134,11 +138,18 @@ angular.module('starter.services', [])
                     content += '<div class="from">';
                     content += '<img src="'+ data.UO.I+'" class="profile"/>';
                     content += '<span >'+ data.MG +'</span>';
-                    //content += '<span class="time">'+dateStrs[2]+'</span>';
                     content += '</div>'
                     
-                  } else if( data.type == 'I' ) {
-                    content = '<span class="date">'+data.MG+'</span>'; 
+                  } else if( data.type == 'J' ) {
+                    content = '<span class="date">'+data.MG+'</span>';
+                  } else if( data.type == 'SI' ) {
+                    content = '<img src="'+data.MG+'"/></img>';
+                  } else if( data.type == 'RI' ) {
+                    content = '<div class="small">'+ data.UO.NM+'</div>' ;
+                    content += '<div class="from">'
+                    content += '<img src="'+ data.UO.I+'" class="profile"/>';     
+                    content += '<img src="'+data.MG+'" class="from"/></img>';
+                    content += '</div>';
                   } else {
                     content = '<span>'+data.MG+'</span>';
                   }
@@ -156,7 +167,7 @@ angular.module('starter.services', [])
                     param.image = data.UO.I;
                   }
 
-                  if( data.type != 'I' ){
+                  if( data.type != 'J' ){
                     ChannelDao.update( param );
                   }
 
@@ -181,7 +192,7 @@ angular.module('starter.services', [])
 
                     $rootScope.totalUnreadCount++;
 
-                    if( data.T != 'I' ){
+                    if( data.T != 'J' ){
                       ChannelDao.add( channel );
                     }
 
@@ -203,17 +214,25 @@ angular.module('starter.services', [])
         var channels = {};
         for( var inx = 0 ; inx < channelArray.length ; inx++ ){
           var data = channelArray[inx];
-          var channel = {'channel': data.channel, 'users' : data.DT.US };
-          if( data.DT.UC > 2 ){
-            channel.name = data.DT.NM;
+          var channel = {'channel': data.channel };
+
+          if( data.DT != undefined ){
+            channel.users = data.DT.US;
+
+            if( data.DT.UC > 2 ){
+              channel.name = data.DT.NM;
+            } else {
+              channel.name = data.DT.F;
+            }
           } else {
-            channel.name = data.DT.F;
+            channel.users = "";
+            channel.name = "";
           }
 
           channels[ data.channel ] =  channel;
         }
 
-        callback(channels);    
+        callback(channels);
       });
     },
     unreadMessage : function(channels, callback){
@@ -226,11 +245,16 @@ angular.module('starter.services', [])
           data = JSON.parse(data);
 
           data.MG = decodeURIComponent( data.MG );
+          var sr = data.UO.U == loginUser.userId ? 'S':'R';
+
           if( data.T != undefined ){
             data.type = data.T;
+            if( data.T == "I" ){
+              data.type = sr + data.T;
+            }
           } else {
-            data.type = data.UO.U == loginUser.userId ? 'S':'R';
-          }            
+            data.type = sr;
+          }
 
           var channel = channels[data.C];
           channel.message = data.MG;
@@ -243,7 +267,7 @@ angular.module('starter.services', [])
             channel.image = data.UO.I;
           }
 
-          if( data.type != 'I' ){
+          if( data.type != 'J' ){
             ChannelDao.add( channel );
           }
           MessageDao.add( data );
@@ -357,10 +381,17 @@ angular.module('starter.services', [])
               content += '<div class="from">'
               content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
               content += '<span class="from">'+data.message+'</span>';
-              //content += '<span class="time">'+ dateStrs[2]+'</span>';
               content += '</div>';
-            } else if( data.type =='I' ) {
+            } else if( data.type =='J' ) {
               content = '<span class="date">'+data.message+'</span>';
+            } else if( data.type == 'SI' ) {
+              content = '<img src="'+data.message+'"/></img>';
+            } else if( data.type == 'RI' ) {
+              content = '<div class="small">'+ data.sender_name+'</div>' ;
+              content += '<div class="from">'
+              content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';     
+              content += '<img src="'+data.message+'" class="from"/></img>';
+              content += '</div>';
             } else {
               content = '<span>'+data.message+'</span>';
             }
@@ -373,7 +404,7 @@ angular.module('starter.services', [])
           callback(messages);
         });
       } else {
-        self.send( inviteMessage, 'I' );
+        self.send( inviteMessage, 'J' );
       }
     },
     send : function(msg, type){

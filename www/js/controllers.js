@@ -400,9 +400,15 @@ angular.module('starter.controllers', [])
     });
   };
 
+  $scope.openFileDialog = function() {
+    console.log('fire! $scope.openFileDialog()');
+    ionic.trigger('click', { target: document.getElementById('file') });
+  };
+
   $scope.$on('$destroy', function() {
      window.onbeforeunload = undefined;
   });
+
   $scope.$on('$locationChangeStart', function(event, next, current) {
     if( current.indexOf('/chat') > -1 ){
       if(!confirm("Are you sure you want to leave this page?")) {
@@ -411,6 +417,27 @@ angular.module('starter.controllers', [])
         $rootScope.currentChannel = '';
       }
     }
+  });
+
+  var inputObj = document.getElementById('file');
+  angular.element( inputObj ).on('change',function(event) {
+    console.log('fire! angular#element change event');
+
+    $rootScope.xpush.uploadFile( channelId, {
+      file: inputObj,
+      //overwrite: true,
+      type: 'image'
+    }, function(data, idx){
+      console.log("progress  ["+idx+"]: "+data);
+    }, function(data,idx){
+      imageId = data.result.name;
+
+      inputObj.value = "";
+      console.log("completed ["+idx+"]: "+JSON.stringify(data));
+      
+      var imageUrl = $rootScope.xpush.getFileUrl(channelId, imageId );
+      Chat.send( imageUrl, 'I' );
+    });
   });
 
   $scope.postDatas = function(users){

@@ -17,17 +17,17 @@ body {
 	padding:0;
 }
 
-.messages li.T, .messages li.I {
+.messages li.T, .messages li.J {
 	clear:both;
 	float: none;
 	max-width:100%;
 }
 
-.messages li.S {
+.messages li.S, .messages li.SI {
 	float:right;
 }
 
-.messages li.S img {
+.messages li.S img, .messages li.SI img {
 	float:right;
 }
 
@@ -268,4 +268,8 @@ paper-input {
 	max-height: 373px;
 	min-height: 294px;
 	overflow-y: auto;
+}
+
+#file {
+	display: none;
 }

@@ -9,9 +9,11 @@
     <ol class="messages">
       <li ng-repeat="message in messages" ng-bind-html="message.content" ng-class="message.from"></li>
     </ol>
+    <input type="file" id="file"/>  
   </ion-content>
   <ion-footer-bar class="bar-frosted">
     <button class="button icon ion-plus-circled" ng-click="showPopup()"></button>
+    <button class="button icon ion-filing" ng-click="openFileDialog()" ></button>
     <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 10px 0 10px;"/>
     <button class="button button-positive" style="min-width:50px;" ng-click="send()" >Send </button>
   </ion-footer-bar>
