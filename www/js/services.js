@@ -143,12 +143,16 @@ angular.module('starter.services', [])
                   } else if( data.type == 'J' ) {
                     content = '<span class="date">'+data.MG+'</span>';
                   } else if( data.type == 'SI' ) {
-                    content = '<img src="'+data.MG+'"/></img>';
+                    content = '<span>';
+                    content += '<img src="'+data.MG+'"/></img>';
+                    content += '</span>';
                   } else if( data.type == 'RI' ) {
                     content = '<div class="small">'+ data.UO.NM+'</div>' ;
                     content += '<div class="from">'
-                    content += '<img src="'+ data.UO.I+'" class="profile"/>';     
+                    content += '<img src="'+ data.UO.I+'" class="profile"/>';
+                    content += '<span>';
                     content += '<img src="'+data.MG+'" class="from"/></img>';
+                    content += '</span>';
                     content += '</div>';
                   } else {
                     content = '<span>'+data.MG+'</span>';
@@ -161,7 +165,12 @@ angular.module('starter.services', [])
 
                   // 2 people Channel
 
-                  var param = { 'channel':data.C, 'reset' : true, 'message':data.MG };
+                  var param = { 'channel':data.C, 'reset' : true };
+                  if( data.type.indexOf( 'I' ) > -1 ){
+                    param.message = "@image@";
+                  } else {
+                    param.message = data.MG;
+                  }
 
                   if( data.type == 'R' && data.C.indexOf( "$" ) > -1 ){
                     param.image = data.UO.I;
@@ -177,7 +186,12 @@ angular.module('starter.services', [])
                   
                   $rootScope.xpush.getChannelData( data.C, function( err, channelJson ){
                     var channel = {'channel': data.C, 'users' : channelJson.DT.US};
-                    channel.message = decodeURIComponent( data.MG );
+
+                    if( data.T != undefined && data.T == 'I' ){
+                      channel.message = "@image@";
+                    } else {
+                      channel.message = decodeURIComponent( data.MG );
+                    }
 
                     if( channelJson.DT.UC > 2 ){
                       channel.name = channelJson.DT.NM;
@@ -385,12 +399,16 @@ angular.module('starter.services', [])
             } else if( data.type =='J' ) {
               content = '<span class="date">'+data.message+'</span>';
             } else if( data.type == 'SI' ) {
-              content = '<img src="'+data.message+'"/></img>';
+              content = '<span>';
+              content += '<img src="'+data.message+'"/></img>';
+              content += '</span>'; 
             } else if( data.type == 'RI' ) {
               content = '<div class="small">'+ data.sender_name+'</div>' ;
               content += '<div class="from">'
-              content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';     
+              content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
+              content += '<span>';
               content += '<img src="'+data.message+'" class="from"/></img>';
+              content += '</span>';
               content += '</div>';
             } else {
               content = '<span>'+data.message+'</span>';

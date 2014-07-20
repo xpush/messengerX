@@ -428,6 +428,7 @@ angular.module('starter.controllers', [])
       //overwrite: true,
       type: 'image'
     }, function(data, idx){
+      inputObj.value = "";
       console.log("progress  ["+idx+"]: "+data);
     }, function(data,idx){
       imageId = data.result.name;

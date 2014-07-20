@@ -1,8 +1,4 @@
 ;(function() {
-  var serverConf = {
-  	host: 'http://www.notdol.com',
-  	port: 8000
-  };
 
   var SESSION = 'session';
   var CHANNEL = 'channel';
@@ -18,7 +14,7 @@
 
   var RMKEY = 'message';
 
-  var XPush = function(host, appId){
+  var XPush = function(host, appId, eventHandler){
     if(!host){alert('params(1) must have hostname'); return;}
     if(!appId){alert('params(2) must have appId'); return;}
     var self = this;
@@ -39,6 +35,11 @@
   	self.on('newChannel',function(data){
   		self.channelNameList.push( data.chNm );
   	});
+
+    if(eventHandler){
+      self._isEventHandler = true;
+      self.on('___session_event', eventHandler);
+    }
   };
 
   XPush.Context = {
@@ -141,6 +142,38 @@
     return newChannel;
   };
 
+  // create new Channel ( *** CHANNEL_ONLY *** )
+  XPush.prototype.createSimpleChannel = function(channel, userObj, cb){
+    var self = this;
+
+    var ch = self._makeChannel(channel);
+    self.getChannelInfo(channel,function(err,data){
+      if(err){
+        console.log(" == node channel " ,err);
+        if(cb) cb(err);
+      }else if ( data.status == 'ok'){
+
+        if(userObj){
+          self.userId = userObj.U || 'someone';
+          self.deviceId = userObj.D || 'WEB';
+        }else{
+          self.userId = 'someone';
+          self.deviceId = 'WEB';
+        }
+
+        ch.info = data.result;
+        ch._server = {serverUrl : data.result.server.url};
+        ch.chNm = data.result.channel;
+
+        ch.connect(function(){
+          if(cb) cb();
+        }, 'CHANNEL_ONLY');
+
+      }
+    });
+
+  };
+
   XPush.prototype.getChannels = function(cb){
     var self = this;
     console.log("xpush : getChannels ",self.userId);
@@ -206,7 +239,7 @@
     var ch = self.getChannel(channel);
     if(!ch){
       self._channels[channel] = ch;
-      ch = self._makeChannel(channel);
+      ch = self._makeChannel();
       self.getChannelInfo(channel,function(err,data){
         if(err){
           console.log(" == node channel " ,err);
@@ -263,7 +296,7 @@
     var self = this;
     console.log('xpush : connection _makeChannel ',chNm);
     for( var key in self._channels ){
-      if( key == chNm ){
+      if( key == chNm && self._channels[key] != undefined && self._channels[key]._connected ){
         return self._channels[key];
       }
     }
@@ -274,7 +307,6 @@
       self._channels[chNm] = ch;
     }
     return ch;
-    //if(chNm)
   };
 
   XPush.prototype.calcChannel = function(ch){
@@ -338,15 +370,18 @@
     if(!ch){
       self._channels[channel] = ch;
       ch = self._makeChannel(channel);
-      self.getChannelInfo(channel,function(err,data){
+      self.getChannelInfo(channel,function(err,json){
         if(err){
           console.log(" == node channel " ,err);
-        }else if ( data.status == 'ok'){
-          ch.setServerInfo(data.result);
+        }else if ( json.status == 'ok'){
+          ch.setServerInfo(json.result);
+          ch.send(name,data);
         }
       });
+    }else{
+      ch.send(name,data);
     }
-    ch.send(name,data);
+
   };
 
   XPush.prototype.getUnreadMessage = function(cb){
@@ -358,7 +393,7 @@
       if(result && result.length > 0){
         result.sort(UTILS.messageTimeSort);
       }
-      
+
       self.sEmit('message-received');
       cb(err, result);
     });
@@ -441,11 +476,11 @@
         break;
 
         case 'CONNECT' :
-          //app , channel, userId, count
+          self.emit('___session_event', 'SESSION', data);
         break;
 
         case 'DISCONNECT' :
-
+          self.emit('___session_event', 'SESSION', data);
         break;
 
       }
@@ -494,7 +529,6 @@
     //});
 
     socket.on('disconnect',function(){
-      var self = this;
       self.isExistUnread = true;
     });
   };
@@ -515,7 +549,7 @@
           try{
             xhr = new ActiveXObject('Microsoft.XMLHTTP');
           }catch (e){
-            console.error('\nYour browser is not compatible with XPUSH AJAX');                           
+            console.error('\nYour browser is not compatible with XPUSH AJAX');
           }
         }
       }
@@ -524,8 +558,8 @@
     var _url = self.hostname+context;
 
     var param = Object.keys(data).map(function(k) {
-      return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
-    }).join('&')
+      return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]);
+    }).join('&');
 
     method = (method.toLowerCase() == "get") ? "GET":"POST";
     param  = (param == null || param == "") ? null : param;
@@ -535,11 +569,11 @@
 
     xhr.open(method, _url, true);
     xhr.onreadystatechange = function() {
-         
+
       if(xhr.readyState < 4) {
         return;
       }
-             
+
       if(xhr.status !== 200) {
         console.log("xpush : ajax error", self.hostname+context,param);
         cb(xhr.status,{});
@@ -552,7 +586,7 @@
         }else{
           cb(null,r);
         }
-      }           
+      }
     };
 
     console.log("xpush : ajax ", self.hostname+context,method,param);
@@ -655,7 +689,7 @@
   };
 
   var Connection = function(xpush , type, server){
-    var self = this;
+
     this._xpush = xpush;
     this._server = server;
     this._type = type;
@@ -701,7 +735,7 @@
   	});
   };
 
-  Connection.prototype.connect = function(cbConnect){
+  Connection.prototype.connect = function(cbConnect, mode){
     var self = this;
       var query =
         'A='+self._xpush.appId+'&'+
@@ -717,6 +751,13 @@
         'U='+self._xpush.userId+'&'+
         'D='+self._xpush.deviceId+'&'+
         'S='+self.info.server.name;
+
+      if(mode){
+        if(mode == 'CHANNEL_ONLY'){
+          self._xpush.isExistUnread = false;
+        }
+        query = query +'&MD='+ mode;
+      }
     }
 
     self._socket = io.connect(self._server.serverUrl+'/'+self._type+'?'+query, socketOptions);
@@ -748,6 +789,24 @@
   		console.log("xpush : channel receive ", self.chNm, data, self._xpush.userId);
   		self._xpush.emit(RMKEY, self.chNm, RMKEY , data);
   	});
+
+
+    if(self._xpush._isEventHandler) {
+
+      self._socket.on('_event',function(data){
+
+        switch(data.event){
+          case 'CONNECTION' :
+            self._xpush.emit('___session_event', 'CHANNEL', data);
+          break;
+          case 'DISCONNECT' :
+            self._xpush.emit('___session_event', 'CHANNEL', data);
+          break;
+        }
+
+      });
+    }
+
     if(cb)cb();
   };
 

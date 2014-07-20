@@ -27,10 +27,6 @@ body {
 	float:right;
 }
 
-.messages li.S img, .messages li.SI img {
-	float:right;
-}
-
 .messages span {
 	border-radius:.75rem;
 	background:#e6e5eb;
@@ -55,8 +51,18 @@ body {
 	text-overflow: ellipsis;
 	overflow-x: hidden;
 	word-wrap: break-word;
-	max-width:100%;
+	max-width:90%;
 	/**max-width:calc(100% - 84px);*/
+}
+
+.messages img {
+	display:block;
+	border-radius:.75rem;
+}
+
+.messages .from img {
+	padding: 0px;
+	margin: 0px;
 }
 
 .messages .from span.time {
@@ -90,9 +96,13 @@ body {
 	color:#fff;
 }
 
-.messages img {
+.messages li.SI span {
+	background:#158ffe;
+	color:#fff;
+}
+
+.messages li.SI img {
 	display:block;
-	max-width:65%;
 	border-radius:.75rem;
 }
 
@@ -237,6 +247,17 @@ paper-input {
 
 .item-channel .hidden {
 	display: none;
+}
+
+.item-channel .item-img img{
+	width:20px;
+	height:20px;
+	float:left;
+}
+
+.item-channel .item-img span{
+	float:left;
+	padding-left: 5px;
 }
 
 .item-channel > img:first-child, .item-channel .item-image, .item-channel .item-content > img:first-child, .item-channel .item-content .item-image, .item-channel-left > img:first-child, .item-channel-left .item-image, .item-channel-left .item-content > img:first-child, .item-channel-left .item-content .item-image {
