@@ -765,12 +765,12 @@
     console.log( 'xpush : socketconnect', self._server.serverUrl+'/'+self._type+'?'+query);
     self._socket.on('connect', function(){
       console.log( 'channel connection completed' );
-      self._connected = true;
       while(self.messageStack.length > 0 ){
-        console.log( "111111 : "  + self.messageStack.length  );
         var t = self.messageStack.shift();
-        self.send(t.NM, t.DT);
+        //.self.send(t.NM, t.DT);
+        self._socket.emit('send', {NM: t.NM , DT: t.DT});
       }
+      self._connected = true;
       if(!self.isFirtConnect) return;
       self.isFirtConnect = false;
       self.connectionCallback(cbConnect);

@@ -7,7 +7,7 @@
 <ion-view title="{{channelName}}">
   <ion-content padding="true" class="has-header" start-y="120">
     <ol class="messages">
-      <li ng-repeat="message in messages" ng-bind-html="message.content" ng-class="message.from"></li>
+      <li ng-repeat="message in messages" bind-html-compile="message.content" ng-class="message.from"></li>
     </ol>
     <input type="file" id="file"/>  
   </ion-content>

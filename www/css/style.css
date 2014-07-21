@@ -63,6 +63,10 @@ body {
 .messages .from img {
 	padding: 0px;
 	margin: 0px;
+	max-width: 200px;
+	min-height: 22px;
+	border-radius:.75rem;
+	display:block;	
 }
 
 .messages .from span.time {
@@ -104,6 +108,8 @@ body {
 .messages li.SI img {
 	display:block;
 	border-radius:.75rem;
+	max-width: 200px;	
+	min-height: 22px;
 }
 
 .messages img.profile {

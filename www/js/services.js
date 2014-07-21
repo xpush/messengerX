@@ -91,7 +91,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Manager', function($http, $rootScope, Sign, ChannelDao, MessageDao, UTIL ) {
+.factory('Manager', function($http, $rootScope, Sign, $sce, ChannelDao, MessageDao, UTIL ) {
   var initFlag = false;
   return {
     init : function(callback){
@@ -144,19 +144,21 @@ angular.module('starter.services', [])
                     content = '<span class="date">'+data.MG+'</span>';
                   } else if( data.type == 'SI' ) {
                     content = '<span>';
-                    content += '<img src="'+data.MG+'"/></img>';
+                    content += '<img src="'+data.MG+'" onload="scrollDown();" ng-click="alert(\'123\');"></img>';
                     content += '</span>';
                   } else if( data.type == 'RI' ) {
                     content = '<div class="small">'+ data.UO.NM+'</div>' ;
                     content += '<div class="from">'
                     content += '<img src="'+ data.UO.I+'" class="profile"/>';
                     content += '<span>';
-                    content += '<img src="'+data.MG+'" class="from"/></img>';
+                    content += '<img src="'+data.MG+'" class="from" onload="scrollDown();" ng-click="alert(\'123\');"></img>';
                     content += '</span>';
                     content += '</div>';
                   } else {
                     content = '<span>'+data.MG+'</span>';
                   }
+
+                  content = $sce.trustAsHtml( content );
 
                   var nextMessage = { content : content, from : data.type, date : dateStrs[1] };
 
@@ -343,7 +345,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Chat', function($http, $rootScope, BASE_URL, ChannelDao, MessageDao, UTIL, Cache ) {
+.factory('Chat', function($http, $compile, $rootScope, BASE_URL, ChannelDao, MessageDao, UTIL, Cache ) {
   var channelSocket;
   var CONF = {};
   var self;
@@ -400,20 +402,21 @@ angular.module('starter.services', [])
               content = '<span class="date">'+data.message+'</span>';
             } else if( data.type == 'SI' ) {
               content = '<span>';
-              content += '<img src="'+data.message+'"/></img>';
+              content += '<img src="'+data.message+'" />';
               content += '</span>'; 
             } else if( data.type == 'RI' ) {
               content = '<div class="small">'+ data.sender_name+'</div>' ;
               content += '<div class="from">'
               content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
               content += '<span>';
-              content += '<img src="'+data.message+'" class="from"/></img>';
+              content += '<img src="'+data.message+'" class="from"/></img>';            
               content += '</span>';
               content += '</div>';
             } else {
-              content = '<span>'+data.message+'</span>';
+              content = '<span ng-click="alert(\'123\');">'+data.message+'</span>';
             }
 
+            //content = $sce.trustAsHtml( content );
             messages.push( { content : content, from : data.type, date : dateStrs[1] } );
           }
 

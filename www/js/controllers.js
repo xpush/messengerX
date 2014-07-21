@@ -307,8 +307,10 @@ angular.module('starter.controllers', [])
     $scope.$apply();
 
     // Update the scroll area and tell the frosted glass to redraw itself
-    $ionicFrostedDelegate.update();
-    $ionicScrollDelegate.scrollBottom(true);
+    if( nextMessage.from != 'RI' && nextMessage.from != 'SI' ){
+      $ionicFrostedDelegate.update();
+      $ionicScrollDelegate.scrollBottom(true);
+    }
   };
 
   $scope.send = function() {    
