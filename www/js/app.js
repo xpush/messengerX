@@ -20,6 +20,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
 
     if( window.device ){
+      console.log( JSON.stringify( device ) );
       $rootScope.deviceId = device.uuid;
 
       var pushNotification = window.plugins.pushNotification;

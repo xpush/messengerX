@@ -91,7 +91,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Manager', function($http, $rootScope, Sign, $sce, ChannelDao, MessageDao, UTIL ) {
+.factory('Manager', function($http, $rootScope, Sign, ChannelDao, MessageDao, UTIL ) {
   var initFlag = false;
   return {
     init : function(callback){
@@ -144,21 +144,21 @@ angular.module('starter.services', [])
                     content = '<span class="date">'+data.MG+'</span>';
                   } else if( data.type == 'SI' ) {
                     content = '<span>';
-                    content += '<img src="'+data.MG+'" onload="scrollDown();" ng-click="alert(\'123\');"></img>';
+                    content += '<img src="'+data.MG+'" image-link="true" ></img>';
                     content += '</span>';
                   } else if( data.type == 'RI' ) {
                     content = '<div class="small">'+ data.UO.NM+'</div>' ;
                     content += '<div class="from">'
                     content += '<img src="'+ data.UO.I+'" class="profile"/>';
                     content += '<span>';
-                    content += '<img src="'+data.MG+'" class="from" onload="scrollDown();" ng-click="alert(\'123\');"></img>';
+                    content += '<img src="'+data.MG+'" image-link="true" load class="from"></img>';
                     content += '</span>';
                     content += '</div>';
                   } else {
                     content = '<span>'+data.MG+'</span>';
                   }
 
-                  content = $sce.trustAsHtml( content );
+                  //content = $sce.trustAsHtml( content );
 
                   var nextMessage = { content : content, from : data.type, date : dateStrs[1] };
 
@@ -402,14 +402,14 @@ angular.module('starter.services', [])
               content = '<span class="date">'+data.message+'</span>';
             } else if( data.type == 'SI' ) {
               content = '<span>';
-              content += '<img src="'+data.message+'" />';
+              content += '<img src="'+data.message+'" image-link/>';
               content += '</span>'; 
             } else if( data.type == 'RI' ) {
               content = '<div class="small">'+ data.sender_name+'</div>' ;
               content += '<div class="from">'
               content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
               content += '<span>';
-              content += '<img src="'+data.message+'" class="from"/></img>';            
+              content += '<img src="'+data.message+'" image-link class="from"/></img>';            
               content += '</span>';
               content += '</div>';
             } else {

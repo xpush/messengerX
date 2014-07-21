@@ -76,6 +76,12 @@
     self.deviceId = deviceId;
     var sendData = {A: self.appId, U: userId, PW: password, D: deviceId};
     self.ajax( XPush.Context.LOGIN , 'POST', sendData, function(err, result){
+
+      if(err){
+        if(cbLogin) cbLogin(err, result);
+        return;
+      }
+
       if(result.status == 'ok'){
         // result.result = {"token":"HS6pNwzBoK","server":"215","serverUrl":"http://www.notdol.com:9990"};
         var c = self._sessionConnection = new Connection(self, SESSION, result.result);
@@ -249,14 +255,14 @@
       });
     }
 
-    var blobs = [];
+    var blobs   = [];
     var streams = [];
 
     for(var i=0; i<inputObj.file.files.length; i++){
-      var file = inputObj.file.files[i];
-      var size = 0;
-      streams[i] = ss.createStream();
-      blobs[i] = ss.createBlobReadStream(file);
+      var file   = inputObj.file.files[i];
+      var size   = 0;
+      streams[i] = ss.createStream({highWaterMark: 64 * 1024});
+      blobs[i]   = ss.createBlobReadStream(file, {highWaterMark: 64 * 1024});
 
       blobs[i].on('data', function(chunk) {
         size += chunk.length;
@@ -264,8 +270,9 @@
       });
 
       var _data = {};
+      _data.orgName = file.name;
       if(inputObj.overwrite) _data.name = file.name;
-      if(inputObj.type) _data.type = inputObj.type;
+      if(inputObj.type)      _data.type = inputObj.type;
 
       ch.upload(streams[i], _data, function(result){
         fnCallback(result, i);

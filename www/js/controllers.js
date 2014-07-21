@@ -402,11 +402,6 @@ angular.module('starter.controllers', [])
     });
   };
 
-  $scope.openFileDialog = function() {
-    console.log('fire! $scope.openFileDialog()');
-    ionic.trigger('click', { target: document.getElementById('file') });
-  };
-
   $scope.$on('$destroy', function() {
      window.onbeforeunload = undefined;
   });
@@ -422,23 +417,68 @@ angular.module('starter.controllers', [])
   });
 
   var inputObj = document.getElementById('file');
+  $scope.openFileDialog = function() {
+    if( navigator.camera ){
+
+      var opts = {
+        quality: 50,
+        destinationType: Camera.DestinationType.FILE_URI,
+        sourceType: 0,
+        encodingType: 0
+      }
+
+      navigator.camera.getPicture(onSuccess, onFail, opts);
+
+      function onSuccess(FILE_URI) {              
+        console.log(FILE_URI);
+
+        inputObj.value = FILE_URI;
+
+        console.log( inputObj) ; 
+        console.log( inputObj.value );
+        $rootScope.xpush.uploadFile( channelId, {
+          file: inputObj,
+          type: 'image'
+        }, function(data, idx){
+          inputObj.value = "";
+          console.log("progress  ["+idx+"]: "+data);
+        }, function(data,idx){
+          var tname = data.result.tname;
+
+          inputObj.value = "";
+          console.log("completed ["+idx+"]: "+JSON.stringify(data));
+          
+          var imageUrl = $rootScope.xpush.getFileUrl(channelId, tname );
+          Chat.send( imageUrl, 'I' );
+        });
+      }
+
+      function onFail(message) {              
+        console.log(message);
+      }
+    } else {
+      ionic.trigger('click', { target: document.getElementById('file') });
+    }
+  };
+
   angular.element( inputObj ).on('change',function(event) {
-    console.log('fire! angular#element change event');
+
+    console.log( "onchanged" );
 
     $rootScope.xpush.uploadFile( channelId, {
       file: inputObj,
-      //overwrite: true,
       type: 'image'
     }, function(data, idx){
       inputObj.value = "";
       console.log("progress  ["+idx+"]: "+data);
     }, function(data,idx){
-      imageId = data.result.name;
+      var tname = data.result.tname;
 
       inputObj.value = "";
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
       
-      var imageUrl = $rootScope.xpush.getFileUrl(channelId, imageId );
+      var imageUrl = $rootScope.xpush.getFileUrl(channelId, tname );
+
       Chat.send( imageUrl, 'I' );
     });
   });

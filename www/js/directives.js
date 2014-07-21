@@ -56,22 +56,35 @@ angular.module('starter.directives', [])
     template: '<img ng-src="{{image}}" />'
   };
 })
+.directive('imageLink', function ( $window, $ionicFrostedDelegate, $ionicScrollDelegate, $ionicPopup ) {       
+  return {
+    link: function(scope, element, attrs) {
+
+      if( attrs.imageLink == "true" ){
+        element.bind("load" , function(event){
+          $ionicFrostedDelegate.update();
+          $ionicScrollDelegate.scrollBottom(true);
+        });
+      }
+
+      element.bind("click" , function(event){
+        var imgUrl = attrs.src.replace( "T_", "" );
+
+        var left = screen.width/2 - 400
+            , top = screen.height/2 - 300
+            , popup = $window.open(imgUrl, '', "top=" + top + ",left=" + left + ",width=800,height=600");
+      });
+    }
+  }
+})
 .directive('bindHtmlCompile', function ($compile) {
   return function(scope, element, attrs) {
     scope.$watch(
       function(scope) {
-        // watch the 'compile' expression for changes
         return scope.$eval(attrs.bindHtmlCompile);
       },
       function(value) {
-        // when the 'compile' expression changes
-        // assign it into the current DOM
         element.html(value);
-
-        // compile the new DOM and link it to the current
-        // scope.
-        // NOTE: we only compile .childNodes so that
-        // we don't get into infinite loop compiling ourselves
         $compile(element.contents())(scope);
       }
     );
