@@ -6,7 +6,7 @@ angular.module('starter.controllers', [])
 
   ChannelDao.getAllCount().then( function ( result ){
     $rootScope.totalUnreadCount = result.total_count;
-  });  
+  });
 
   $scope.channelArray = [];
 
@@ -196,26 +196,42 @@ angular.module('starter.controllers', [])
     });
   }
 })
-.controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, Sign, Cache) {
+.controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, $ionicPopup, Sign, Cache) {
   $scope.signIn = function(user) {
 		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
-    $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, function(message, result){
+    $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, function(err, result){
 
-      var loginUser = {};
-      loginUser.app = params.A;
-      loginUser.userId = user.userId;
-      loginUser.password = params.PW;
-      loginUser.deviceId = $rootScope.deviceId;
+      if(err){
+        var alertMessage = {title: 'Login Failed'};
+        if(err == 'ERR-NOTEXIST'){
+          alertMessage.subTitle = 'User is not existed. Please try again.';
+        }else if(err == 'ERR-PASSWORD'){
+          alertMessage.subTitle ='Password is wrong. Please try again.'; // Forgot your password?
+        }else {
+          alertMessage.subTitle = 'Invalid log in or server error. Please try again.';
+        }
 
-      loginUser.image = result.user.DT.I;
-      loginUser.userName = result.user.DT.NM;
-      loginUser.message = result.user.DT.MG;
+        $ionicPopup.alert(alertMessage)/*.then(function(res) {
+        })*/;
 
-      $rootScope.loginUser = loginUser;
-      Sign.setUser( loginUser );
+      }else{
+        var loginUser = {};
+        loginUser.app = params.A;
+        loginUser.userId = user.userId;
+        loginUser.password = params.PW;
+        loginUser.deviceId = $rootScope.deviceId;
 
-      Cache.add(user.userId, {'NM':loginUser.userName, 'I':loginUser.image});
-      $state.go('tab.friends');
+        loginUser.image = result.user.DT.I;
+        loginUser.userName = result.user.DT.NM;
+        loginUser.message = result.user.DT.MG;
+
+        $rootScope.loginUser = loginUser;
+        Sign.setUser( loginUser );
+
+        Cache.add(user.userId, {'NM':loginUser.userName, 'I':loginUser.image});
+        $state.go('tab.friends');
+      }
+
     });
   };
 })
@@ -268,7 +284,7 @@ angular.module('starter.controllers', [])
     initChat( '' );
   } else {
     var friendIds = stateParams.friendIds.split("$");
-    
+
     channelUsers = channelUsers.concat( friendIds );
 
     if( channelUsers.indexOf( loginUser.userId ) < 0 ){
@@ -289,7 +305,7 @@ angular.module('starter.controllers', [])
       createObject.unreadCount = 0;
       ChannelDao.insert( createObject );
 
-      var inviteMsg = "";    
+      var inviteMsg = "";
       if( channelUsers.length > 2 ){
         inviteMsg = UTIL.getInviteMessage( channelUsers );
       }
@@ -313,7 +329,7 @@ angular.module('starter.controllers', [])
     }
   };
 
-  $scope.send = function() {    
+  $scope.send = function() {
     if( $scope.inputMessage != '' ){
       var msg = $scope.inputMessage;
       $scope.inputMessage = '';
@@ -333,7 +349,7 @@ angular.module('starter.controllers', [])
     }
   };
 
-  $scope.showPopup = function() {    
+  $scope.showPopup = function() {
     $scope.datas = [];
     $scope.selection = [];
     $scope.channelUsers = channelUsers;
@@ -342,7 +358,7 @@ angular.module('starter.controllers', [])
       if( friends != undefined ){
         $scope.datas = friends;
       }
-    });    
+    });
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
@@ -429,12 +445,12 @@ angular.module('starter.controllers', [])
 
       navigator.camera.getPicture(onSuccess, onFail, opts);
 
-      function onSuccess(FILE_URI) {              
+      function onSuccess(FILE_URI) {
         console.log(FILE_URI);
 
         inputObj.value = FILE_URI;
 
-        console.log( inputObj) ; 
+        console.log( inputObj) ;
         console.log( inputObj.value );
         $rootScope.xpush.uploadFile( channelId, {
           file: inputObj,
@@ -447,13 +463,13 @@ angular.module('starter.controllers', [])
 
           inputObj.value = "";
           console.log("completed ["+idx+"]: "+JSON.stringify(data));
-          
+
           var imageUrl = $rootScope.xpush.getFileUrl(channelId, tname );
           Chat.send( imageUrl, 'I' );
         });
       }
 
-      function onFail(message) {              
+      function onFail(message) {
         console.log(message);
       }
     } else {
@@ -476,7 +492,7 @@ angular.module('starter.controllers', [])
 
       inputObj.value = "";
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
-      
+
       var imageUrl = $rootScope.xpush.getFileUrl(channelId, tname );
 
       Chat.send( imageUrl, 'I' );
