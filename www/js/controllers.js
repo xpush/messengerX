@@ -1,7 +1,7 @@
 angular.module('starter.controllers', [])
 
 .controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, ChannelDao, Friends, Sign ) {
-  
+  $rootScope.currentChannel = '';
   var loginUserId = Sign.getUser().userId;
 
   ChannelDao.getAllCount().then( function ( result ){
@@ -26,7 +26,7 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, UTIL, Manager) {
-
+  $rootScope.currentChannel = '';
   $scope.listFriend = function(){
     Friends.list(function(friends){
       if( friends != undefined ){
@@ -170,7 +170,7 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('AccountCtrl', function($scope, $rootScope, Sign) {
-
+  $rootScope.currentChannel = '';
   $scope.loginUser = Sign.getUser();
 
   $scope.newImage = '';
