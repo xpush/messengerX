@@ -102,7 +102,45 @@ angular.module('starter.controllers', [])
     $state.go( 'chat' );
   };
 
+  $scope.showPopup = function() {
+    $scope.modal.show();
+  };
+
+  $ionicModal.fromTemplateUrl('templates/modal-friends.html', function(modal) {
+    $scope.modal = modal;
+    $scope.modal.changed = false;
+  }, {
+    animation: 'slide-in-up'
+  });
+  $scope.$on('modal.hidden', function() {
+
+    if($scope.modal.changed){
+      Friends.list(function(friends){
+        if( friends != undefined ){
+          $scope.friends = [];
+          $scope.friends = friends;
+          $scope.friendCount = friends.length;
+          //var current = $state.current;
+          //$state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
+          $scope.modal.changed = false;
+        }
+      });
+    }
+  });
+
+})
+
+.controller('FriendsModalCtrl', function($scope, Users, Friends) {
   $scope.selection = [];
+  console.log('asdfasdfasdfasdf');
+
+  Users.refresh(function(users){
+    if( users != undefined ){
+      $scope.datas = [];
+      $scope.datas = users;
+      $scope.selection = [];
+    }
+  });
 
   $scope.toggleSelection = function( friendId ){
     var inx = $scope.selection.indexOf( friendId );
@@ -113,54 +151,26 @@ angular.module('starter.controllers', [])
     }
   };
 
-  $scope.showPopup = function() {
-    $scope.modal.show();
-  };
-
-  $ionicModal.fromTemplateUrl('templates/modal-friends.html', function(modal) {
-    $scope.modal = modal;
-  }, {
-    animation: 'slide-in-up'
-  });
-
-})
-
-.controller('FriendsModalCtrl', function($scope, Users, Friends) {
-  $scope.selection = [];
-
-  Users.refresh(function(users){
-    if( users != undefined ){
-      $scope.datas = [];
-      $scope.datas = users;
-    }
-  });
-
   $scope.addFriends = function() {
     var res = $scope.selection;
 
-    console.log(res);
-    var addUsers = [];
+    if(res.length > 0){
+      var addUsers = [];
 
-    //TO-DO : Only ID
-    for( var key in res ){
-      if( addUsers.indexOf( res[key] ) < 0 ){
-        addUsers.push( res[key] );
+      //TO-DO : Only ID
+      for( var key in res ){
+        if( addUsers.indexOf( res[key] ) < 0 ){
+          addUsers.push( res[key] );
+        }
       }
+
+      Friends.add( addUsers, function( data ){
+        $scope.modal.changed = true;
+        $scope.modal.hide();
+      });
     }
 
-    Friends.add( addUsers, function( data ){
-      Friends.list(function(friends){
-        if( friends != undefined ){
-          $scope.friends = [];
-          $scope.friends = friends;
-          $scope.friendCount = friends.length;
-          //var current = $state.current;
-          //$state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
-        }
-      });
-    });
 
-    $scope.modal.hide();
   };
 
 })
