@@ -125,7 +125,7 @@ angular.module('starter.services', [])
 
                   if( latestDate != dateStrs[3] ){
                     var dateMessage = dateStrs[1]+" "+dateStrs[2];
-                    $rootScope.currentScope.add( { content : content, type : 'T', date : dateStrs[1], message : dateMessage } );
+                    $rootScope.currentScope.add( { type : 'T', date : dateStrs[1], message : dateMessage } );
                     latestDate = dateStrs[3];
                     $rootScope.currentChannelLatestDate = latestDate;
                   }
@@ -357,7 +357,7 @@ angular.module('starter.services', [])
 
             if( latestDate != dateStrs[3] ){
               var dateMessage = dateStrs[1]+" "+dateStrs[2];
-              messages.push( { content : content, type : 'T', date : dateStrs[1], message : dateMessage } );
+              messages.push( { type : 'T', date : dateStrs[1], message : dateMessage } );
               latestDate = dateStrs[3];
             }
 
