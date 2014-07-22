@@ -361,7 +361,7 @@ angular.module('starter.services', [])
               latestDate = dateStrs[3];
             }
 
-            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I }, afterLoad : "false" );
+            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I, afterLoad : "false" );
           }
 
           $rootScope.currentChannelLatestDate = latestDate;
