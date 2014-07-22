@@ -26,7 +26,7 @@
         </div>
         <div ng-if="message.type=='SI'">
           <span>
-            <img ng-src="{{message.message}}" image-link/>
+            <img ng-src="{{message.message}}" image-link="{{message.afterLoad}}"/>
           </span>
         </div>        
         <div ng-if="message.type=='S'">
