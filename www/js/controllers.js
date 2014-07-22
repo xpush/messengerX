@@ -25,7 +25,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, Friends, Users, UTIL, Manager) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, Friends, Users, UTIL, Manager) {
   $rootScope.currentChannel = '';
   $scope.listFriend = function(){
     Friends.list(function(friends){
@@ -114,61 +114,57 @@ angular.module('starter.controllers', [])
   };
 
   $scope.showPopup = function() {
-
-    $scope.selection = [];
-
-    Users.refresh(function(users){
-      if( users != undefined ){
-        $scope.datas = [];
-        $scope.datas = users;
-      }
-    });
-
-    // An elaborate, custom popup
-    var myPopup = $ionicPopup.show({
-      templateUrl: "templates/popup-friends.html",
-      title: 'Add Friends',
-      //subTitle: 'Please use normal things',
-      scope: $scope,
-      buttons: [
-        { text: 'Cancel' },
-        {
-          text: '<b>Save</b>',
-          type: 'button-positive',
-          onTap: function(e) {
-            return $scope.selection;
-          }
-        },
-      ]
-    });
-
-    myPopup.then(function(res) {
-      if( res != undefined ){
-
-        var addUsers = [];
-
-        //TO-DO : Only ID
-        for( var key in res ){
-          if( addUsers.indexOf( res[key] ) < 0 ){
-            addUsers.push( res[key] );
-          }
-        }
-
-        Friends.add( addUsers, function( data ){
-          Friends.list(function(friends){
-            if( friends != undefined ){
-              $scope.friends = [];
-              $scope.friends = friends;
-              $scope.friendCount = friends.length;
-              //var current = $state.current;
-              //$state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
-            }
-          });
-        });
-      }
-    });
+    $scope.modal.show();
   };
+
+  $ionicModal.fromTemplateUrl('templates/modal-friends.html', function(modal) {
+    $scope.modal = modal;
+  }, {
+    animation: 'slide-in-up'
+  });
+
 })
+
+.controller('FriendsModalCtrl', function($scope, Users, Friends) {
+  $scope.selection = [];
+
+  Users.refresh(function(users){
+    if( users != undefined ){
+      $scope.datas = [];
+      $scope.datas = users;
+    }
+  });
+
+  $scope.addFriends = function() {
+    var res = $scope.selection;
+
+    console.log(res);
+    var addUsers = [];
+
+    //TO-DO : Only ID
+    for( var key in res ){
+      if( addUsers.indexOf( res[key] ) < 0 ){
+        addUsers.push( res[key] );
+      }
+    }
+
+    Friends.add( addUsers, function( data ){
+      Friends.list(function(friends){
+        if( friends != undefined ){
+          $scope.friends = [];
+          $scope.friends = friends;
+          $scope.friendCount = friends.length;
+          //var current = $state.current;
+          //$state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
+        }
+      });
+    });
+
+    $scope.modal.hide();
+  };
+
+})
+
 .controller('AccountCtrl', function($scope, $rootScope, Sign) {
   $rootScope.currentChannel = '';
   $scope.loginUser = Sign.getUser();

@@ -66,7 +66,7 @@ body {
 	max-width: 200px;
 	min-height: 22px;
 	border-radius:.75rem;
-	display:block;	
+	display:block;
 }
 
 .messages .from span.time {
@@ -108,7 +108,7 @@ body {
 .messages li.SI img {
 	display:block;
 	border-radius:.75rem;
-	max-width: 200px;	
+	max-width: 200px;
 	min-height: 22px;
 }
 
@@ -286,6 +286,16 @@ paper-input {
 	max-height: 80px;
 	display:block;
  }
+
+ .img-friend{
+    float: left;
+    margin-right: 10px;
+    top: 15px;
+    left: 15px;
+    max-width: 45px;
+    max-height: 45px;
+    width: 100%;
+    border-radius: 4px; }
 
 /*
 * override ionic css
