@@ -7,7 +7,35 @@
 <ion-view title="{{channelName}}">
   <ion-content padding="true" class="has-header" start-y="120">
     <ol class="messages">
-      <li ng-repeat="message in messages" bind-html-compile="message.content" ng-class="message.from"></li>
+      <li ng-repeat="message in messages" ng-class="message.type">
+        <div ng-if="message.type=='R'">
+          <div class="small">{{message.name}}</div>
+          <div class="from">
+            <img ng-src="{{message.image}}" class="profile" />
+            <span class="from">{{message.message}}</span>
+          </div>
+        </div>
+        <div ng-if="message.type=='RI'">
+          <div class="small">{{message.name}}</div>
+          <div class="from">
+            <img ng-src="{{message.image}}" class="profile" />
+            <span>
+              <img ng-src="{{message.message}}" image-link="{{message.afterLoad}}" class="from"/>
+            </span>
+          </div>
+        </div>
+        <div ng-if="message.type=='SI'">
+          <span>
+            <img ng-src="{{message.message}}" image-link/>
+          </span>
+        </div>        
+        <div ng-if="message.type=='S'">
+          <span>{{message.message}}</span>
+        </div>
+        <div ng-if="message.type=='T' || message.type=='J'">
+          <span class="date">{{message.message}}</span>
+        </div>                              
+      </li>      
     </ol>
     <input type="file" id="file"/>  
   </ion-content>

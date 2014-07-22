@@ -91,7 +91,7 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Manager', function($http, $rootScope, Sign, ChannelDao, MessageDao, UTIL ) {
+.factory('Manager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, UTIL ) {
   var initFlag = false;
   return {
     init : function(callback){
@@ -121,46 +121,16 @@ angular.module('starter.services', [])
 
                 if( ch == $rootScope.currentChannel ){
                   var latestDate = $rootScope.currentChannelLatestDate;
-
-                  var content;
                   var dateStrs = UTIL.timeToString( data.TS );
 
                   if( latestDate != dateStrs[3] ){
-                    content = '<span class="date">'+dateStrs[1]+" "+dateStrs[2]+'</span>';
-                    $rootScope.currentScope.add( { content : content, from : 'T', date : dateStrs[1] } );
+                    var dateMessage = dateStrs[1]+" "+dateStrs[2];
+                    $rootScope.currentScope.add( { content : content, type : 'T', date : dateStrs[1], message : dateMessage } );
                     latestDate = dateStrs[3];
                     $rootScope.currentChannelLatestDate = latestDate;
                   }
 
-                  if(data.type == 'R'){
-
-                    content = '<div class="small">'+ data.UO.NM+'</div>' ;
-                    content += '<div class="from">';
-                    content += '<img src="'+ data.UO.I+'" class="profile"/>';
-                    content += '<span >'+ data.MG +'</span>';
-                    content += '</div>'
-                    
-                  } else if( data.type == 'J' ) {
-                    content = '<span class="date">'+data.MG+'</span>';
-                  } else if( data.type == 'SI' ) {
-                    content = '<span>';
-                    content += '<img src="'+data.MG+'" image-link="true" ></img>';
-                    content += '</span>';
-                  } else if( data.type == 'RI' ) {
-                    content = '<div class="small">'+ data.UO.NM+'</div>' ;
-                    content += '<div class="from">'
-                    content += '<img src="'+ data.UO.I+'" class="profile"/>';
-                    content += '<span>';
-                    content += '<img src="'+data.MG+'" image-link="true" load class="from"></img>';
-                    content += '</span>';
-                    content += '</div>';
-                  } else {
-                    content = '<span>'+data.MG+'</span>';
-                  }
-
-                  //content = $sce.trustAsHtml( content );
-
-                  var nextMessage = { content : content, from : data.type, date : dateStrs[1] };
+                  var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, afterLoad : "true" };
 
                   // Add to DB
                   MessageDao.add( data );
@@ -192,7 +162,7 @@ angular.module('starter.services', [])
                     if( data.T != undefined && data.T == 'I' ){
                       channel.message = "@image@";
                     } else {
-                      channel.message = decodeURIComponent( data.MG );
+                      channel.message = data.MG;
                     }
 
                     if( channelJson.DT.UC > 2 ){
@@ -381,43 +351,17 @@ angular.module('starter.services', [])
             var data = messageArray[inx];
             var dateStrs = UTIL.timeToString( data.time );
 
-            var content;
             if( inx > 0 ){
               latestDate =  UTIL.timeToString( messageArray[inx-1].time )[3];
             }
 
             if( latestDate != dateStrs[3] ){
-              content = '<span class="date">'+dateStrs[1]+" "+dateStrs[2]+'</span>';
-              messages.push( { content : content, from : 'T', date : dateStrs[1] } );
+              var dateMessage = dateStrs[1]+" "+dateStrs[2];
+              messages.push( { content : content, type : 'T', date : dateStrs[1], message : dateMessage } );
               latestDate = dateStrs[3];
             }
 
-            if(data.type == 'R'){                
-              content = '<div class="small">'+ data.sender_name+'</div>' ;
-              content += '<div class="from">'
-              content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
-              content += '<span class="from">'+data.message+'</span>';
-              content += '</div>';
-            } else if( data.type =='J' ) {
-              content = '<span class="date">'+data.message+'</span>';
-            } else if( data.type == 'SI' ) {
-              content = '<span>';
-              content += '<img src="'+data.message+'" image-link/>';
-              content += '</span>'; 
-            } else if( data.type == 'RI' ) {
-              content = '<div class="small">'+ data.sender_name+'</div>' ;
-              content += '<div class="from">'
-              content += '<img src="'+ Cache.get( data.sender_id ).I+'" class="profile"/>';
-              content += '<span>';
-              content += '<img src="'+data.message+'" image-link class="from"/></img>';            
-              content += '</span>';
-              content += '</div>';
-            } else {
-              content = '<span ng-click="alert(\'123\');">'+data.message+'</span>';
-            }
-
-            //content = $sce.trustAsHtml( content );
-            messages.push( { content : content, from : data.type, date : dateStrs[1] } );
+            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I } );
           }
 
           $rootScope.currentChannelLatestDate = latestDate;
@@ -429,18 +373,7 @@ angular.module('starter.services', [])
       }
     },
     send : function(msg, type){
-      var param = {
-        A:      CONF._app,
-        C:  CONF._channel,
-        NM:     'MG',
-        DT:     {
-          UO:     CONF._user,
-          MG:  msg,
-          S : CONF._user.U
-        }
-      };
-
-      var DT = {UO:CONF._user,MG:msg,S : CONF._user.U};
+      var DT = {UO:CONF._user,MG:encodeURIComponent(msg),S : CONF._user.U};
 
       if( type !=undefined ){
         DT.T = type;

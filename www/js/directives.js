@@ -85,7 +85,7 @@ angular.module('starter.directives', [])
       },
       function(value) {
         element.html(value);
-        $compile(element.contents())(scope);
+        //$compile(element.contents())(scope);
       }
     );
   };

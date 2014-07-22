@@ -5,7 +5,7 @@
   </div>
   <li class="item item-checkbox item-users" ng-repeat="data in datas" >	
     <label class="checkbox" >
-      <input type="checkbox" ng-click="toggleSelection('{{data.user_id}}')" ng-checked="selection.indexOf('{{data.user_id}}') > -1 || channelUsers.indexOf('{{data.user_id}}') > -1 " ng-disabled="channelUsers.indexOf('{{data.user_id}}') > -1"/>
+      <input type="checkbox" ng-click='toggleSelection("{{data.user_id}}")' ng-checked='selection.indexOf("{{data.user_id}}") > -1 || channelUsers.indexOf("{{data.user_id}}") > -1 ' ng-disabled='channelUsers.indexOf("{{data.user_id}}") > -1'/>
     </label>
   	<img ng-src="{{data.image}}"></img>
     <p>{{data.user_name}}</p>    
