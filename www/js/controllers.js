@@ -464,7 +464,7 @@ angular.module('starter.controllers', [])
 
   $scope.emoticons = [];
   $scope.emoticons.push( { '01' : '../img/emo/s2/anger.PNG', '02' : '../img/emo/s2/burn.PNG', '03' : '../img/emo/s2/cool.PNG', '04' : '../img/emo/s2/love.PNG', '05' : '../img/emo/s2/shout.PNG', '06' : '../img/emo/s2/smile.PNG' } );
-  $scope.emoticons.push( { '01' : '../img/emo/b2/anger.PNG', '02' : '../img/emo/b2/cry.PNG', '03' : '../img/emo/b2/haha.PNG', '04' : '../img/emo/b2/money.PNG', '05' : '../img/emo/b2/shocked.PNG', '06' : '../img/emo/b2/victory.PNG' } );
+  $scope.emoticons.push( { '01' : '../img/emo/b2/anger.png', '02' : '../img/emo/b2/cry.png', '03' : '../img/emo/b2/haha.png', '04' : '../img/emo/b2/money.png', '05' : '../img/emo/b2/shocked.png', '06' : '../img/emo/b2/victory.png' } );
 
   $scope.curEmoTabId = "0";
   $scope.showEmo = "false";
