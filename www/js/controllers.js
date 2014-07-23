@@ -52,7 +52,7 @@ angular.module('starter.controllers', [])
   if( $rootScope.firstFlag ){
     $scope.listFriend();
     //$scope.syncFriends();
-    Manager.init();    
+    Manager.init();
     $rootScope.firstFlag = false;
   } else {
     $scope.listFriend();
@@ -200,6 +200,20 @@ angular.module('starter.controllers', [])
   }
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, $ionicPopup, Sign, Cache) {
+
+  var url = $location.url();
+  if(url.indexOf('?') > -1) {
+    var mode = url.slice(url.indexOf('?') + 1, url.length);
+    if(mode == 'LOGOUT'){
+      var alertMessage = {
+        title: 'Log out.',
+        subTitle: 'Auto logout feature and closing of session.'
+      };
+      $ionicPopup.alert(alertMessage);
+    }
+  }
+
+
   $scope.signIn = function(user) {
 		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
     $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, function(err, result){
@@ -247,7 +261,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, Friends, Sign, Chat, ChannelDao, UTIL) {
+.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, $window, Friends, Sign, Chat, ChannelDao, UTIL) {
   $rootScope.currentScope = $scope;
 
   var loginUser = Sign.getUser();
@@ -357,7 +371,7 @@ angular.module('starter.controllers', [])
     footerAdvance.style.display = "flex";
 
     document.getElementById( "btn-plus" ).style.display = "none";
-    document.getElementById( "btn-close" ).style.display = "block";    
+    document.getElementById( "btn-close" ).style.display = "block";
   };
 
   $scope.closePopup = function() {
@@ -366,7 +380,7 @@ angular.module('starter.controllers', [])
 
     document.getElementById( "btn-close" ).style.display = "none";
     document.getElementById( "btn-plus" ).style.display = "block";
-  };    
+  };
 
   $scope.openFriendsModal  = function() {
     $scope.datas = [];
@@ -452,7 +466,11 @@ angular.module('starter.controllers', [])
   });
 
   $scope.openWebRTC = function( ){
-    alert( 'Comming Soon..' );
+
+
+    var left = screen.width/2 - 400
+        , top = screen.height/2 - 300
+        , popup = $window.open(imgUrl, '', "top=" + top + ",left=" + left + ",width=800,height=600");
   };
 
   $scope.emoticons = [];

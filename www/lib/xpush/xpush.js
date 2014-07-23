@@ -8,8 +8,8 @@
   ,SS:'socketId',CD:'createDate',UD:'updateDate'};
 
   var socketOptions ={
-  	transports: ['websocket']
-  	,'force new connection': true
+    transports: ['websocket']
+    ,'force new connection': true
   };
 
   var RMKEY = 'message';
@@ -27,14 +27,14 @@
     self._sessionConnection;
     self.maxConnection = 5;
     self.maxTimeout = 30000;
-  	self.channelNameList = [];
+    self.channelNameList = [];
     self.hostname = host;
     self.receiveMessageStack = [];
     self.isExistUnread = true;
 
-  	self.on('newChannel',function(data){
-  		self.channelNameList.push( data.chNm );
-  	});
+    self.on('newChannel',function(data){
+      self.channelNameList.push( data.chNm );
+    });
 
     if(eventHandler){
       self._isEventHandler = true;
@@ -45,7 +45,7 @@
   XPush.Context = {
     SessionServer : '/session', //'/session',
     ChannelServer : '/cs', // /cs/:channel ( header: appKey )
-  	SIGNUP : '/user/register',
+    SIGNUP : '/user/register',
     LOGIN : '/auth',
     Channel : '/channel',
     Signout : '/signout',
@@ -86,15 +86,15 @@
         // result.result = {"token":"HS6pNwzBoK","server":"215","serverUrl":"http://www.notdol.com:9990"};
         var c = self._sessionConnection = new Connection(self, SESSION, result.result);
 
-    		c.connect(function(){
-    			console.log("xpush : login end", self.userId);
-    			self.initSessionSocket(self._sessionConnection._socket, function(){
+        c.connect(function(){
+          console.log("xpush : login end", self.userId);
+          self.initSessionSocket(self._sessionConnection._socket, function(){
             if(cbLogin) cbLogin(result.message, result.result); // @ TODO from yohan.
           });
-    		});
+        });
       }else{
         if(cbLogin) cbLogin(result.message);
-      	alert('xpush : login error'+ result.message);
+        alert('xpush : login error'+ result.message);
       }
     });
   };
@@ -122,16 +122,16 @@
       //created: "2014-06-29T16:08:06.684Z"i
       console.log("xpush : createChannel end", err);
       console.log("xpush : createChannel end", result);
-  	  if(err && err != 'WARN-EXISTED') {
-  	  	if(cb){
+      if(err && err != 'WARN-EXISTED') {
+        if(cb){
           cb(err, result);
         }
-  	  }
+      }
       channelNm = result.C || channelNm;
       self.getChannelInfo(channelNm,function(err,data){
         //channel , seq, server.channel,name,url
 
-    		if(err){
+        if(err){
           console.log(" == node channel " ,err);
         }else if ( data.status == 'ok'){
           newChannel.setServerInfo(data.result);
@@ -233,10 +233,10 @@
   };
 
   XPush.prototype.exitChannel = function(chNm, cb){
-  	var self = this;
-  	self.sEmit('channel-exit', {C: chNm}, function(err, result){
+    var self = this;
+    self.sEmit('channel-exit', {C: chNm}, function(err, result){
         if(cb) cb(err,result);
-  	});
+    });
   };
 
   XPush.prototype.uploadFile = function(channel, inputObj, fnPrg, fnCallback){
@@ -347,12 +347,12 @@
 
   XPush.prototype.isExistChannel = function(chNm){
     var self = this;
-  	for(var i = 0 ; i < self.channelNameList.length ; i++){
-  		if(self.channelNameList[i] == chNm){
-  			return true;
-  		}
-  	}
-  	return false;
+    for(var i = 0 ; i < self.channelNameList.length ; i++){
+      if(self.channelNameList[i] == chNm){
+        return true;
+      }
+    }
+    return false;
   };
 
   //params.key, value
@@ -414,7 +414,7 @@
 
   XPush.prototype.getGroupUsers = function(groupId,cb){
     var self = this;
-	if(typeof(arguments[0]) == 'function') {cb = arguments[0]; groupId = undefined;}
+  if(typeof(arguments[0]) == 'function') {cb = arguments[0]; groupId = undefined;}
     groupId = groupId ? groupId : self.userId;
     self.sEmit('group-list',{'GR': groupId}, function(err,result){
       cb(err,result);
@@ -423,7 +423,7 @@
 
   XPush.prototype.addUserToGroup = function(groupId, userIds,cb){
     var self = this;
-  	if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userIds = groupId; groupId = undefined;}
+    if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userIds = groupId; groupId = undefined;}
     groupId = groupId ? groupId : self.userId;
     userIds = userIds ? userIds : [];
     self.sEmit('group-add',{'GR': groupId, 'U': userIds}, function(err,result){
@@ -434,7 +434,7 @@
 
   XPush.prototype.removeUserFromGroup = function(groupId, userId, cb){
     var self = this;
-	if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userId = groupId; groupId = undefined;}
+  if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userId = groupId; groupId = undefined;}
     groupId = groupId ? groupId : self.userId;
 
     self.sEmit('group-remove',{'GR': groupId, userId: userId}, function(err, result){
@@ -456,7 +456,7 @@
   XPush.prototype.initSessionSocket = function(socket,cb){
     var self = this;
     socket.on('_event',function(data){
-      console.log('xpush : session receive ', '_event', data.C,data.NM,data.DT, self.userId);
+      console.log('xpush : session receive ', data.event, data.C,data.NM,data.DT, self.userId);
       // data.event = NOTIFICATION
       // channel,name, timestamp, data= {}
       switch(data.event){
@@ -488,6 +488,11 @@
 
         case 'DISCONNECT' :
           self.emit('___session_event', 'SESSION', data);
+        break;
+
+        case 'LOGOUT' :
+          console.log('LOGOUT', data);
+          self.emit('___session_event', 'LOGOUT', data);
         break;
 
       }
@@ -676,7 +681,7 @@
   };
 
   XPush.prototype.off = function(event, fct){
-  	var self = this;
+    var self = this;
     self._events = self._events || {};
     if( event in self._events === false  )  return;
     self._events[event].splice(self._events[event].indexOf(fct), 1);
@@ -706,7 +711,7 @@
     this._socketStatus; // disconnected, connected
     this._socket;
     this.checkTimer;
-  	this.info;
+    this.info;
     this.messageStack = [];
     this.isFirtConnect = true;
     this._connected = false;
@@ -732,14 +737,14 @@
   Connection.prototype.setServerInfo = function(info,cb){
     console.log("xpush : setServerInfo ", info);
     var self = this;
-  	self.info = info;
-  	self._server = {serverUrl : info.server.url};
-  	self.chNm = info.channel;
-  	self.connect(function(){
+    self.info = info;
+    self._server = {serverUrl : info.server.url};
+    self.chNm = info.channel;
+    self.connect(function(){
       console.log("xpush : setServerInfo end ", arguments,self._xpush.userId, self.chNm);
       //self.connectionCallback();
       if(cb) cb();
-  	});
+    });
   };
 
   Connection.prototype.connect = function(cbConnect, mode){
@@ -792,10 +797,10 @@
     var self = this;
     console.log("xpush : connection ",'connectionCallback',self._type, self._xpush.userId,self.chNm);
 
-  	self._socket.on('message',function(data){
-  		console.log("xpush : channel receive ", self.chNm, data, self._xpush.userId);
-  		self._xpush.emit(RMKEY, self.chNm, RMKEY , data);
-  	});
+    self._socket.on('message',function(data){
+      console.log("xpush : channel receive ", self.chNm, data, self._xpush.userId);
+      self._xpush.emit(RMKEY, self.chNm, RMKEY , data);
+    });
 
 
     if(self._xpush._isEventHandler) {
@@ -824,7 +829,7 @@
   };
 
   Connection.prototype.send = function(name, data,cb){
-  	var self = this;
+    var self = this;
     if(self._connected){
       self._socket.emit('send', {NM: name , DT: data});
     }else{

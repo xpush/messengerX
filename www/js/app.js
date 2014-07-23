@@ -34,6 +34,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.deviceId = 'ionic';
     }
 
+    // webrtc support ?
+    if (
+      (navigator.mozGetUserMedia && window.mozRTCPeerConnection) ||
+      (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection)
+    ){
+      $rootScope.supportWebRTC = true;
+    }else{
+      $rootScope.supportWebRTC = false;
+    }
+
     $rootScope.localNoti = function(param, callback){
       if( window.plugin && window.plugin.notification.local ){
         window.plugin.notification.local.add({
@@ -60,7 +70,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           if ( e.regid.length > 0 ){
             console.log("regID = " + e.regid);
             $rootScope.notiId = e.regid;
-            //$rootScope.deviceId =            
+            //$rootScope.deviceId =
           }
           break;
 
@@ -95,12 +105,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     function successHandler(result) {
       console.log( 'result = '+result );
     }
-         
+
     // result contains any error description text returned from the plugin call
     function errorHandler(error) {
       console.log( 'error = '+result );
     }
-             
+
     function tokenHandler(result) {
       console.log( 'device token = '+result );
     }
@@ -110,7 +120,13 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     var HOST = "http://stalk-front-s01.cloudapp.net:8000";
     var APPID = 'messengerx';
 
-    $rootScope.xpush = new XPush(HOST, APPID);
+    $rootScope.xpush = new XPush(HOST, APPID, function (type, data){
+
+      if(type == 'LOGOUT'){
+        window.location.href = '/#/sign-in?LOGOUT';
+      }
+
+    });
 
     // tootScope function
     $rootScope.logout = function(){
@@ -149,14 +165,14 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       url: '/chat',
       templateUrl: "templates/chat.html",
       controller: 'ChatCtrl'
-    })       
+    })
 
     // setup an abstract state for the tabs directive
     .state('tab', {
       url: "/tab",
       abstract: true,
       templateUrl: "templates/tabs.html"
-    }) 
+    })
 
     // Each tab has its own nav history stack:
     .state('tab.channel', {
