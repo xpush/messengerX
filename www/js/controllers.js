@@ -109,11 +109,11 @@ angular.module('starter.controllers', [])
   $ionicModal.fromTemplateUrl('templates/modal-friends.html', function(modal) {
     $scope.modal = modal;
     $scope.modal.changed = false;
+    $scope.modal.selection = [];
   }, {
     animation: 'slide-in-up'
   });
   $scope.$on('modal.hidden', function() {
-
     if($scope.modal.changed){
       Friends.list(function(friends){
         if( friends != undefined ){
@@ -127,50 +127,46 @@ angular.module('starter.controllers', [])
       });
     }
   });
+  $scope.$on('modal.shown', function() {
+    $scope.modal.selection = [];
+    $scope.modal.changed = false;
+    Users.refresh(function(users){
+      if( users != undefined ){
+        $scope.modal.datas = [];
+        $scope.modal.datas = users;
+        $scope.modal.selection = [];
+      }
+    });
 
+  });
 })
 
 .controller('FriendsModalCtrl', function($scope, Users, Friends) {
-  $scope.selection = [];
-  console.log('asdfasdfasdfasdf');
-
-  Users.refresh(function(users){
-    if( users != undefined ){
-      $scope.datas = [];
-      $scope.datas = users;
-      $scope.selection = [];
-    }
-  });
 
   $scope.toggleSelection = function( friendId ){
-    var inx = $scope.selection.indexOf( friendId );
+    var inx = $scope.modal.selection.indexOf( friendId );
     if( inx > -1 ){
-      $scope.selection.splice(inx, 1);
+      $scope.modal.selection.splice(inx, 1);
     } else {
-      $scope.selection.push( friendId );
+      $scope.modal.selection.push( friendId );
     }
   };
 
   $scope.addFriends = function() {
-    var res = $scope.selection;
+    var res = $scope.modal.selection;
 
     if(res.length > 0){
       var addUsers = [];
-
-      //TO-DO : Only ID
       for( var key in res ){
         if( addUsers.indexOf( res[key] ) < 0 ){
           addUsers.push( res[key] );
         }
       }
-
       Friends.add( addUsers, function( data ){
         $scope.modal.changed = true;
         $scope.modal.hide();
       });
     }
-
-
   };
 
 })

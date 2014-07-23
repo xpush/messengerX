@@ -3,14 +3,14 @@
   <ion-header-bar class="bar bar-header bar-positive">
     <button class="button button-icon ion-close" ng-click="modal.hide()"></button>
     <h1 class="title">Search your friends</h1>
-    <button class="button button-icon icon-right ion-checkmark" ng-click="addFriends()" ng-disabled='selection.length == 0'>OK&nbsp;</button>
+    <button class="button button-icon icon-right ion-checkmark" ng-click="addFriends()" ng-disabled='modal.selection.length == 0'>OK&nbsp;</button>
   </ion-header-bar>
 
   <ion-content> <!-- class="has-header" -->
     <ion-list>
-      <ion-item class="item item-checkbox" ng-repeat="data in datas">
+      <ion-item class="item item-checkbox" ng-repeat="data in modal.datas">
         <label class="checkbox" >
-          <input type="checkbox" ng-click='toggleSelection("{{data.user_id}}")' ng-checked='selection.indexOf("{{data.user_id}}") > -1 || channelUsers.indexOf("{{data.user_id}}") > -1 ' ng-disabled='channelUsers.indexOf("{{data.user_id}}") > -1'/>
+          <input type="checkbox" ng-click='toggleSelection("{{data.user_id}}")' ng-checked='modal.selection.indexOf("{{data.user_id}}") > -1 || channelUsers.indexOf("{{data.user_id}}") > -1 ' ng-disabled='channelUsers.indexOf("{{data.user_id}}") > -1'/>
         </label>
         <img class="img-friend" ng-src="{{data.image}}" />
         <h2>{{data.user_name}}</h2>
@@ -18,7 +18,7 @@
       </ion-item>
     </ion-list>
     <div class="card">
-      <div class="item item-text-wrap" ng-if="datas.length == 0">
+      <div class="item item-text-wrap" ng-if="modal.datas.length == 0">
         User is not existed.
       </div>
     </div>
