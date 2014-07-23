@@ -453,7 +453,24 @@ angular.module('starter.controllers', [])
 
   $scope.openWebRTC = function( ){
     alert( 'Comming Soon..' );
-  }
+  };
+
+  $scope.emoticons = [];
+  $scope.emoticons.push( { 'id':'01', 'url' : '../img/emo/anger.PNG' } );
+  $scope.emoticons.push( { 'id':'02', 'url' : '../img/emo/burn.PNG' } );
+  $scope.emoticons.push( { 'id':'03', 'url' : '../img/emo/cool.PNG' } );
+  $scope.emoticons.push( { 'id':'04', 'url' : '../img/emo/love.PNG' } );
+  $scope.emoticons.push( { 'id':'05', 'url' : '../img/emo/shout.PNG' } );
+  $scope.emoticons.push( { 'id':'06', 'url' : '../img/emo/smile.PNG' } );
+
+  $scope.showEmoticons = function(){
+    document.getElementById( 'chat-emoticons' ).style.display = "flex";
+  };
+
+  $scope.sendEmoticon = function(url){
+    document.getElementById( 'chat-emoticons' ).style.display = "none";
+    Chat.send( url, 'I' );
+  };
 
   var inputObj = document.getElementById('file');
   $scope.openFileDialog = function( sourceType ) {

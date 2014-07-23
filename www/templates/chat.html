@@ -41,7 +41,9 @@
   </ion-content>
   <ion-footer-bar class="bar-frosted" >
     <button id="btn-plus" class="button icon ion-plus-round" ng-click="showPopup()"></button>
-    <button id="btn-close" style="display:none;" class="button icon ion-close-round" ng-click="closePopup()"></button>
+    <button id="btn-close" style="display:none;" class="button icon ion-close-round" ng-click="closePopup()"></button>    
+    <button id="btn-happy" class="button icon ion-happy" ng-click="showEmoticons()"></button>
+
     <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 10px 0 10px;"/>
     <button class="button button-positive" style="min-width:50px;" ng-click="send()" >Send </button>
   </ion-footer-bar>
@@ -51,13 +53,18 @@
     <button class="button icon ion-filing" ng-click="openFileDialog()" ></button>
   -->
     <div class="col">
-      <img src="../www/img/image.png" ng-click="openFileDialog('1')"/>
+      <img src="../img/image.png" ng-click="openFileDialog('1')"/>
     </div>
     <div class="col" ng-if="device.flatform == 'android'">
-      <img src="../www/img/camera.png" ng-click="openFileDialog('2')"/>
+      <img src="../img/camera.png" ng-click="openFileDialog('2')"/>
     </div>
     <div class="col" >
-      <img src="../www/img/videocameracompact.png" ng-click="openWebRTC()"/>
+      <img src="../img/videocameracompact.png" ng-click="openWebRTC()"/>
     </div>
   </div>
+  <div class="chat-emoticon row" id="chat-emoticons" >
+    <div class="col" ng-repeat="emoticon in emoticons">
+      <img ng-src="{{emoticon.url}}" ng-click="sendEmoticon( '{{emoticon.url}}' )" />
+    </div>
+  </div>  
 </ion-view>

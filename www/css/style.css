@@ -311,7 +311,7 @@ paper-input {
 	display: none;
 }
 
-.chat-extends{
+.chat-extends, .chat-emoticon{
 	display:none;
 	position:absolute;
 	z-index:999;
@@ -325,4 +325,9 @@ paper-input {
 
 .chat-extends div{
 	text-align: center;
+}
+
+.chat-emoticon img{
+	width:150px;
+	height:150px;
 }
