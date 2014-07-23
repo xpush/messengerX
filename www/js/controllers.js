@@ -201,19 +201,6 @@ angular.module('starter.controllers', [])
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, $ionicPopup, Sign, Cache) {
 
-  var url = $location.url();
-  if(url.indexOf('?') > -1) {
-    var mode = url.slice(url.indexOf('?') + 1, url.length);
-    if(mode == 'LOGOUT'){
-      var alertMessage = {
-        title: 'Log out.',
-        subTitle: 'Auto logout feature and closing of session.'
-      };
-      $ionicPopup.alert(alertMessage);
-    }
-  }
-
-
   $scope.signIn = function(user) {
 		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
     $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, function(err, result){
@@ -477,7 +464,7 @@ angular.module('starter.controllers', [])
   $scope.emoticons.push( { '01' : '../img/emo/anger.PNG', '02' : '../img/emo/burn.PNG', '03' : '../img/emo/cool.PNG' } );
   $scope.emoticons.push( { '04' : '../img/emo/love.PNG', '05' : '../img/emo/shout.PNG', '06' : '../img/emo/smile.PNG' } );
 
-  $scope.showEmoticons = function(){    
+  $scope.showEmoticons = function(){
     document.getElementById( 'tabbody0' ).style.display = "flex";
     document.getElementById( 'chat-emoticons' ).style.display = "block";
   };
@@ -487,18 +474,18 @@ angular.module('starter.controllers', [])
     Chat.send( url, 'I' );
   };
 
-  $scope.tabActive = function( tabId ){      
+  $scope.tabActive = function( tabId ){
     var tabs = document.getElementById( 'emoticon-tabs' ).getElementsByTagName( "a" );
 
     for( var inx = 0 ; inx < tabs.length;inx++ ){
       if( tabs[inx].id == "tab"+tabId ){
-        tabs[inx].className = "tab-item tab-item-active";      
+        tabs[inx].className = "tab-item tab-item-active";
         document.getElementById( "tabbody"+inx ).style.display = "flex";
       } else {
         tabs[inx].className = "tab-item";
         document.getElementById( "tabbody"+inx ).style.display = "none";
       }
-    } 
+    }
   };
 
   var inputObj = document.getElementById('file');

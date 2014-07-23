@@ -123,7 +123,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     $rootScope.xpush = new XPush(HOST, APPID, function (type, data){
 
       if(type == 'LOGOUT'){
-        window.location.href = '/#/sign-in?LOGOUT';
+        window.location = '/err.html?LOGOUT';
       }
 
     });
