@@ -456,20 +456,31 @@ angular.module('starter.controllers', [])
   };
 
   $scope.emoticons = [];
-  $scope.emoticons.push( { 'id':'01', 'url' : '../img/emo/anger.PNG' } );
-  $scope.emoticons.push( { 'id':'02', 'url' : '../img/emo/burn.PNG' } );
-  $scope.emoticons.push( { 'id':'03', 'url' : '../img/emo/cool.PNG' } );
-  $scope.emoticons.push( { 'id':'04', 'url' : '../img/emo/love.PNG' } );
-  $scope.emoticons.push( { 'id':'05', 'url' : '../img/emo/shout.PNG' } );
-  $scope.emoticons.push( { 'id':'06', 'url' : '../img/emo/smile.PNG' } );
+  $scope.emoticons.push( { '01' : '../www/img/emo/anger.PNG', '02' : '../www/img/emo/burn.PNG', '03' : '../www/img/emo/cool.PNG' } );
+  $scope.emoticons.push( { '04' : '../www/img/emo/love.PNG', '05' : '../www/img/emo/shout.PNG', '06' : '../www/img/emo/smile.PNG' } );
 
-  $scope.showEmoticons = function(){
-    document.getElementById( 'chat-emoticons' ).style.display = "flex";
+  $scope.showEmoticons = function(){    
+    document.getElementById( 'tabbody0' ).style.display = "flex";
+    document.getElementById( 'chat-emoticons' ).style.display = "block";
   };
 
   $scope.sendEmoticon = function(url){
     document.getElementById( 'chat-emoticons' ).style.display = "none";
     Chat.send( url, 'I' );
+  };
+
+  $scope.tabActive = function( tabId ){      
+    var tabs = document.getElementById( 'emoticon-tabs' ).getElementsByTagName( "a" );
+
+    for( var inx = 0 ; inx < tabs.length;inx++ ){
+      if( tabs[inx].id == "tab"+tabId ){
+        tabs[inx].className = "tab-item tab-item-active";      
+        document.getElementById( "tabbody"+inx ).style.display = "flex";
+      } else {
+        tabs[inx].className = "tab-item";
+        document.getElementById( "tabbody"+inx ).style.display = "none";
+      }
+    } 
   };
 
   var inputObj = document.getElementById('file');
