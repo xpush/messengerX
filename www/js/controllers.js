@@ -456,8 +456,8 @@ angular.module('starter.controllers', [])
   };
 
   $scope.emoticons = [];
-  $scope.emoticons.push( { '01' : '../www/img/emo/anger.PNG', '02' : '../www/img/emo/burn.PNG', '03' : '../www/img/emo/cool.PNG' } );
-  $scope.emoticons.push( { '04' : '../www/img/emo/love.PNG', '05' : '../www/img/emo/shout.PNG', '06' : '../www/img/emo/smile.PNG' } );
+  $scope.emoticons.push( { '01' : '../img/emo/anger.PNG', '02' : '../img/emo/burn.PNG', '03' : '../img/emo/cool.PNG' } );
+  $scope.emoticons.push( { '04' : '../img/emo/love.PNG', '05' : '../img/emo/shout.PNG', '06' : '../img/emo/smile.PNG' } );
 
   $scope.showEmoticons = function(){    
     document.getElementById( 'tabbody0' ).style.display = "flex";
