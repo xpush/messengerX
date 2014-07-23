@@ -352,6 +352,22 @@ angular.module('starter.controllers', [])
   };
 
   $scope.showPopup = function() {
+    var footerAdvance = document.getElementById( "chat-extends" );
+    footerAdvance.style.display = "block";
+
+    document.getElementById( "btn-plus" ).style.display = "none";
+    document.getElementById( "btn-close" ).style.display = "block";    
+  };
+
+  $scope.closePopup = function() {
+    var footerAdvance = document.getElementById( "chat-extends" );
+    footerAdvance.style.display = "none";
+
+    document.getElementById( "btn-close" ).style.display = "none";
+    document.getElementById( "btn-plus" ).style.display = "block";
+  };    
+
+  $scope.openFriendsModal  = function() {
     $scope.datas = [];
     $scope.selection = [];
     $scope.channelUsers = channelUsers;

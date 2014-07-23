@@ -23,7 +23,7 @@ angular.module('starter.constants', [])
           {name: 'time', type: 'integer'},
           {name: 'owner_id', type: 'text'}
         ],
-        table_index : { type : '', name : 'IDX_TB_MESSAGE', columns : [ 'channel_id', 'owner_id' ] }
+        table_index : [{ type : '', name : 'IDX_TB_MESSAGE', columns : [ 'channel_id', 'owner_id' ] }]
       },
       {
         name: 'TB_CHANNEL',
@@ -38,7 +38,7 @@ angular.module('starter.constants', [])
           {name: 'channel_updated', type: 'integer'},
           {name: 'owner_id', type: 'text'}
         ],
-        table_index : { type : 'UNIQUE', name : 'IDX_TB_CHANNEL', columns : [ 'channel_id', 'owner_id' ] }
+        table_index : [{ type : 'UNIQUE', name : 'IDX_U_TB_CHANNEL', columns : [ 'channel_id', 'owner_id' ] }, { type : '', name : 'IDX_TB_CHANNEL', columns : [ 'owner_id' ] }]
       },
       {
         name: 'TB_USER',
@@ -52,7 +52,7 @@ angular.module('starter.constants', [])
           {name: 'owner_id', type: 'text'},
           {name: 'friend_flag', type: 'text DEFAULT "N" '}
         ],
-        table_index : { type : 'UNIQUE', name : 'IDX_TB_USER', columns : [ 'user_id', 'owner_id' ] }
+        table_index : [{ type : 'UNIQUE', name : 'IDX_TB_USER', columns : [ 'user_id', 'owner_id' ] }]
       }
     ]
 });

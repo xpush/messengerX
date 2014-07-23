@@ -366,12 +366,12 @@ angular.module('starter.dao', [])
       var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';      
       self.query(query);
 
-      if( table.table_index != undefined ){
-        setTimeout( function(){
-
-          var query = 'CREATE '+ table.table_index.type +' INDEX IF NOT EXISTS ' + table.table_index.name +' ON ' +table.name + ' (' + table.table_index.columns.join(',') + ')';
+      if( table.table_index != undefined ){      
+        for( var key in table.table_index ){
+          var tableInx = table.table_index[key];
+          var query = 'CREATE '+ tableInx.type +' INDEX IF NOT EXISTS ' + tableInx.name +' ON ' +table.name + ' (' + tableInx.columns.join(',') + ')';
           self.query(query);
-        }, 2000 );
+        }
       }
     });
   };

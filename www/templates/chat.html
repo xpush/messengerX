@@ -39,10 +39,14 @@
     </ol>
     <input type="file" id="file"/>  
   </ion-content>
-  <ion-footer-bar class="bar-frosted">
-    <button class="button icon ion-plus-circled" ng-click="showPopup()"></button>
-    <button class="button icon ion-filing" ng-click="openFileDialog()" ></button>
+  <ion-footer-bar class="bar-frosted" >
+    <button id="btn-plus" class="button icon ion-plus-round" ng-click="showPopup()"></button>
+    <button id="btn-close" style="display:none;" class="button icon ion-close-round" ng-click="closePopup()"></button>
     <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 10px 0 10px;"/>
     <button class="button button-positive" style="min-width:50px;" ng-click="send()" >Send </button>
   </ion-footer-bar>
+  <div class="chat-extends" id="chat-extends">
+    <button class="button icon ion-plus-circled" ng-click="openFriendsModal()"></button>
+    <button class="button icon ion-filing" ng-click="openFileDialog()" ></button>
+  </div>
 </ion-view>
