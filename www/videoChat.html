@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Simple Example</title>
+  <script src="lib/socketio/socket.io.js"></script>
+</head>
+<body>
+  <div id='videos'>
+    <video id='localVideo' autoplay muted></video>
+    <video id='remoteVideo' autoplay></video>
+  </div>
+
+  <script src="lib/xpush/xpush.js"></script>
+  <script src="lib/xpush/webrtc-adapter.js"></script>
+  <script src="lib/xpush/webrtc.js"></script>
+
+  <script type="text/javascript">
+
+    var localVideo  = document.querySelector('#localVideo');
+    var remoteVideo = document.querySelector('#remoteVideo');
+
+    var url = location.href;
+    var params = url.slice(url.indexOf('?') + 1, url.length);
+
+    var obj = JSON.parse(decodeURIComponent(params));
+
+    var webrtc = new XWebRTC(
+      obj.S, obj.A, obj.C, obj.U,
+      localVideo, remoteVideo);
+
+  </script>
+
+</body>
+</html>

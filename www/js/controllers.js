@@ -454,10 +454,28 @@ angular.module('starter.controllers', [])
 
   $scope.openWebRTC = function( ){
 
+    var chKey = UTIL.getUniqueKey();
 
-    var left = screen.width/2 - 400
-        , top = screen.height/2 - 300
-        , popup = $window.open(imgUrl, '', "top=" + top + ",left=" + left + ",width=800,height=600");
+    var params = {
+      S: $rootScope.host,
+      A: $rootScope.app,
+      C: chKey,
+      U: {
+        U: loginUser.userId,
+        A: loginUser.deviceId
+      }
+    };
+
+    var url = '/videoChat.html?'+encodeURIComponent(JSON.stringify(params));
+
+    var popup = $window.open(url, chKey, "width=800,height=600");
+    popup.onbeforeunload = function(){
+      Chat.send( chKey, 'VO' );
+    };
+
+    Chat.send( chKey, 'VI' );
+
+
   };
 
   $scope.emoticons = [];

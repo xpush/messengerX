@@ -34,6 +34,9 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.deviceId = 'ionic';
     }
 
+    $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";
+    $rootScope.app  = 'messengerx';
+
     // webrtc support ?
     if (
       (navigator.mozGetUserMedia && window.mozRTCPeerConnection) ||
@@ -117,10 +120,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
     DB.init();
 
-    var HOST = "http://stalk-front-s01.cloudapp.net:8000";
-    var APPID = 'messengerx';
-
-    $rootScope.xpush = new XPush(HOST, APPID, function (type, data){
+    $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
 
       if(type == 'LOGOUT'){
         window.location = '/err.html?LOGOUT';
