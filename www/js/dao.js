@@ -383,6 +383,7 @@ angular.module('starter.dao', [])
       transaction.executeSql(query, bindings, function(transaction, result) {
         deferred.resolve(result);
       }, function(transaction, error) {
+        console.log( error );
         deferred.reject(error);
       });
     });

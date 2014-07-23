@@ -50,8 +50,9 @@ angular.module('starter.controllers', [])
 
   // Init Socket
   if( $rootScope.firstFlag ){
-    $scope.syncFriends();
-    Manager.init();
+    $scope.listFriend();
+    //$scope.syncFriends();
+    Manager.init();    
     $rootScope.firstFlag = false;
   } else {
     $scope.listFriend();
@@ -353,7 +354,7 @@ angular.module('starter.controllers', [])
 
   $scope.showPopup = function() {
     var footerAdvance = document.getElementById( "chat-extends" );
-    footerAdvance.style.display = "block";
+    footerAdvance.style.display = "flex";
 
     document.getElementById( "btn-plus" ).style.display = "none";
     document.getElementById( "btn-close" ).style.display = "block";    
@@ -450,14 +451,18 @@ angular.module('starter.controllers', [])
     }
   });
 
+  $scope.openWebRTC = function( ){
+    alert( 'Comming Soon..' );
+  }
+
   var inputObj = document.getElementById('file');
-  $scope.openFileDialog = function() {
+  $scope.openFileDialog = function( sourceType ) {
     if( navigator.camera ){
 
       var opts = {
         quality: 50,
         destinationType: Camera.DestinationType.FILE_URI,
-        sourceType: 0,
+        sourceType: sourceType,
         encodingType: 0
       }
 

@@ -318,7 +318,11 @@ paper-input {
 	top:44px;
 	left:0px;
 	opacity:0.8;
-	display:block;
+	display:none;
 	width:100%;
 	background: #F0F3F8;
+}
+
+.chat-extends div{
+	text-align: center;
 }
