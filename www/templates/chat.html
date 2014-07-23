@@ -62,9 +62,27 @@
       <img src="../img/videocameracompact.png" ng-click="openWebRTC()"/>
     </div>
   </div>
-  <div class="chat-emoticon row" id="chat-emoticons" >
-    <div class="col" ng-repeat="emoticon in emoticons">
-      <img ng-src="{{emoticon.url}}" ng-click="sendEmoticon( '{{emoticon.url}}' )" />
+
+  <div class="chat-emoticon" id="chat-emoticons">
+    <div id="emoticon-tabs" class="tabs tab-emoticon">
+      <a class="tab-item tab-item-active" id="tab0" ng-click="tabActive('0');">
+        <i class="icon ion-happy"></i>
+      </a>
+      <a class="tab-item" id="tab1" ng-click="tabActive('1');">
+        <i class="icon ion-star"></i>
+      </a>
     </div>
+    <div class="row" id="tabbody{{$index}}" style="display:none;" ng-repeat="emoticon in emoticons" >
+      <div class="col" ng-repeat="image in emoticon">
+        <img ng-src="{{image}}" ng-click="sendEmoticon( '{{image}}' )" />
+      </div>
+    </div>
+    <!--
+    <div class="row" style="display:none;" id="tabbody1">
+      <div class="col" ng-repeat="emoticon in emoticons">
+        <img ng-src="{{emoticon.url}}" ng-click="sendEmoticon( '{{emoticon.url}}' )" />
+      </div>
+    </div>     
+    -->
   </div>  
 </ion-view>
