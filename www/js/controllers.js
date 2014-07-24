@@ -532,27 +532,13 @@ angular.module('starter.controllers', [])
       navigator.camera.getPicture(onSuccess, onFail, opts);
 
       function onSuccess(FILE_URI) {
-        console.log(FILE_URI);
 
-        inputObj.value = FILE_URI;
-
-        console.log( inputObj) ;
-        console.log( inputObj.value );
-        $rootScope.xpush.uploadFile( channelId, {
-          file: inputObj,
+        $rootScope.xpush.getFileUrl(channelId, FILE_URI, {
           type: 'image'
-        }, function(data, idx){
-          inputObj.value = "";
-          console.log("progress  ["+idx+"]: "+data);
-        }, function(data,idx){
-          var tname = data.result.tname;
-
-          inputObj.value = "";
-          console.log("completed ["+idx+"]: "+JSON.stringify(data));
-
-          var imageUrl = $rootScope.xpush.getFileUrl(channelId, tname );
-          Chat.send( imageUrl, 'I' );
+        }, function (data){
+          console.log('RESULT : ', data);
         });
+
       }
 
       function onFail(message) {
@@ -565,7 +551,7 @@ angular.module('starter.controllers', [])
 
   angular.element( inputObj ).on('change',function(event) {
 
-    $rootScope.xpush.uploadFile( channelId, {
+    $rootScope.xpush.uploadStream( channelId, {
       file: inputObj,
       type: 'image'
     }, function(data, idx){

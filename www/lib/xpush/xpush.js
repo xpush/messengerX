@@ -102,11 +102,6 @@
   XPush.prototype.logout = function(userId, deviceId){
     var self = this;
     self._sessionConnection.disconnect();
-    for( var key in self._channels ){
-      if( self._channels[key]._connected ){
-        self._channels[key].disconnect();
-      }
-    }
   };
 
   // params.channel(option), params.users
@@ -249,9 +244,8 @@
     });
   };
 
-  XPush.prototype.uploadFile = function(channel, inputObj, fnPrg, fnCallback){
+  XPush.prototype._getChannelAsync = function(channel, cb){
     var self = this;
-
     var ch = self.getChannel(channel);
     if(!ch){
       self._channels[channel] = ch;
@@ -259,38 +253,95 @@
       self.getChannelInfo(channel,function(err,data){
         if(err){
           console.log(" == node channel " ,err);
+          cb(err);
         }else if ( data.status == 'ok'){
-          ch.setServerInfo(data.result); // @ TODO 이건 callback 이 아니라 sync 하게 처리 해야 할 까?
+          ch.setServerInfo(data.result);
+          cb(false, ch);
         }
       });
+    }else{
+      cb(false, ch);
     }
+  };
 
-    var blobs   = [];
-    var streams = [];
+  XPush.prototype.uploadStream = function(channel, inputObj, fnPrg, fnCallback){
+    var self = this;
 
-    for(var i=0; i<inputObj.file.files.length; i++){
-      var file   = inputObj.file.files[i];
-      var size   = 0;
-      streams[i] = ss.createStream({highWaterMark: 64 * 1024});
-      blobs[i]   = ss.createBlobReadStream(file, {highWaterMark: 64 * 1024});
+    self._getChannelAsync(channel, function (err, ch){
 
-      blobs[i].on('data', function(chunk) {
-        size += chunk.length;
-        fnPrg(Math.floor(size / file.size * 100), i);
-      });
+      var blobs   = [];
+      var streams = [];
 
-      var _data = {};
-      _data.orgName = file.name;
-      if(inputObj.overwrite) _data.name = file.name;
-      if(inputObj.type)      _data.type = inputObj.type;
+      for(var i=0; i<inputObj.file.files.length; i++){
+        var file   = inputObj.file.files[i];
+        var size   = 0;
+        streams[i] = ss.createStream({highWaterMark: 64 * 1024});
+        blobs[i]   = ss.createBlobReadStream(file, {highWaterMark: 64 * 1024});
 
-      ch.upload(streams[i], _data, function(result){
-        fnCallback(result, i);
-      });
-      blobs[i].pipe(streams[i]);
+        blobs[i].on('data', function(chunk) {
+          size += chunk.length;
+          fnPrg(Math.floor(size / file.size * 100), i);
+        });
 
-    }
+        var _data = {};
+        _data.orgName = file.name;
+        if(inputObj.overwrite) _data.name = file.name;
+        if(inputObj.type)      _data.type = inputObj.type;
 
+        ch.upload(streams[i], _data, function(result){
+          fnCallback(result, i);
+        });
+        blobs[i].pipe(streams[i]);
+      }
+
+    });
+
+
+  };
+
+  XPush.prototype.uploadFile = function(channel, img, inputObj, fnCallback){
+    var self = this;
+
+    self._getChannelAsync(channel, function(err, ch){
+
+      if(window.FileTransfer && window.FileUploadOptions){
+
+        var url = ch._server.serverUrl+'/upload';
+        console.log(url);
+
+        var options = new FileUploadOptions();
+        options.fileKey="post";
+        options.chunkedMode = false;
+        options.params = {
+          'key1': 'VAL1',
+          'key2': 'VAL2'
+        };
+        options.headers = {
+          'XP-A': self.appId,
+          'XP-C': channel,
+          'XP-U': JSON.stringify({
+            U: self.userId,
+            D: self.deviceId
+          }) //[U]^[D]^[TK] @ TODO add user token
+        };
+        options.headers['XP-FU-org'] = inputObj.name;
+        if(inputObj.overwrite) options.headers['XP-FU-nm'] = inputObj.name;
+        if(inputObj.type)      options.headers['XP-FU-tp'] = inputObj.type;
+
+        var ft = new FileTransfer();
+        ft.upload(img, encodeURI(url), function(data){
+
+          console.log(data);
+          fnCallback(data);
+          //$scope.picData = FILE_URI;
+          //$scope.$apply();
+        }, function(e) {
+            console.log("On fail " + e);
+        }, options);
+
+      }
+
+    });
   };
 
   XPush.prototype.getFileUrl = function(channel, fileName){
@@ -555,8 +606,13 @@
     });
   };
 
-  XPush.prototype.ajax = function( context, method, data , cb){
+  XPush.prototype.ajax = function( context, method, data, headers, cb){
     var self = this;
+
+    if(typeof(headers) == 'function' && !cb){
+      cb = headers;
+      headers = false;
+    }
 
     var xhr;
     try{
@@ -612,6 +668,14 @@
     };
 
     console.log("xpush : ajax ", self.hostname+context,method,param);
+
+    if(headers) {
+      for (var key in headers) {
+        if (headers.hasOwnProperty(key)) {
+          xhr.setRequestHeader(key, headers[key]);
+        }
+      }
+    }
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.send( (method == "POST") ? param : null);
 
@@ -812,7 +876,6 @@
       self._xpush.emit(RMKEY, self.chNm, RMKEY , data);
     });
 
-
     if(self._xpush._isEventHandler) {
 
       self._socket.on('_event',function(data){
@@ -875,7 +938,6 @@
     }
   };
 
-
   var UTILS = {};
 
   UTILS.messageTimeSort = function(a,b){
@@ -896,65 +958,5 @@
   };
   //window.XPush = new XPush();
   window.XPush = XPush;
-/*
-  G( SessionSocket );
 
-  G.init( applicationKey );
-
- - Application의 모든 사용자
-  G.getUserList();
-
- - 내가 채널 정보 생성
-  var CH01 = G.createChannel('channel01', [userId, userId2, userId3]);
-  and
-  var CH01 = G.getChannel('channel01');
-
- - 채널에서 나가기
-  CH01.leaved();
-
- - 채널의 사용자 리스트
-  var memberIds = CH01.getUserList();
-
- - 채널에서 보내는 메시지 받기
-  CH01.onMsg('key01',function(data){
-    // data
-  });
-
- - 채널에서 보내는 모든 메시지 받기
-  CH01.onMsg(function(data){
-    // 모든 key 들을 전부 받는 이벤트
-  });
-
- - 채널에서 사용자가 탈퇴했음
-  CH01.onMemberLeaved(function(userIds){
-
-  });
-
- - 채널에 사용자를 추가했음
-  CH01.onMemberJoined(function(userIds){
-
-  });
-
- - 채널이 사라졌음
-  CH01.onDestoryed(function(userIds){
-
-  });
-
- - 채널에 메시지 전송하기
-  CH01.send('key09',{ key1: 'value01', key2: 'value02'});
-
- - 채널이 생성되면서 내가 들어왔음
-  G.on('channelCreated',function(chObj, data){
-    // data {chName: 'string', chMember : [] }
-    chObj.onMsg('...' , function(data){...});
-    or
-    var CH02 = G.getChannel(data.chName);
-  });
-
-  1. SessionSocket 은 싱글 인스턴스
-  2. Channel 은 create 를 하든 get 을 하든 Channel 명당 하나의 객체만을 생성한다.
-  3. Message 는 SessionSocket에서 받든 channelSocket 에서 받든 상관없이 channel 객체에 이벤트가 발생한다.
-  4. send 는 channel 정보의 서버로 rest 로 던진다. socket이 연결되어 있으면 socket 으로 전송 ( send 함수 )
-  5. listen 하기 위한 Message Socket 은 최근 5초간(설정) 연속적인 메시지가 가장 많은 곳으로 다시 연결한다??
-*/
 })();
