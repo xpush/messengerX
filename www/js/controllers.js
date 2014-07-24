@@ -436,9 +436,14 @@ angular.module('starter.controllers', [])
     }
   });
 
-  $scope.openWebRTC = function( ){
+  $scope.openWebRTC = function( key ){
 
-    var chKey = UTIL.getUniqueKey();
+    var newFlag = false;
+    if( key === undefined ){
+      newFlag = true;
+    }
+
+    var chKey = newFlag ? UTIL.getUniqueKey() : key;
 
     var params = {
       S: $rootScope.host,
@@ -457,9 +462,9 @@ angular.module('starter.controllers', [])
       Chat.send( chKey, 'VO' );
     };
 
-    Chat.send( chKey, 'VI' );
-
-
+    if( newFlag ){
+      Chat.send( chKey, 'VI' );
+    }
   };
 
   $scope.emoticons = [];
@@ -475,6 +480,8 @@ angular.module('starter.controllers', [])
     if( $scope.showEmo == "true" ){
       document.getElementById( 'tabbody'+$scope.curEmoTabId ).style.display = "flex";
       document.getElementById( 'chat-emoticons' ).style.display = "block";
+      document.getElementById( "chat-extends" ).style.display = "none";
+      $scope.showExt = "false";
     } else {
       document.getElementById( 'chat-emoticons' ).style.display = "none";
     }
@@ -484,8 +491,10 @@ angular.module('starter.controllers', [])
     $scope.showExt = flag;
     if( $scope.showExt == "true" ){
       document.getElementById( "chat-extends" ).style.display = "flex";
+      document.getElementById( 'chat-emoticons' ).style.display = "none";
+      $scope.showEmo = "false";
     } else {
-      document.getElementById( "chat-extends" ).style.display = "none";  
+      document.getElementById( "chat-extends" ).style.display = "none";
     }
   };
 

@@ -17,7 +17,11 @@
           <img src="http://maps.google.com/mapfiles/kml/pal3/icon55.png" ></img>
           <span>image</span>
         </p>
-        <p class="clear" ng-if=" channel.latest_message != '@image@' ">{{channel.latest_message}}&nbsp;</p>
+        <p class="clear item-img" ng-if=" channel.latest_message == '@video@' ">
+          <img src="http://www.vutelepresence.com/images/icon-camera.png" ></img>
+          <span>video</span>
+        </p>        
+        <p class="clear" ng-if=" channel.latest_message != '@image@' && channel.latest_message != '@video@' ">{{channel.latest_message}}&nbsp;</p>
         <span ng-if="channel.unread_count > 0" class="channel-message-unread">{{channel.unread_count}}</span>
         <span updated-time timestamp="channel.channel_updated"></span>
       </ion-item>

@@ -111,10 +111,7 @@ angular.module('starter.services', [])
 
                 var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
                 if( data.T != undefined ){
-                  data.type = data.T;
-                  if( data.T == "I" ){
-                    data.type = sr + data.T;
-                  }
+                  data.type = sr + data.T;
                 } else {
                   data.type = sr;
                 }
@@ -130,7 +127,7 @@ angular.module('starter.services', [])
                     $rootScope.currentChannelLatestDate = latestDate;
                   }
 
-                  var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, afterLoad : "true" };
+                  var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, active : "true" };
 
                   // Add to DB
                   MessageDao.add( data );
@@ -138,8 +135,10 @@ angular.module('starter.services', [])
                   // 2 people Channel
 
                   var param = { 'channel':data.C, 'reset' : true };
-                  if( data.type.indexOf( 'I' ) > -1 ){
+                  if( data.T == 'I' ){
                     param.message = "@image@";
+                  } else if ( data.T == 'VI' ) {
+                    param.message = "@video@";
                   } else {
                     param.message = data.MG;
                   }
@@ -149,6 +148,7 @@ angular.module('starter.services', [])
                   }
 
                   if( data.type != 'J' ){
+                    console.log( param );
                     ChannelDao.update( param );
                   }
 
@@ -159,8 +159,10 @@ angular.module('starter.services', [])
                   $rootScope.xpush.getChannelData( data.C, function( err, channelJson ){
                     var channel = {'channel': data.C, 'users' : channelJson.DT.US};
 
-                    if( data.T != undefined && data.T == 'I' ){
+                    if( data.T == 'I' ){
                       channel.message = "@image@";
+                    } else if ( data.T == 'VI' ) {
+                      param.message = "@video@";
                     } else {
                       channel.message = data.MG;
                     }
@@ -361,7 +363,7 @@ angular.module('starter.services', [])
               latestDate = dateStrs[3];
             }
 
-            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I, afterLoad : "false" } );
+            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I, active : "false" } );
           }
 
           $rootScope.currentChannelLatestDate = latestDate;

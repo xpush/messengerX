@@ -14,13 +14,13 @@
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
             <span>
-              <img ng-src="{{message.message}}" image-link="{{message.afterLoad}}" class="from"/>
+              <img ng-src="{{message.message}}" image-link="{{message.active}}" class="from"/>
             </span>
           </div>
         </div>
         <div ng-if="message.type=='SI'">
           <span>
-            <img ng-src="{{message.message}}" image-link="{{message.afterLoad}}"/>
+            <img ng-src="{{message.message}}" image-link="{{message.active}}"/>
           </span>
         </div>        
         <div ng-if="message.type=='S'">
@@ -28,8 +28,24 @@
         </div>
         <div ng-if="message.type=='T' || message.type=='J'">
           <span class="date">{{message.message}}</span>
-        </div>                              
-      </li>      
+        </div>
+        <div ng-if="message.type=='SVI'">
+          <span>
+            <img ng-src="../img/webcam.png" ng-if="message.active == 'true'"  />
+            <img ng-src="../img/webcam.png" ng-if="message.active =='false'" />
+          </span>
+        </div>
+        <div ng-if="message.type=='RVI'">
+          <div class="small">{{message.name}}</div>
+          <div class="from">
+            <img ng-src="{{message.image}}" class="profile" />
+            <span>
+              <img ng-src="../img/webcam.png" ng-if="message.active == 'true'" ng-click="openWebRTC('{{message.message}}')" class="from"/>
+              <img ng-src="../img/webcam.png" ng-if="message.active =='false'"class="from"/>
+            </span>
+          </div>
+        </div>        
+      </li>
     </ol>
     <input type="file" id="file"/>  
   </ion-content>
@@ -50,7 +66,7 @@
       <img src="../img/camera.png" ng-click="openFileDialog('2')"/>
     </div>
     <div class="col" >
-      <img src="../img/videocameracompact.png" ng-click="openWebRTC()"/>
+      <img src="../img/webcam.png" ng-click="openWebRTC()"/>
     </div>
   </div>
 

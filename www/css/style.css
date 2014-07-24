@@ -23,7 +23,7 @@ body {
 	max-width:100%;
 }
 
-.messages li.S, .messages li.SI {
+.messages li.S, .messages li.SI, .messages li.SVI {
 	float:right;
 }
 
@@ -95,12 +95,7 @@ body {
 	font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
 }
 
-.messages li.S span {
-	background:#158ffe;
-	color:#fff;
-}
-
-.messages li.SI span {
+.messages li.S span, .messages li.SI span, .messages li.SVI span {
 	background:#158ffe;
 	color:#fff;
 }
