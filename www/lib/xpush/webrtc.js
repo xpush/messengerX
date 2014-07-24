@@ -51,7 +51,7 @@
   var XWebRTC = function(_host, _app, _channelName, _userId, _localVideo, _remoteVideo){
     var self = this;
 
-    CONFIG.constraints    = {video: true};
+    CONFIG.constraints    = {'audio': true, 'video': true};
     CONFIG.pc             = {'iceServers': [{'url': 'stun:stun.l.google.com:19302'}]};
     CONFIG.pcConstraints  = {'optional': [{'DtlsSrtpKeyAgreement': true}]};
     CONFIG.sdpConstraints = {'mandatory': {'OfferToReceiveAudio':true,'OfferToReceiveVideo':true }};
