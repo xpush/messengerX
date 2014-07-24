@@ -79,7 +79,7 @@
     <div class="col" ng-if="device.flatform == 'android'">
       <img src="../img/camera.png" ng-click="openFileDialog('2')"/>
     </div>
-    <div class="col" >
+    <div class="col" ng-if=" channelId.indexOf( '$' ) > -1 ">
       <img src="../img/webcam.png" ng-click="openWebRTC()"/>
     </div>
   </div>

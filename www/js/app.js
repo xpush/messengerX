@@ -132,7 +132,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     $rootScope.logout = function(){
       $rootScope.totalUnreadCount = 0;
       Sign.logout();
-
+      $rootScope.xpush.logout();
       $rootScope.firstFlag = true;
     };
 

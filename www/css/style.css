@@ -23,7 +23,7 @@ body {
 	max-width:100%;
 }
 
-.messages li.S, .messages li.SI, .messages li.SVI {
+.messages li.S, .messages li.SI, .messages li.SVI, .messages li.SE{
 	float:right;
 }
 
@@ -108,6 +108,12 @@ body {
 	display:block;
 	border-radius:.75rem;
 	max-width: 200px;
+	min-height: 22px;
+}
+
+.messages li.SE img, .messages li.RE img {
+	display:block;
+	max-width: 100px;
 	min-height: 22px;
 }
 

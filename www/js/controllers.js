@@ -169,9 +169,7 @@ angular.module('starter.controllers', [])
       });
     }
   };
-
 })
-
 .controller('AccountCtrl', function($scope, $rootScope, Sign) {
   $rootScope.currentChannel = '';
   $scope.loginUser = Sign.getUser();
@@ -320,6 +318,7 @@ angular.module('starter.controllers', [])
 
   $rootScope.$stateParams = {};
   $scope.channelName = channelName;
+  $scope.channelId = channelId;
 
   $scope.add = function( nextMessage ) {
     $scope.messages.push(angular.extend({}, nextMessage));

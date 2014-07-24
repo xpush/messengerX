@@ -99,6 +99,16 @@
     });
   };
 
+  XPush.prototype.logout = function(userId, deviceId){
+    var self = this;
+    self._sessionConnection.disconnect();
+    for( var key in self._channels ){
+      if( self._channels[key]._connected ){
+        self._channels[key].disconnect();
+      }
+    }
+  };
+
   // params.channel(option), params.users
   XPush.prototype.createChannel = function(users, channel, datas, cb){
     var self = this;
