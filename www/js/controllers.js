@@ -240,7 +240,7 @@ angular.module('starter.controllers', [])
 .controller('SignUpCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
   $scope.signUp = function(user) {
     var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
-     'DT' : {'NM' : user.userName, 'I':'../img/default_image.jpg', 'MG':'' } };
+     'DT' : {'NM' : user.userName, 'I':'../www/img/default_image.jpg', 'MG':'' } };
     Sign.register( params, function(data){
       $state.go('signin');
     });
@@ -467,8 +467,8 @@ angular.module('starter.controllers', [])
   };
 
   $scope.emoticons = [];
-  $scope.emoticons.push( { '01' : '../img/emo/s2/anger.PNG', '02' : '../img/emo/s2/burn.PNG', '03' : '../img/emo/s2/cool.PNG', '04' : '../img/emo/s2/love.PNG', '05' : '../img/emo/s2/shout.PNG', '06' : '../img/emo/s2/smile.PNG' } );
-  $scope.emoticons.push( { '01' : '../img/emo/b2/anger.png', '02' : '../img/emo/b2/cry.png', '03' : '../img/emo/b2/haha.png', '04' : '../img/emo/b2/money.png', '05' : '../img/emo/b2/shocked.png', '06' : '../img/emo/b2/victory.png' } );
+  $scope.emoticons.push( { '01' : '../www/img/emo/s2/anger.PNG', '02' : '../www/img/emo/s2/burn.PNG', '03' : '../www/img/emo/s2/cool.PNG', '04' : '../www/img/emo/s2/love.PNG', '05' : '../www/img/emo/s2/shout.PNG', '06' : '../www/img/emo/s2/smile.PNG' } );
+  $scope.emoticons.push( { '01' : '../www/img/emo/b2/anger.png', '02' : '../www/img/emo/b2/cry.png', '03' : '../www/img/emo/b2/haha.png', '04' : '../www/img/emo/b2/money.png', '05' : '../www/img/emo/b2/shocked.png', '06' : '../www/img/emo/b2/victory.png' } );
 
   $scope.curEmoTabId = "0";
   $scope.showEmo = "false";
@@ -533,10 +533,11 @@ angular.module('starter.controllers', [])
 
       function onSuccess(FILE_URI) {
 
-        $rootScope.xpush.getFileUrl(channelId, FILE_URI, {
+        $rootScope.xpush.uploadFile(channelId, FILE_URI, {
           type: 'image'
         }, function (data){
-          console.log('RESULT : ', data);
+          var imageUrl = $rootScope.xpush.getFileUrl(channelId, JSON.parse(data.response).result.tname );
+          Chat.send( imageUrl, 'I' );
         });
 
       }

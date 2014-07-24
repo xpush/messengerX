@@ -45,8 +45,8 @@
         </div>
         <div ng-if="message.type=='SVI'">
           <span>
-            <img ng-src="../img/webcam.png" ng-if="message.active == 'true'"  />
-            <img ng-src="../img/webcam.png" ng-if="message.active =='false'" />
+            <img ng-src="../www/img/webcam.png" ng-if="message.active == 'true'"  />
+            <img ng-src="../www/img/webcam.png" ng-if="message.active =='false'" />
           </span>
         </div>
         <div ng-if="message.type=='RVI'">
@@ -54,8 +54,8 @@
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
             <span>
-              <img ng-src="../img/webcam.png" ng-if="message.active == 'true'" ng-click="openWebRTC('{{message.message}}')" class="from"/>
-              <img ng-src="../img/webcam.png" ng-if="message.active =='false'"class="from"/>
+              <img ng-src="../www/img/webcam.png" ng-if="message.active == 'true'" ng-click="openWebRTC('{{message.message}}')" class="from"/>
+              <img ng-src="../www/img/webcam.png" ng-if="message.active =='false'"class="from"/>
             </span>
           </div>
         </div>        
@@ -65,7 +65,7 @@
   </ion-content>
   <ion-footer-bar class="bar-frosted" >
     <button ng-if=" showExt == 'true' " class="button icon ion-close-round" ng-click="toggleExt('false')"></button>
-    <button ng-if=" showExt =='false' " class="button icon ion-plus-round" ng-click="toggleExt('true')"></button>
+    <button ng-if=" showExt =='false' " class="button icon ion-plus-round" ng-click="openFileDialog('2')"></button>
     <button ng-if=" showEmo == 'true' " class="button icon ion-sad" ng-click="toggleEmoticons('false')"></button>
     <button ng-if=" showEmo =='false' " class="button icon ion-happy" ng-click="toggleEmoticons('true')"></button>
 
@@ -74,13 +74,13 @@
   </ion-footer-bar>
   <div class="chat-extends row" id="chat-extends">
     <div class="col">
-      <img src="../img/image.png" ng-click="openFileDialog('1')"/>
+      <img src="../www/img/image.png" ng-click="openFileDialog('2')"/>
     </div>
     <div class="col" ng-if="device.flatform == 'android'">
-      <img src="../img/camera.png" ng-click="openFileDialog('2')"/>
+      <img src="../www/img/camera.png" ng-click="openFileDialog('1')"/>
     </div>
     <div class="col" ng-if=" channelId.indexOf( '$' ) > -1 ">
-      <img src="../img/webcam.png" ng-click="openWebRTC()"/>
+      <img src="../www/img/webcam.png" ng-click="openWebRTC()"/>
     </div>
   </div>
 
