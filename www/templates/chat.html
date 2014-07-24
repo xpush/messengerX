@@ -22,7 +22,21 @@
           <span>
             <img ng-src="{{message.message}}" image-link="{{message.active}}"/>
           </span>
-        </div>        
+        </div>
+        <div ng-if="message.type=='RE'">
+          <div class="small">{{message.name}}</div>
+          <div class="from">
+            <img ng-src="{{message.image}}" class="profile" />
+            <span>
+              <img ng-src="{{message.message}}" class="from"/>
+            </span>
+          </div>
+        </div>
+        <div ng-if="message.type=='SE'">
+          <span>
+            <img ng-src="{{message.message}}" />
+          </span>
+        </div>           
         <div ng-if="message.type=='S'">
           <span>{{message.message}}</span>
         </div>

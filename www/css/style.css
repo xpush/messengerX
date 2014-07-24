@@ -52,7 +52,6 @@ body {
 	overflow-x: hidden;
 	word-wrap: break-word;
 	max-width:82%;
-	/**max-width:calc(100% - 84px);*/
 }
 
 .messages img {
@@ -97,6 +96,11 @@ body {
 
 .messages li.S span, .messages li.SI span, .messages li.SVI span {
 	background:#158ffe;
+	color:#fff;
+}
+
+.messages li.SE span, .messages li.RE span{
+	background:transparent;
 	color:#fff;
 }
 

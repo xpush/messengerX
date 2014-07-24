@@ -20,8 +20,12 @@
         <p class="clear item-img" ng-if=" channel.latest_message == '@video@' ">
           <img src="http://www.vutelepresence.com/images/icon-camera.png" ></img>
           <span>video</span>
-        </p>        
-        <p class="clear" ng-if=" channel.latest_message != '@image@' && channel.latest_message != '@video@' ">{{channel.latest_message}}&nbsp;</p>
+        </p>
+        <p class="clear item-img" ng-if=" channel.latest_message == '@emoticon@' ">
+          <img src="http://png.findicons.com/files/icons/1729/openworld/48/gaim_insert_smiley_small.png" ></img>
+          <span>emoticon</span>
+        </p>            
+        <p class="clear" ng-if=" channel.latest_message != '@image@' && channel.latest_message != '@video@' && channel.latest_message != '@emoticon@' ">{{channel.latest_message}}&nbsp;</p>
         <span ng-if="channel.unread_count > 0" class="channel-message-unread">{{channel.unread_count}}</span>
         <span updated-time timestamp="channel.channel_updated"></span>
       </ion-item>

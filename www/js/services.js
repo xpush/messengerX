@@ -137,6 +137,8 @@ angular.module('starter.services', [])
                   var param = { 'channel':data.C, 'reset' : true };
                   if( data.T == 'I' ){
                     param.message = "@image@";
+                  } else if( data.T == 'E' ){
+                    param.message = "@emoticon@";
                   } else if ( data.T == 'VI' ) {
                     param.message = "@video@";
                   } else {
@@ -161,6 +163,8 @@ angular.module('starter.services', [])
 
                     if( data.T == 'I' ){
                       channel.message = "@image@";
+                    } else if( data.T == 'E' ){
+                      channel.message = "@emoticon@";
                     } else if ( data.T == 'VI' ) {
                       param.message = "@video@";
                     } else {

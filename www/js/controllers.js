@@ -501,7 +501,7 @@ angular.module('starter.controllers', [])
   $scope.sendEmoticon = function(url){
     $scope.toggleEmoticons( "false" );
     document.getElementById( 'chat-emoticons' ).style.display = "none";
-    Chat.send( url, 'I' );
+    Chat.send( url, 'E' );
   };
 
   $scope.tabActive = function( tabId ){
