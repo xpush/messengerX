@@ -76,14 +76,14 @@
     <div class="col">
       <img ng-src="{{rootImgPath}}/image.png" ng-click="openFileDialog('2')"/>
     </div>
-    <div class="col" ng-if="device.flatform == 'android'">
+    <div class="col" ng-if=" cameraFlag ">
       <img ng-src="{{rootImgPath}}/camera.png" ng-click="openFileDialog('1')"/>
     </div>
     <div class="col" ng-if=" channelId.indexOf( '$' ) > -1 ">
       <img ng-src="{{rootImgPath}}/webcam.png" ng-click="openWebRTC()"/>
     </div>
   </div>
-
+ 
   <div class="chat-emoticon" id="chat-emoticons">
     <div id="emoticon-tabs" class="tabs tab-emoticon">
       <a class="tab-item tab-item-active" id="tab0" ng-click="tabActive('0');">

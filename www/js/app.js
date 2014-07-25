@@ -10,9 +10,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       StatusBar.styleDefault();
     }
 
+    $rootScope.cameraFlag = false;
     if( window.device ){
       $rootScope.deviceId = device.uuid;
       $rootScope.rootImgPath = "img";
+      $rootScope.cameraFlag = true;
 
       var pushNotification = window.plugins.pushNotification;
 
