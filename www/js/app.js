@@ -1,6 +1,6 @@
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass'])
 
-.run(function($ionicPlatform, $rootScope, DB, Sign ) {
+.run(function($location, $ionicPlatform, $rootScope, DB, Sign ) {
   $ionicPlatform.ready(function() {
 
     if(window.cordova && window.cordova.plugins.Keyboard) {
@@ -23,9 +23,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       } else {
           pushNotification.register(tokenHandler, errorHandler,{"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});
       }
+    } else if ( $location.absUrl().indexOf( 'file' ) > -1 ) {
+      $rootScope.rootImgPath = "img";
+      $rootScope.deviceId = 'ionic';
     } else {
       $rootScope.rootImgPath = "../img";
-      $rootScope.deviceId = 'ionic';
+      $rootScope.deviceId = 'ionic';     
     }
 
     $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";

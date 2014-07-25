@@ -1,0 +1,9 @@
+{
+  "name": "messengerX",
+  "main": "index.html",
+  "window": {
+    "toolbar": true,
+   	"width": 600,
+  	"height": 800
+  }
+}
