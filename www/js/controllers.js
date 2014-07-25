@@ -240,7 +240,7 @@ angular.module('starter.controllers', [])
 .controller('SignUpCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
   $scope.signUp = function(user) {
     var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
-     'DT' : {'NM' : user.userName, 'I':'../www/img/default_image.jpg', 'MG':'' } };
+     'DT' : {'NM' : user.userName, 'I':'img/default_image.jpg', 'MG':'' } };
     Sign.register( params, function(data){
       $state.go('signin');
     });
@@ -436,6 +436,7 @@ angular.module('starter.controllers', [])
   });
 
   $scope.openWebRTC = function( key ){
+    $scope.toggleExt( "false" );
 
     var newFlag = false;
     if( key === undefined ){
@@ -467,8 +468,9 @@ angular.module('starter.controllers', [])
   };
 
   $scope.emoticons = [];
-  $scope.emoticons.push( { '01' : '../www/img/emo/s2/anger.PNG', '02' : '../www/img/emo/s2/burn.PNG', '03' : '../www/img/emo/s2/cool.PNG', '04' : '../www/img/emo/s2/love.PNG', '05' : '../www/img/emo/s2/shout.PNG', '06' : '../www/img/emo/s2/smile.PNG' } );
-  $scope.emoticons.push( { '01' : '../www/img/emo/b2/anger.png', '02' : '../www/img/emo/b2/cry.png', '03' : '../www/img/emo/b2/haha.png', '04' : '../www/img/emo/b2/money.png', '05' : '../www/img/emo/b2/shocked.png', '06' : '../www/img/emo/b2/victory.png' } );
+  var rootImgPath = $rootScope.rootImgPath;
+  $scope.emoticons.push( { '01' : rootImgPath+'/emo/s2/anger.PNG', '02' : rootImgPath+'/emo/s2/burn.PNG', '03' : rootImgPath+'/emo/s2/cool.PNG', '04' : rootImgPath+'/emo/s2/love.PNG', '05' : rootImgPath+'/emo/s2/shout.PNG', '06' : rootImgPath+'/emo/s2/smile.PNG' } );
+  $scope.emoticons.push( { '01' : rootImgPath+'/emo/b2/anger.png', '02' : rootImgPath+'/emo/b2/cry.png', '03' : rootImgPath+'/emo/b2/haha.png', '04' : rootImgPath+'/emo/b2/money.png', '05' : rootImgPath+'/emo/b2/shocked.png', '06' : rootImgPath+'/emo/b2/victory.png' } );
 
   $scope.curEmoTabId = "0";
   $scope.showEmo = "false";
@@ -477,9 +479,9 @@ angular.module('starter.controllers', [])
   $scope.toggleEmoticons = function( flag ){
     $scope.showEmo = flag;
     if( $scope.showEmo == "true" ){
-      document.getElementById( 'tabbody'+$scope.curEmoTabId ).style.display = "flex";
+      document.getElementById( 'tabbody'+$scope.curEmoTabId ).className = "row flex";
       document.getElementById( 'chat-emoticons' ).style.display = "block";
-      document.getElementById( "chat-extends" ).style.display = "none";
+      document.getElementById( "chat-extends" ).className = "chat-extends row hide";
       $scope.showExt = "false";
     } else {
       document.getElementById( 'chat-emoticons' ).style.display = "none";
@@ -489,11 +491,11 @@ angular.module('starter.controllers', [])
   $scope.toggleExt = function( flag ) {
     $scope.showExt = flag;
     if( $scope.showExt == "true" ){
-      document.getElementById( "chat-extends" ).style.display = "flex";
+      document.getElementById( "chat-extends" ).className= "chat-extends row flex";
       document.getElementById( 'chat-emoticons' ).style.display = "none";
       $scope.showEmo = "false";
     } else {
-      document.getElementById( "chat-extends" ).style.display = "none";
+      document.getElementById( "chat-extends" ).className = "chat-extends row hide";
     }
   };
 
@@ -510,10 +512,10 @@ angular.module('starter.controllers', [])
     for( var inx = 0 ; inx < tabs.length;inx++ ){
       if( tabs[inx].id == "tab"+tabId ){
         tabs[inx].className = "tab-item tab-item-active";
-        document.getElementById( "tabbody"+inx ).style.display = "flex";
+        document.getElementById( "tabbody"+inx ).className = "row flex";
       } else {
         tabs[inx].className = "tab-item";
-        document.getElementById( "tabbody"+inx ).style.display = "none";
+        document.getElementById( "tabbody"+inx ).className = "row hide";
       }
     }
   };
@@ -532,7 +534,7 @@ angular.module('starter.controllers', [])
       navigator.camera.getPicture(onSuccess, onFail, opts);
 
       function onSuccess(FILE_URI) {
-
+        $scope.toggleExt( "false" );
         $rootScope.xpush.uploadFile(channelId, FILE_URI, {
           type: 'image'
         }, function (data){
@@ -543,9 +545,11 @@ angular.module('starter.controllers', [])
       }
 
       function onFail(message) {
+        $scope.toggleExt( "false" );
         console.log(message);
       }
     } else {
+      $scope.toggleExt( "false" );
       ionic.trigger('click', { target: document.getElementById('file') });
     }
   };

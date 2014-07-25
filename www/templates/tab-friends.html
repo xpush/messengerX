@@ -14,7 +14,7 @@
         Profile
       </div>
       <ion-item class="item item-avatar" ng-click="goProfile()">
-      <img ng-src="{{loginUser.image}}" />
+      <img ng-src="{{rootImgPath}}/webcam.png" />
         <h2>{{loginUser.userName}}</h2>
         <p>{{loginUser.message}}</p>
       </ion-item>
@@ -30,6 +30,7 @@
         <p>{{friend.message}}</p>
       </ion-item>
     </ion-list>
+      
   </ion-content>
 <button class="button icon ion-person-add button-add-friend" ng-click="showPopup()"></button>
 </ion-view>

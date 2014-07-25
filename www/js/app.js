@@ -1,27 +1,18 @@
-// Ionic Starter App
-
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
-// 'starter.services' is found in services.js
-// 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass'])
 
 .run(function($ionicPlatform, $rootScope, DB, Sign ) {
   $ionicPlatform.ready(function() {
-    // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-    // for form inputs)
+
     if(window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
     }
     if(window.StatusBar) {
-      // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
 
     if( window.device ){
-      console.log( JSON.stringify( device ) );
       $rootScope.deviceId = device.uuid;
+      $rootScope.rootImgPath = "img";
 
       var pushNotification = window.plugins.pushNotification;
 
@@ -31,6 +22,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           pushNotification.register(tokenHandler, errorHandler,{"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});
       }
     } else {
+      $rootScope.rootImgPath = "../img";
       $rootScope.deviceId = 'ionic';
     }
 
@@ -61,6 +53,14 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
             //autoCancel: true // Setting this flag and the notification is automatically canceled when the user clicks it
             //ongoing:    Boolean, // Prevent clearing of notification (Android only)
         });
+      }
+    }
+
+    $rootScope.getImage = function(image){
+      if ( image =='' ){
+        return $rootScope.rootImgPath+'/default_image.jpg';
+      } else {
+        return image;
       }
     }
 

@@ -56,7 +56,7 @@ angular.module('starter.directives', [])
     template: '<img ng-src="{{image}}" />'
   };
 })
-.directive('imageLink', function ( $window, $ionicFrostedDelegate, $ionicScrollDelegate, $ionicPopup ) {       
+.directive('imageLink', function ( $rootScope, $window, $ionicFrostedDelegate, $ionicScrollDelegate, $ionicPopup ) {       
   return {
     link: function(scope, element, attrs) {
 
@@ -77,7 +77,7 @@ angular.module('starter.directives', [])
     }
   }
 })
-.directive('channelUsers', function(UTIL) {
+.directive('channelUsers', function(UTIL, $rootScope) {
   return {
     restrict: 'A',
     scope: {
@@ -95,7 +95,7 @@ angular.module('starter.directives', [])
         $scope.className = "hidden";
       }
     },
-    template: '<span class="{{className}}"><img src="../img/user-icon.png"></img>&nbsp;{{count}}</span>'
+    template: '<span class="{{className}}"><img src="'+$rootScope.rootImgPath+'/user-icon.png"></img>&nbsp;{{count}}</span>'
   };
 })
 .directive('updatedTime', function(UTIL) {
