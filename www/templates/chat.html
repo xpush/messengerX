@@ -61,7 +61,7 @@
         </div>        
       </li>
     </ol>
-    <input type="file" id="file"/>  
+    <input type="file" id="file"/>
   </ion-content>
   <ion-footer-bar class="bar-frosted" >
     <button ng-if=" showExt == 'true' " class="button icon ion-close-round" ng-click="toggleExt('false')"></button>
@@ -95,7 +95,7 @@
     </div>
     <div class="row hide" id="tabbody{{$index}}" ng-repeat="emoticon in emoticons" >
       <div class="col" ng-repeat="image in emoticon">
-        <img ng-src="{{image}}" ng-click="sendEmoticon( '{{image}}' )" />
+        <img class="emoticon" ng-src="{{image}}" ng-click="sendEmoticon( '{{image}}' )" />
       </div>
     </div>
   </div>  

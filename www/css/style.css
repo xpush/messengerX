@@ -332,7 +332,7 @@ paper-input {
 	text-align: center;
 }
 
-.chat-emoticon img{
+img.emoticon{
 	max-width: 150px;
 	max-height: 150px;
 	width: 100%;

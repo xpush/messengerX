@@ -150,7 +150,6 @@ angular.module('starter.services', [])
                   }
 
                   if( data.type != 'J' ){
-                    console.log( param );
                     ChannelDao.update( param );
                   }
 
@@ -174,7 +173,7 @@ angular.module('starter.services', [])
                     if( channelJson.DT.UC > 2 ){
                       channel.name = channelJson.DT.NM;
                       channel.image = '';
-                    } else {
+                    } else if( channelJson.DT.UC == 2 ){
                       channel.name = data.UO.NM;
                       channel.image = data.UO.I;
                     }
@@ -184,7 +183,7 @@ angular.module('starter.services', [])
 
                     $rootScope.totalUnreadCount++;
 
-                    if( data.T != 'J' ){
+                    if( data.T != 'J' && channelJson.DT.UC >= 2 ){
                       ChannelDao.add( channel );
                     }
 
@@ -221,7 +220,9 @@ angular.module('starter.services', [])
             channel.name = "";
           }
 
-          channels[ data.channel ] =  channel;
+          if( data.DT != undefined && data.DT.UC > 1 ){
+            channels[ data.channel ] =  channel;
+          }
         }
 
         callback(channels);

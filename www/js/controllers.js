@@ -197,6 +197,59 @@ angular.module('starter.controllers', [])
     });
   }
 })
+.controller('EmoticonCtrl', function($scope, $rootScope, Sign, ChannelDao, Chat) {
+  $rootScope.currentChannel = '';
+  var loginUser = Sign.getUser();
+
+  $scope.emoticons = [];
+  //$scope.emoticons.push( { 'name' : 'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xfa1/v/t1.0-1/c67.18.221.221/s160x160/284679_120535951374133_5000781_n.jpg?oh=be2e992f62de5b9eae595ccd6f9c1d9a&oe=543D3784&__gda__=1413696200_51a370af8931f5b918ddc7365f1e3e8d' } );
+
+  $scope.openFileDialog = function() {
+    ionic.trigger('click', { target: document.getElementById('file') });
+  };
+
+  var createObject = {};
+  var channelUsers = [loginUser.userId];
+  createObject.U = channelUsers;
+  createObject.DT = { 'US' : channelUsers, 'UC': channelUsers.length };
+
+  var channelId = ChannelDao.generateId(createObject);
+  createObject.C = channelId;
+
+  $rootScope.xpush.createChannel(channelUsers, channelId, createObject.DT, function(data){
+
+    var param = {};
+    param.app = loginUser.app;
+    param.channel = channelId;
+    param.userId = loginUser.userId;
+    param.deviceId = loginUser.deviceId;
+
+    // Channel Init
+    Chat.init( param, loginUser, '', $scope, function( messages ){
+    });
+  });
+
+  var inputObj = document.getElementById('file');
+  angular.element( inputObj ).on('change',function(event) {
+
+    $rootScope.xpush.uploadStream( channelId, {
+      file: inputObj
+    }, function(data, idx){
+      inputObj.value = "";
+      console.log("progress  ["+idx+"]: "+data);
+    }, function(data,idx){
+      var name = data.result.name;
+
+      inputObj.value = "";
+      console.log("completed ["+idx+"]: "+JSON.stringify(data));
+
+      var imageUrl = $rootScope.xpush.getFileUrl(channelId, name );
+      $scope.emoticons.push( { name : imageUrl } );
+      console.log( $scope.emoticons );
+      $scope.$apply();
+    });
+  });
+})
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, $ionicPopup, Sign, Cache) {
 
   $scope.signIn = function(user) {

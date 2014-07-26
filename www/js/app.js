@@ -60,15 +60,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         });
       }
     }
-
-    $rootScope.getImage = function(image){
-      if ( image =='' ){
-        return $rootScope.rootImgPath+'/default_image.jpg';
-      } else {
-        return image;
-      }
-    }
-
     // Android
     onNotification = function(e) {
       //$("#app-status-ul").append('<li>EVENT -> RECEIVED:' + e.event + '</li>');
@@ -206,6 +197,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         'tab-account': {
           templateUrl: 'templates/tab-account.html',
           controller: 'AccountCtrl'
+        }
+      }
+    })
+
+    .state('tab.emoticon', {
+      url: '/emoticon',
+      views: {
+        'tab-emoticon': {
+          templateUrl: 'templates/tab-emoticon.html',
+          controller: 'EmoticonCtrl'
         }
       }
     })
