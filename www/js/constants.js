@@ -9,7 +9,7 @@ angular.module('starter.constants', [])
   //.constant('BASE_URL', 'localhost')
   .constant('DB_CONFIG', {
     name: 'stalk.db',
-    version: '1.1', 
+    version: '1.2',
     tables: [
       {
         name: 'TB_MESSAGE',
@@ -43,7 +43,6 @@ angular.module('starter.constants', [])
       {
         name: 'TB_USER',
         columns: [
-          //{name: '_id',     type: 'integer primary key autoincrement'},
           {name: 'user_id',   type: 'text'},
           {name: 'user_name',  type: 'text'},
           {name: 'message',    type: 'text'},
@@ -53,6 +52,16 @@ angular.module('starter.constants', [])
           {name: 'friend_flag', type: 'text DEFAULT "N" '}
         ],
         table_index : [{ type : 'UNIQUE', name : 'IDX_TB_USER', columns : [ 'user_id', 'owner_id' ] }]
+      },
+      {
+        name: 'TB_EMOTICON',
+        columns: [
+          {name: 'group_id',   type: 'text'},
+          {name: 'tag',  type: 'text'},
+          {name: 'image',    type: 'text'},
+          {name: 'owner_id', type: 'text'}
+        ],
+        table_index : [{ type : '', name : 'IDX_TB_EMOTICON', columns : [ 'owner_id' ] }]
       }
     ]
 });

@@ -80,7 +80,6 @@ angular.module('starter.dao', [])
   }
 })
 .factory('ChannelDao', function(DB, UTIL, APP_INFO, Sign) {
-  // Might use a resource here that returns a JSON array
   var scope;
   var loginUserId;
 
@@ -271,8 +270,39 @@ angular.module('starter.dao', [])
     }
   }
 })
-.factory('MessageDao', function(DB, Sign, Cache) {file:///D:/ionic/workspace/messengerX/www/index.html#/tab/
-  // Might use a resource here that returns a JSON array
+.factory('EmoticonDao', function(DB, Sign) {
+
+  return {
+    list : function(){
+      var loginUserId = Sign.getUser().userId;
+      return DB.query(
+        'SELECT group_id, tag, image FROM TB_EMOTICON WHERE owner_id = ? ORDER BY group_id ASC ;', [loginUserId]
+      ).then(function(result) {
+        return DB.fetchAll(result);
+      });
+    },
+    add : function(jsonObj){
+      console.log( jsonObj );   
+      var loginUserId = Sign.getUser().userId;
+      var query =
+        "INSERT OR REPLACE INTO TB_EMOTICON "+
+        "(group_id, tag, image, owner_id) VALUES "+
+        "(?, ?, ?, ?) ;";
+
+      var cond = [
+        jsonObj.group,
+        jsonObj.tag,
+        jsonObj.image,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
+    }
+  }
+})
+.factory('MessageDao', function(DB, Sign, Cache) {
   var scope;
 
   return {
@@ -369,8 +399,10 @@ angular.module('starter.dao', [])
       if( table.table_index != undefined ){      
         for( var key in table.table_index ){
           var tableInx = table.table_index[key];
-          var query = 'CREATE '+ tableInx.type +' INDEX IF NOT EXISTS ' + tableInx.name +' ON ' +table.name + ' (' + tableInx.columns.join(',') + ')';
-          self.query(query);
+          setTimeout( function(){
+            var query = 'CREATE '+ tableInx.type +' INDEX IF NOT EXISTS ' + tableInx.name +' ON ' +table.name + ' (' + tableInx.columns.join(',') + ')';
+            self.query(query);
+          }, 2000 );
         }
       }
     });
@@ -383,6 +415,7 @@ angular.module('starter.dao', [])
       transaction.executeSql(query, bindings, function(transaction, result) {
         deferred.resolve(result);
       }, function(transaction, error) {
+        console.log( query );
         console.log( error );
         deferred.reject(error);
       });

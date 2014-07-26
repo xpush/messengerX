@@ -197,12 +197,14 @@ angular.module('starter.controllers', [])
     });
   }
 })
-.controller('EmoticonCtrl', function($scope, $rootScope, Sign, ChannelDao, Chat) {
+.controller('EmoticonCtrl', function($scope, $rootScope, Sign, ChannelDao, Chat, EmoticonDao, Emoticons) {
   $rootScope.currentChannel = '';
   var loginUser = Sign.getUser();
 
-  $scope.emoticons = [];
-  //$scope.emoticons.push( { 'name' : 'https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xfa1/v/t1.0-1/c67.18.221.221/s160x160/284679_120535951374133_5000781_n.jpg?oh=be2e992f62de5b9eae595ccd6f9c1d9a&oe=543D3784&__gda__=1413696200_51a370af8931f5b918ddc7365f1e3e8d' } );
+  $scope.emoticons = {};
+  EmoticonDao.list().then(function(emoticonArray) {
+    $scope.emoticons = Emoticons.set( emoticonArray );
+  });
 
   $scope.openFileDialog = function() {
     ionic.trigger('click', { target: document.getElementById('file') });
@@ -244,9 +246,8 @@ angular.module('starter.controllers', [])
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
 
       var imageUrl = $rootScope.xpush.getFileUrl(channelId, name );
-      $scope.emoticons.push( { name : imageUrl } );
-      console.log( $scope.emoticons );
-      $scope.$apply();
+      EmoticonDao.add( {group:'custom', tag :'', image : imageUrl} );
+      Emoticons.add( 'custom', imageUrl );
     });
   });
 })
@@ -508,7 +509,7 @@ angular.module('starter.controllers', [])
       }
     };
 
-    var url = '/videoChat.html?'+encodeURIComponent(JSON.stringify(params));
+    var url = '../videoChat.html?'+encodeURIComponent(JSON.stringify(params));
 
     var popup = $window.open(url, chKey, "width=800,height=600");
     popup.onbeforeunload = function(){
@@ -522,8 +523,10 @@ angular.module('starter.controllers', [])
 
   $scope.emoticons = [];
   var rootImgPath = $rootScope.rootImgPath;
-  $scope.emoticons.push( { '01' : rootImgPath+'/emo/s2/anger.PNG', '02' : rootImgPath+'/emo/s2/burn.PNG', '03' : rootImgPath+'/emo/s2/cool.PNG', '04' : rootImgPath+'/emo/s2/love.PNG', '05' : rootImgPath+'/emo/s2/shout.PNG', '06' : rootImgPath+'/emo/s2/smile.PNG' } );
-  $scope.emoticons.push( { '01' : rootImgPath+'/emo/b2/anger.png', '02' : rootImgPath+'/emo/b2/cry.png', '03' : rootImgPath+'/emo/b2/haha.png', '04' : rootImgPath+'/emo/b2/money.png', '05' : rootImgPath+'/emo/b2/shocked.png', '06' : rootImgPath+'/emo/b2/victory.png' } );
+  $scope.emoticons.push( { '01' : rootImgPath+'/emo/s2/anger.PNG', '02' : rootImgPath+'/emo/s2/burn.PNG', '03' : rootImgPath+'/emo/s2/cool.PNG', '04' : rootImgPath+'/emo/s2/love.PNG' } );
+    //, '05' : rootImgPath+'/emo/s2/shout.PNG', '06' : rootImgPath+'/emo/s2/smile.PNG' } );
+  $scope.emoticons.push( { '01' : rootImgPath+'/emo/b2/anger.png', '02' : rootImgPath+'/emo/b2/cry.png', '03' : rootImgPath+'/emo/b2/haha.png', '04' : rootImgPath+'/emo/b2/money.png' } );
+    //, '05' : rootImgPath+'/emo/b2/shocked.png', '06' : rootImgPath+'/emo/b2/victory.png' } );
 
   $scope.curEmoTabId = "0";
   $scope.showEmo = "false";

@@ -398,6 +398,82 @@ angular.module('starter.services', [])
     }
   }
 })
+.factory('Emoticons', function(EmoticonDao){
+  var emoticons = {};
+  var metas = [];
+
+  return {
+    add : function (group,json) {
+      var k;
+      var groupInx = metas[group];
+      var groupKey = group;
+
+      if( groupInx === undefined ){
+        metas[group] = 0;
+        emoticons[group] = [];
+      }
+
+      if( groupInx != 0 ){
+        groupKey = group + groupInx;
+      }
+
+      if( emoticons[groupKey].length < 4 ){
+        k = groupKey;
+      } else {
+        k = group + (++groupInx);
+        emoticons[k] = [];
+        metas[group] = groupInx;
+      }
+
+      emoticons[k].push( json );
+    },        
+    get : function () {
+      return emoticons;
+    },
+    set : function (emoticonArray) {
+      var before;
+      var jnx = 0;
+      var result = {};
+
+      for( var inx = 0 ; inx < emoticonArray.length ; inx++ ){
+        var emo = emoticonArray[inx];
+        var group = emo.group_id;
+
+        if( result[group] === undefined ){
+          result[group] = [];
+        }
+        result[group].push( emo.image );
+      }
+
+      for( var key in result ){
+        var groups = result[key];
+
+        var jnx = 0;
+        if( groups.length > 4 ){
+          var newKey;
+          while( groups.length > 4 ){
+            var temp = groups.slice(0,4);
+            newKey = key+jnx;
+
+            result[newKey] = temp;
+            groups.splice( 0,4 );
+            jnx++;
+          }
+
+          newKey = key+jnx;
+          result[newKey] = groups;
+          delete result[key];
+          metas[key] = jnx;
+        } else {
+          metas[key] = 0;
+        }
+      }
+
+      emoticons = result;
+      return emoticons;
+    }
+  }
+})
 .factory('UTIL', function(Cache, Sign){
   var cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
   return {          
