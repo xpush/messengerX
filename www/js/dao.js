@@ -273,11 +273,21 @@ angular.module('starter.dao', [])
 .factory('EmoticonDao', function(DB, Sign) {
 
   return {
-    list : function(){
+    list : function(param){
       var loginUserId = Sign.getUser().userId;
-      return DB.query(
-        'SELECT group_id, tag, image FROM TB_EMOTICON WHERE owner_id = ? ORDER BY group_id ASC ;', [loginUserId]
-      ).then(function(result) {
+      var query = "SELECT group_id, tag, image FROM TB_EMOTICON WHERE owner_id = ? ";
+      if( param.group != undefined ){
+        query += "AND group_id = ? ";
+      }
+      query += "ORDER BY group_id ASC ;";
+
+      var cond=[loginUserId];
+      if( param.group != undefined ){
+        cond.push( param.group );
+      }
+
+      return DB.query( query, cond ).then(function(result) {
+        console.log( result );
         return DB.fetchAll(result);
       });
     },
@@ -399,10 +409,8 @@ angular.module('starter.dao', [])
       if( table.table_index != undefined ){      
         for( var key in table.table_index ){
           var tableInx = table.table_index[key];
-          setTimeout( function(){
-            var query = 'CREATE '+ tableInx.type +' INDEX IF NOT EXISTS ' + tableInx.name +' ON ' +table.name + ' (' + tableInx.columns.join(',') + ')';
-            self.query(query);
-          }, 2000 );
+          var query = 'CREATE '+ tableInx.type +' INDEX IF NOT EXISTS ' + tableInx.name +' ON ' +table.name + ' (' + tableInx.columns.join(',') + ')';
+          self.query(query);
         }
       }
     });

@@ -85,17 +85,16 @@
   </div>
  
   <div class="chat-emoticon" id="chat-emoticons">
-    <div id="emoticon-tabs" class="tabs tab-emoticon">
-      <a class="tab-item tab-item-active" id="tab0" ng-click="tabActive('0');">
-        <i class="icon ion-happy"></i>
-      </a>
-      <a class="tab-item" id="tab1" ng-click="tabActive('1');">
-        <i class="icon ion-social-reddit"></i>
+    <div id="emoticon-tabs" class="tabs tab-emoticon" >
+      <a ng-class="emoticon.CN" id="tab{{$index}}" ng-repeat="emoticon in emoticons" ng-click="tabActive('{{$index}}');">
+        <i class="icon {{emoticon.tag}}"></i>
       </a>
     </div>
-    <div class="row hide" id="tabbody{{$index}}" ng-repeat="emoticon in emoticons" >
-      <div class="col" ng-repeat="image in emoticon">
-        <img class="emoticon" ng-src="{{image}}" ng-click="sendEmoticon( '{{image}}' )" />
+    <div id="tabbody{{$index}}" style="display:none;" ng-repeat="emoticon in emoticons">
+      <div class="row flex" ng-repeat="items in emoticon.items"> 
+        <div class="col" ng-repeat="image in items">
+          <img class="emoticon" ng-src="{{image}}" ng-click="sendEmoticon( '{{image}}' )" />
+        </div>
       </div>
     </div>
   </div>  

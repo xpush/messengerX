@@ -14,6 +14,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     if( window.device ){
       $rootScope.deviceId = device.uuid;
       $rootScope.rootImgPath = "img";
+      $rootScope.rootPath = "../";
+
       $rootScope.cameraFlag = true;
 
       var pushNotification = window.plugins.pushNotification;
@@ -25,10 +27,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     } else if ( $location.absUrl().indexOf( 'file' ) > -1 ) {
       $rootScope.rootImgPath = "img";
+      $rootScope.rootPath = "../www/";
       $rootScope.deviceId = 'ionic';
     } else {
       $rootScope.rootImgPath = "../img";
-      $rootScope.deviceId = 'ionic';     
+      $rootScope.rootPath = "/";
+      $rootScope.deviceId = 'ionic';
     }
 
     $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";

@@ -403,73 +403,88 @@ angular.module('starter.services', [])
   var metas = [];
 
   return {
-    add : function (group,json) {
-      var k;
-      var groupInx = metas[group];
-      var groupKey = group;
+    list : function( param, callback){
+      EmoticonDao.list(param).then(function(emoticonArray) {
+        var before = "";
+        var result = {};
 
-      if( groupInx === undefined ){
-        metas[group] = 0;
-        emoticons[group] = [];
+        for( var inx = 0 ; inx < emoticonArray.length ; inx++ ){
+          var emo = emoticonArray[inx];
+          var group = emo.group_id;
+          var tag = emo.tag;
+
+          if( result[group] === undefined ){
+            result[group] = { group : group, tag : tag, items : [] };
+          }
+
+          result[group].items.push( emo.image );
+        }
+
+        var superResult = [];
+        for( var key in result ){
+          var groups = result[key];
+          var group = groups.group;
+          var tag = groups.tag;
+
+
+          var rr = { group : group, tag : tag, items : {}, metas : 0, tag : 'ion-android-hand', 'CN' : 'tab-item' };
+
+          var jnx = 0;
+          if( groups.items.length > 4 ){
+            var newKey;
+            while( groups.items.length > 4 ){
+              var temp = groups.items.slice(0,4);
+              newKey = key+jnx;
+
+              rr.items[newKey] = temp;
+              groups.items.splice( 0,4 );
+              jnx++;
+            }
+
+            newKey = key+jnx;
+            rr.items[newKey] = groups.items;
+            rr.metas = jnx;
+          } else {
+            rr.items[key] = groups.items;
+            rr.metas = 0;
+          }
+
+          superResult.push( rr );
+        }
+
+        emoticons = superResult;
+        callback( superResult );
+      });
+    },
+    add : function (param,jsonObject) {
+      EmoticonDao.add( param );
+
+      var k;
+      var groupKey = param.group;
+
+      if( jsonObject === undefined || jsonObject.length == 0 ){
+        jsonObject = {group:group};
+        jsonObject.metas = 0;
+        jsonObject.items = [];
       }
+
+      var groupInx = jsonObject.metas;
 
       if( groupInx != 0 ){
         groupKey = group + groupInx;
       }
 
-      if( emoticons[groupKey].length < 4 ){
+      if( jsonObject.items[groupKey].length < 4 ){
         k = groupKey;
       } else {
         k = group + (++groupInx);
-        emoticons[k] = [];
-        metas[group] = groupInx;
+        jsonObject.items[k] = [];
+        jsonObject.metas = groupInx;
       }
 
-      emoticons[k].push( json );
+      jsonObject.items[k].push( param.image );
     },        
-    get : function () {
-      return emoticons;
-    },
-    set : function (emoticonArray) {
-      var before;
-      var jnx = 0;
-      var result = {};
-
-      for( var inx = 0 ; inx < emoticonArray.length ; inx++ ){
-        var emo = emoticonArray[inx];
-        var group = emo.group_id;
-
-        if( result[group] === undefined ){
-          result[group] = [];
-        }
-        result[group].push( emo.image );
-      }
-
-      for( var key in result ){
-        var groups = result[key];
-
-        var jnx = 0;
-        if( groups.length > 4 ){
-          var newKey;
-          while( groups.length > 4 ){
-            var temp = groups.slice(0,4);
-            newKey = key+jnx;
-
-            result[newKey] = temp;
-            groups.splice( 0,4 );
-            jnx++;
-          }
-
-          newKey = key+jnx;
-          result[newKey] = groups;
-          delete result[key];
-          metas[key] = jnx;
-        } else {
-          metas[key] = 0;
-        }
-      }
-
-      emoticons = result;
+    all : function () {
       return emoticons;
     }
   }

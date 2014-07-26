@@ -197,13 +197,15 @@ angular.module('starter.controllers', [])
     });
   }
 })
-.controller('EmoticonCtrl', function($scope, $rootScope, Sign, ChannelDao, Chat, EmoticonDao, Emoticons) {
+.controller('EmoticonCtrl', function($scope, $rootScope, Sign, ChannelDao, Chat, Emoticons) {
   $rootScope.currentChannel = '';
   var loginUser = Sign.getUser();
 
-  $scope.emoticons = {};
-  EmoticonDao.list().then(function(emoticonArray) {
-    $scope.emoticons = Emoticons.set( emoticonArray );
+  $scope.emoticon = {};
+  Emoticons.list( { group : 'custom' }, function(emoticons){
+    if( emoticons.length > 0 ){
+      $scope.emoticon = emoticons[0];
+    }
   });
 
   $scope.openFileDialog = function() {
@@ -246,8 +248,9 @@ angular.module('starter.controllers', [])
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
 
       var imageUrl = $rootScope.xpush.getFileUrl(channelId, name );
-      EmoticonDao.add( {group:'custom', tag :'', image : imageUrl} );
-      Emoticons.add( 'custom', imageUrl );
+
+      var param = {group:'custom', tag :'', image : imageUrl};
+      Emoticons.add( param, $scope.emoticon );
     });
   });
 })
@@ -300,7 +303,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $ionicFrostedDelegate, $ionicScrollDelegate, $rootScope, $ionicPopup, $window, Friends, Sign, Chat, ChannelDao, UTIL) {
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicFrostedDelegate, $ionicScrollDelegate,  $ionicPopup, $window, Friends, Sign, Chat, ChannelDao, UTIL, Emoticons) {
   $rootScope.currentScope = $scope;
 
   var loginUser = Sign.getUser();
@@ -509,7 +512,7 @@ angular.module('starter.controllers', [])
       }
     };
 
-    var url = '../videoChat.html?'+encodeURIComponent(JSON.stringify(params));
+    var url = $rootScope.rootPath+'videoChat.html?'+encodeURIComponent(JSON.stringify(params));
 
     var popup = $window.open(url, chKey, "width=800,height=600");
     popup.onbeforeunload = function(){
@@ -523,9 +526,19 @@ angular.module('starter.controllers', [])
 
   $scope.emoticons = [];
   var rootImgPath = $rootScope.rootImgPath;
-  $scope.emoticons.push( { '01' : rootImgPath+'/emo/s2/anger.PNG', '02' : rootImgPath+'/emo/s2/burn.PNG', '03' : rootImgPath+'/emo/s2/cool.PNG', '04' : rootImgPath+'/emo/s2/love.PNG' } );
-    //, '05' : rootImgPath+'/emo/s2/shout.PNG', '06' : rootImgPath+'/emo/s2/smile.PNG' } );
-  $scope.emoticons.push( { '01' : rootImgPath+'/emo/b2/anger.png', '02' : rootImgPath+'/emo/b2/cry.png', '03' : rootImgPath+'/emo/b2/haha.png', '04' : rootImgPath+'/emo/b2/money.png' } );
+
+  Emoticons.list( {}, function(emoticons){
+    $scope.emoticons.push( { group : 's2', tag : 'ion-happy', 'CN' : 'tab-item tab-item-active', items : {
+        "01" : [rootImgPath+'/emo/s2/anger.PNG', rootImgPath+'/emo/s2/burn.PNG', rootImgPath+'/emo/s2/cool.PNG', rootImgPath+'/emo/s2/love.PNG'],
+        "02" : [rootImgPath+'/emo/s2/shout.PNG', rootImgPath+'/emo/s2/smile.PNG']}}
+    );
+    $scope.emoticons = $scope.emoticons.concat( emoticons );
+
+    console.log( $scope.emoticons );
+    //$scope.emoticons['b2'] = [rootImgPath+'/emo/b2/anger.png', rootImgPath+'/emo/b2/cry.png',  rootImgPath+'/emo/b2/haha.png', rootImgPath+'/emo/b2/money.png'];
+  });
+
+
     //, '05' : rootImgPath+'/emo/b2/shocked.png', '06' : rootImgPath+'/emo/b2/victory.png' } );
 
   $scope.curEmoTabId = "0";
@@ -535,7 +548,8 @@ angular.module('starter.controllers', [])
   $scope.toggleEmoticons = function( flag ){
     $scope.showEmo = flag;
     if( $scope.showEmo == "true" ){
-      document.getElementById( 'tabbody'+$scope.curEmoTabId ).className = "row flex";
+      //document.getElementById( 'tabbody'+$scope.curEmoTabId ).className = "row flex";
+      document.getElementById( 'tabbody'+$scope.curEmoTabId ).style.display = "block";
       document.getElementById( 'chat-emoticons' ).style.display = "block";
       document.getElementById( "chat-extends" ).className = "chat-extends row hide";
       $scope.showExt = "false";
@@ -568,10 +582,12 @@ angular.module('starter.controllers', [])
     for( var inx = 0 ; inx < tabs.length;inx++ ){
       if( tabs[inx].id == "tab"+tabId ){
         tabs[inx].className = "tab-item tab-item-active";
-        document.getElementById( "tabbody"+inx ).className = "row flex";
+        //document.getElementById( "tabbody"+inx ).className = "row flex";
+        document.getElementById( "tabbody"+inx ).style.display = "block";
       } else {
         tabs[inx].className = "tab-item";
-        document.getElementById( "tabbody"+inx ).className = "row hide";
+        //document.getElementById( "tabbody"+inx ).className = "row hide";
+        document.getElementById( "tabbody"+inx ).style.display = "none";
       }
     }
   };
