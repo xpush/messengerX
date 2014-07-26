@@ -1,0 +1,16 @@
+<ion-view title="Custom Emoticons">
+  <ion-content class="has-header">
+    <ion-list>
+	    <div class="row" ng-repeat="item in emoticon.items" >
+	      <div class="col" ng-repeat="image in item">
+	        <img class="emoticon" ng-src="{{image}}" />
+	      </div>
+	    </div>
+		  <div class="item" ng-if="emoticon.length == 0">
+		  	There is no emoticons.
+		  </div>
+		</ion-list>
+	 	<input type="file" id="file"/>
+  </ion-content>
+  <button class="button icon ion-plus-round button-add-friend" ng-click="openFileDialog()"></button>
+</ion-view>
