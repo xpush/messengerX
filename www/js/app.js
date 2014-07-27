@@ -14,17 +14,30 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     if( window.device ){
       $rootScope.deviceId = device.uuid;
       $rootScope.rootImgPath = "img";
-      $rootScope.rootPath = "../";
+      $rootScope.rootPath = "";
 
       $rootScope.cameraFlag = true;
 
       var pushNotification = window.plugins.pushNotification;
 
       if (device.platform == 'android' || device.platform == 'Android') {
-          pushNotification.register(successHandler, errorHandler,{"senderID":"944977353393","ecb":"onNotification"});
+        pushNotification.register(successHandler, errorHandler,{"senderID":"944977353393","ecb":"onNotification"});
       } else {
-          pushNotification.register(tokenHandler, errorHandler,{"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});
+        pushNotification.register(tokenHandler, errorHandler,{"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});
       }
+
+      document.addEventListener("resume", onResume, false);
+      document.addEventListener("pause", onPause, false);
+
+      function onResume() {
+        console.log('On Resume');
+      }
+
+      function onPause() {
+        console.log('On Pause');
+        $rootScope.xpush.logout();
+      }
+
     } else if ( $location.absUrl().indexOf( 'file' ) > -1 ) {
       $rootScope.rootImgPath = "img";
       $rootScope.rootPath = "../www/";
@@ -51,23 +64,21 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     $rootScope.localNoti = function(param, callback){
       if( window.plugin && window.plugin.notification.local ){
         window.plugin.notification.local.add({
-            id: param.id,  // A unique id of the notifiction
-            //date:,    // This expects a date object
-            message: param.message,  // The message that is displayed
-            title: param.title  // The title of the message
-            //repeat:     String,  // Either 'secondly', 'minutely', 'hourly', 'daily', 'weekly', 'monthly' or 'yearly'
-            //badge:      Number,  // Displays number badge to notification
-            //sound:      String,  // A sound to be played
-            //json:       String,  // Data to be passed through the notification
-            //autoCancel: true // Setting this flag and the notification is automatically canceled when the user clicks it
-            //ongoing:    Boolean, // Prevent clearing of notification (Android only)
+          id: param.id,  // A unique id of the notifiction
+          //date:,    // This expects a date object
+          message: param.message,  // The message that is displayed
+          title: param.title,  // The title of the message
+          //repeat:     String,  // Either 'secondly', 'minutely', 'hourly', 'daily', 'weekly', 'monthly' or 'yearly'
+          //badge:      Number,  // Displays number badge to notification
+          //sound:      String,  // A sound to be played
+          //json:       String,  // Data to be passed through the notification
+          autoCancel: true // Setting this flag and the notification is automatically canceled when the user clicks it
+          //ongoing:    Boolean, // Prevent clearing of notification (Android only)
         });
       }
     }
     // Android
     onNotification = function(e) {
-      //$("#app-status-ul").append('<li>EVENT -> RECEIVED:' + e.event + '</li>');
-
       switch( e.event ){
         case 'registered':
           if ( e.regid.length > 0 ){
@@ -88,10 +99,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
             }
           }
 
-          console.log( e.payload.message );
-          console.log( e.payload.msgcnt );
-          //$("#app-status-ul").append('<li>MESSAGE -> MSG: ' + e.payload.message + '</li>');
-          //$("#app-status-ul").append('<li>MESSAGE -> MSGCNT: ' + e.payload.msgcnt + '</li>');
+          window.plugin.notification.local.add({
+            id: e.payload.TS,  // A unique id of the notifiction
+            message: e.payload.MG,  // The message that is displayed
+            title: e.payload.UO.NM,  // The title of the message
+            autoCancel: true // Setting this flag and the notification is automatically canceled when the user clicks it
+          });
           break;
 
         case 'error':

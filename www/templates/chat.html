@@ -91,8 +91,8 @@
       </a>
     </div>
     <div id="tabbody{{$index}}" style="display:none;" ng-repeat="emoticon in emoticons">
-      <div class="row flex" ng-repeat="items in emoticon.items"> 
-        <div class="col" ng-repeat="image in items">
+      <div class="row" ng-repeat="items in emoticon.items"> 
+        <div class="col center" ng-repeat="image in items">
           <img class="emoticon" ng-src="{{image}}" ng-click="sendEmoticon( '{{image}}' )" />
         </div>
       </div>
