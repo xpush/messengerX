@@ -90,7 +90,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
         case 'message':
           if (e.foreground){
-            //$("#app-status-ul").append('<li>--INLINE NOTIFICATION--' + '</li>');
+            window.plugin.notification.local.add({
+              id: e.payload.TS,  // A unique id of the notifiction
+              message: e.payload.MG,  // The message that is displayed
+              title: e.payload.UO.NM,  // The title of the message
+              autoCancel: true // Setting this flag and the notification is automatically canceled when the user clicks it
+            });
           }else{   // otherwise we were launched because the user touched a notification in the notification tray.
             if (e.coldstart){
               //$("#app-status-ul").append('<li>--COLDSTART NOTIFICATION--' + '</li>');
@@ -98,13 +103,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
               //$("#app-status-ul").append('<li>--BACKGROUND NOTIFICATION--' + '</li>');
             }
           }
-
-          window.plugin.notification.local.add({
-            id: e.payload.TS,  // A unique id of the notifiction
-            message: e.payload.MG,  // The message that is displayed
-            title: e.payload.UO.NM,  // The title of the message
-            autoCancel: true // Setting this flag and the notification is automatically canceled when the user clicks it
-          });
           break;
 
         case 'error':
