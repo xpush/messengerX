@@ -30,7 +30,7 @@ angular.module('starter.services', [])
         // Multi Add Friend
         UserDao.addFriend( userIds );
         callback( data );
-      }); 
+      });
     },
     list : function(callback){
       UserDao.list( { 'friendFlag' : 'Y'} ).then( function ( result ){
@@ -46,9 +46,9 @@ angular.module('starter.services', [])
       var loginUserId = Sign.getUser().userId;
 
       $rootScope.xpush.getGroupUsers( loginUserId, function( err, users ){
-        for( var inx = 0 ; inx < users.length ; inx++ ){              
+        for( var inx = 0 ; inx < users.length ; inx++ ){
           if( users[inx].userId != loginUserId ){
-            var user = { 'userId' : users[inx].U, 'userName': users[inx].DT.NM, 
+            var user = { 'userId' : users[inx].U, 'userName': users[inx].DT.NM,
               'message' : users[inx].DT.MG, 'image': users[inx].DT.I, 'chosung' : UTIL.getChosung( users[inx].DT.NM ), 'friendFlag' : 'Y' };
             UserDao.add( user, true );
           }
@@ -65,7 +65,7 @@ angular.module('starter.services', [])
     refresh : function(callback){
 
       loginUserId = Sign.getUser().userId;
-     
+
       $rootScope.xpush.getUserList({}, function( err, userArray ){
 
         for( var inx = 0 ; inx < userArray.length ; inx++ ){
@@ -88,6 +88,24 @@ angular.module('starter.services', [])
       UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
         callback( result );
       });
+    },
+    search : function(_k, _v, pageNumber, callback){
+      if(!pageNumber) pageNumber = 1;
+      resultsPerPage = 50;
+
+      var params = {
+        keys : _k,
+        values : _v,
+        page: {
+          num: pageNumber,
+          size: resultsPerPage
+        }
+      };
+
+      $rootScope.xpush.getUserList(params, function( err, userArray){
+        callback( userArray );
+      });
+
     }
   }
 })
@@ -156,7 +174,7 @@ angular.module('starter.services', [])
                   $rootScope.currentScope.add( nextMessage );
 
                 } else {
-                  
+
                   $rootScope.xpush.getChannelData( data.C, function( err, channelJson ){
                     var channel = {'channel': data.C, 'users' : channelJson.DT.US};
 
@@ -189,19 +207,19 @@ angular.module('starter.services', [])
 
                     $rootScope.localNoti( { id : data.TS, message : data.MG, title : channel.name}, function(){
                       console.log( '========= local noti callback =========');
-                    });   
-                  });         
+                    });
+                  });
                 }
               });
 
-              initFlag = true;                       
+              initFlag = true;
             });
           });
         });
       }
     },
     channelList : function(callback){
-      $rootScope.xpush.getChannels( function(err, channelArray){        
+      $rootScope.xpush.getChannels( function(err, channelArray){
         var channels = {};
         for( var inx = 0 ; inx < channelArray.length ; inx++ ){
           var data = channelArray[inx];
@@ -292,7 +310,7 @@ angular.module('starter.services', [])
       $rootScope.loginUser = {};
       //$state.go('signin');
       $state.transitionTo('signin', {}, { reload: true, notify: true });
-    },    
+    },
     register : function( params, callback ){
       $http.post("http://"+BASE_URL+":8000/user/register", params)
       .success(function(data) {
@@ -344,7 +362,7 @@ angular.module('starter.services', [])
 
         /*
         *Reset Count Start
-        */      
+        */
         var param = { 'channel' :  params.channel, 'reset' : true, 'message': latestMessage };
         ChannelDao.update( param );
 
@@ -483,7 +501,7 @@ angular.module('starter.services', [])
       }
 
       jsonObject.items[k].push( param.image );
-    },        
+    },
     all : function () {
       return emoticons;
     }
@@ -491,7 +509,7 @@ angular.module('starter.services', [])
 })
 .factory('UTIL', function(Cache, Sign){
   var cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-  return {          
+  return {
     getUniqueKey : function () {
       var s = [], itoh = '0123456789ABCDEF';
       for (var i = 0; i < 36; i++) s[i] = Math.floor(Math.random()*0x10);
@@ -540,7 +558,7 @@ angular.module('starter.services', [])
         code = str.charCodeAt(i)-44032;
         if(code>-1 && code<11172) result += cho[Math.floor(code/588)];
       }
-      return result;      
+      return result;
     },
     getMorphemes : function(str){
 
@@ -563,7 +581,7 @@ angular.module('starter.services', [])
       var result = "";
       for( var inx =0 ; inx < str.length ; inx++ ){
         var ch = str.charAt(inx);
-        
+
         if (ch.search(/[^a-zA-Z]+/) === -1) {
           result += ch;
           continue;
@@ -608,7 +626,7 @@ angular.module('starter.services', [])
     getNames : function( userIds ){
       var loginUserId = Sign.getUser().userId;
       var loginUserName = Sign.getUser().userName;
-      var result;      
+      var result;
       var userNames = [];
 
       var userArray = angular.copy( userIds );
@@ -640,6 +658,6 @@ angular.module('starter.services', [])
       }
 
       return userNames.join(",");
-    }       
+    }
   }
 });

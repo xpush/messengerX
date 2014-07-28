@@ -131,7 +131,7 @@ angular.module('starter.controllers', [])
   $scope.$on('modal.shown', function() {
     $scope.modal.selection = [];
     $scope.modal.changed = false;
-    Users.refresh(function(users){
+    Users.search([], [], 1, function(users){
       if( users != undefined ){
         $scope.modal.datas = [];
         $scope.modal.datas = users;
@@ -163,6 +163,7 @@ angular.module('starter.controllers', [])
           addUsers.push( res[key] );
         }
       }
+
       Friends.add( addUsers, function( data ){
         $scope.modal.changed = true;
         $scope.modal.hide();
@@ -170,6 +171,7 @@ angular.module('starter.controllers', [])
     }
   };
 })
+
 .controller('AccountCtrl', function($scope, $rootScope, Sign) {
   $rootScope.currentChannel = '';
   $scope.loginUser = Sign.getUser();

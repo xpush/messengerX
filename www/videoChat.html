@@ -100,10 +100,8 @@ footer {
     </div>
 
     <div id="container">
-      <div id="card">
-        <div id="remote">
-          <video id='remoteVideo' autoplay></video>
-        </div>
+      <div id="remote">
+        <video id='remoteVideo' autoplay></video>
       </div>
     </div>
 
@@ -125,6 +123,20 @@ footer {
     var webrtc = new XWebRTC(
       obj.S, obj.A, obj.C, obj.U,
       localVideo, remoteVideo);
+/*
+    var _remote = document.getElementById('remote');
+    var remoteVideo = document.getElementById('remoteVideo');
+    var aspectRatio = remoteVideo.videoWidth / remoteVideo.videoHeight;
+
+    var innerHeight = this.innerHeight;
+    var innerWidth = this.innerWidth;
+    var videoWidth = innerWidth < aspectRatio * window.innerHeight ? innerWidth : aspectRatio * window.innerHeight;
+    var videoHeight = innerHeight < window.innerWidth / aspectRatio ? innerHeight : window.innerWidth / aspectRatio;
+    _remote.style.width = videoWidth + 'px';
+    _remote.style.height = videoHeight + 'px';
+    _remote.style.left = (innerWidth - videoWidth) / 2 + 'px';
+    _remote.style.top = (innerHeight - videoHeight) / 2 + 'px';
+*/
 
   </script>
 

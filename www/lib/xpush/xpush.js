@@ -430,8 +430,8 @@
     params = params == undefined ? {}: params;
     var self = this;
     console.log("xpush : getUsertList ",params);
-    self.sEmit('user-list' ,params,function(err,result){
-        if(cb) cb(err, result);
+    self.sEmit('user-list' , params, function(err, result){
+        if(cb) cb(err, result.users, result.count);
     });
   };
 
