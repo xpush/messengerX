@@ -2,7 +2,7 @@
 
   <ion-header-bar class="bar bar-header bar-positive">
     <button class="button button-icon ion-close" ng-click="modal.hide()"></button>
-    <h1 class="title">Search your friends</h1>
+    <h1 class="title">Search your friends({{modal.datas.length}})</h1>
     <button class="button button-icon icon-right ion-checkmark" ng-click="addFriends()" ng-disabled='modal.selection.length == 0'>OK&nbsp;</button>
   </ion-header-bar>
 
@@ -17,6 +17,9 @@
         <p>{{data.DT.MS}}</p>
       </ion-item>
     </ion-list>
+
+    <ion-infinite-scroll ng-if="modal.visible" on-infinite="retrieveFriends()"  distance="1%"></ion-infinite-scroll>
+
     <div class="card">
       <div class="item item-text-wrap" ng-if="modal.datas.length == 0">
         User is not existed.

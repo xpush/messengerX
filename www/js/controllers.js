@@ -104,17 +104,24 @@ angular.module('starter.controllers', [])
   };
 
   $scope.showPopup = function() {
+    $scope.modal.datas = [];
+    $scope.modal.selection = [];
+    $scope.modal.num = 1;
+    $scope.modal.changed = false;
+    $scope.modal.visible = true;
     $scope.modal.show();
   };
 
   $ionicModal.fromTemplateUrl('templates/modal-friends.html', function(modal) {
     $scope.modal = modal;
     $scope.modal.changed = false;
-    $scope.modal.selection = [];
+    $scope.modal.visible = false;
   }, {
     animation: 'slide-in-up'
   });
   $scope.$on('modal.hidden', function() {
+    $scope.modal.visible = false;
+
     if($scope.modal.changed){
       Friends.list(function(friends){
         if( friends != undefined ){
@@ -129,16 +136,7 @@ angular.module('starter.controllers', [])
     }
   });
   $scope.$on('modal.shown', function() {
-    $scope.modal.selection = [];
-    $scope.modal.changed = false;
-    Users.search([], [], 1, function(users){
-      if( users != undefined ){
-        $scope.modal.datas = [];
-        $scope.modal.datas = users;
-        $scope.modal.selection = [];
-      }
-    });
-
+    // do nothing...
   });
 })
 
@@ -169,6 +167,35 @@ angular.module('starter.controllers', [])
         $scope.modal.hide();
       });
     }
+  };
+
+  $scope.retrieveFriends = function() {
+
+console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
+    if($scope.modal.visible){
+
+      Users.search([], [], $scope.modal.num, function(users){
+
+        if( users != undefined ){
+          if($scope.modal.num > 1) {
+            $scope.modal.datas = $scope.modal.datas.concat(users);
+          }else{
+            $scope.modal.datas = users;
+          }
+          $scope.modal.num = $scope.modal.num + 1;
+        }
+
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+
+        if( !users || users.length < 50) {
+          $scope.modal.visible = false;
+        }
+
+      });
+
+    }
+
+
   };
 })
 
