@@ -117,7 +117,8 @@ angular.module('starter.controllers', [])
     $scope.modal.changed = false;
     $scope.modal.visible = false;
   }, {
-    animation: 'slide-in-up'
+    animation: 'slide-in-up',
+    focusFirstInput: true
   });
   $scope.$on('modal.hidden', function() {
     $scope.modal.visible = false;
