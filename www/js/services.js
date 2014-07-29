@@ -660,6 +660,21 @@ angular.module('starter.services', [])
       }
 
       return userNames.join(",");
-    }
+    },
+    getType : function( inputObj ){
+      var images = ['bmp','jpeg','jpg','png'];
+      var movies = ['mp4','avi'];
+      var filename = inputObj.value;
+      var ext = filename.substr( filename.lastIndexOf('.')+1 );
+
+      var result = "";
+      if( images.indexOf( ext.toLowerCase() ) > -1 ){
+        result = "image";
+      } else if( movies.indexOf( ext.toLowerCase() ) > -1){
+        result = "movie";
+      }
+
+      return result;
+    }    
   }
 });

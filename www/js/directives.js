@@ -56,7 +56,7 @@ angular.module('starter.directives', [])
     template: '<img ng-src="{{image}}" />'
   };
 })
-.directive('imageLink', function ( $rootScope, $window, $ionicFrostedDelegate, $ionicScrollDelegate, $ionicPopup ) {       
+.directive('popupLink', function ( $rootScope, $window, $ionicFrostedDelegate, $ionicScrollDelegate, $ionicPopup ) {       
   return {
     link: function(scope, element, attrs) {
 
@@ -68,11 +68,16 @@ angular.module('starter.directives', [])
       }
 
       element.bind("click" , function(event){
-        var imgUrl = attrs.src.replace( "T_", "" );
+        var url;
+        if( attrs.popup != undefined ){
+          url = attrs.popup;
+        } else {
+          url = attrs.src.replace( "T_", "" );
+        }
 
         var left = screen.width/2 - 400
             , top = screen.height/2 - 300
-            , popup = $window.open(imgUrl, '', "top=" + top + ",left=" + left + ",width=800,height=600");
+            , popup = $window.open(url, '', "top=" + top + ",left=" + left + ",width=800,height=600");
       });
     }
   }

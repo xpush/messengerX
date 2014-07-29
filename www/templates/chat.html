@@ -17,13 +17,13 @@
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
             <span>
-              <img ng-src="{{message.message}}" image-link="{{message.active}}" class="from"/>
+              <img ng-src="{{message.message}}" popup-link="{{message.active}}" class="from"/>
             </span>
           </div>
         </div>
         <div ng-if="message.type=='SI'">
           <span>
-            <img ng-src="{{message.message}}" image-link="{{message.active}}"/>
+            <img ng-src="{{message.message}}" popup-link="{{message.active}}"/>
           </span>
         </div>
         <div ng-if="message.type=='RE'">
@@ -52,6 +52,11 @@
             <img ng-src="{{rootImgPath}}/webcam.png" ng-if="message.active =='false'" />
           </span>
         </div>
+        <div ng-if="message.type=='SV'">
+          <span>
+            <img ng-src="{{rootImgPath}}/camera.png" popup-link="{{message.active}}" popup="{{message.message}}"  />
+          </span>
+        </div>
         <div ng-if="message.type=='RVI'">
           <div class="small">{{message.name}}</div>
           <div class="from">
@@ -59,6 +64,15 @@
             <span>
               <img ng-src="{{rootImgPath}}/webcam.png" ng-if="message.active == 'true'" ng-click="openWebRTC('{{message.message}}')" class="from"/>
               <img ng-src="{{rootImgPath}}/webcam.png" ng-if="message.active =='false'"class="from"/>
+            </span>
+          </div>
+        </div>
+        <div ng-if="message.type=='RV'">
+          <div class="small">{{message.name}}</div>
+          <div class="from">
+            <img ng-src="{{message.image}}" class="profile" />
+            <span>
+              <img ng-src="{{rootImgPath}}/camera.png" popup-link="{{message.active}}" popup="{{message.message}}" class="from" />
             </span>
           </div>
         </div>        

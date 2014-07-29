@@ -700,21 +700,40 @@ angular.module('starter.controllers', [])
 
   angular.element( inputObj ).on('change',function(event) {
 
-    $rootScope.xpush.uploadStream( channelId, {
-      file: inputObj,
-      type: 'image'
-    }, function(data, idx){
+    var type = UTIL.getType( inputObj );
+
+    var options = {
+      file: inputObj
+    };
+
+    if( type == 'image' ){
+      options.type = "image";
+    }
+
+    $rootScope.xpush.uploadStream( channelId, options, function(data, idx){
       inputObj.value = "";
       console.log("progress  ["+idx+"]: "+data);
     }, function(data,idx){
-      var tname = data.result.tname;
+      var fname;
+      var msgType;
+
+      console.log( type );
+      if( type == 'image' ){
+        fname = data.result.tname;
+        msgType = 'I';
+      } else if ( type == 'movie' ) {
+        fname = data.result.name;
+        msgType = 'V';
+      } else {
+        return;
+      }
 
       inputObj.value = "";
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
 
-      var imageUrl = $rootScope.xpush.getFileUrl(channelId, tname );
+      var imageUrl = $rootScope.xpush.getFileUrl(channelId, fname );
 
-      Chat.send( imageUrl, 'I' );
+      Chat.send( imageUrl, msgType );
     });
   });
 
