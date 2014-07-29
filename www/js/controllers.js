@@ -112,7 +112,7 @@ angular.module('starter.controllers', [])
     $scope.modal.show();
   };
 
-  $ionicModal.fromTemplateUrl('templates/modal-friends.html', function(modal) {
+  $ionicModal.fromTemplateUrl('templates/modal-users.html', function(modal) {
     $scope.modal = modal;
     $scope.modal.changed = false;
     $scope.modal.visible = false;
@@ -129,8 +129,6 @@ angular.module('starter.controllers', [])
           $scope.friends = [];
           $scope.friends = friends;
           $scope.friendCount = friends.length;
-          //var current = $state.current;
-          //$state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
           $scope.modal.changed = false;
         }
       });
@@ -141,7 +139,7 @@ angular.module('starter.controllers', [])
   });
 })
 
-.controller('FriendsModalCtrl', function($scope, Users, Friends) {
+.controller('UsersModalCtrl', function($scope, Users, Friends) {
 
   $scope.toggleSelection = function( friendId ){
     var inx = $scope.modal.selection.indexOf( friendId );
@@ -170,9 +168,9 @@ angular.module('starter.controllers', [])
     }
   };
 
-  $scope.retrieveFriends = function() {
+  $scope.retrieveUsers = function() {
 
-console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
+    console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
     if($scope.modal.visible){
 
       Users.search([], [], $scope.modal.num, function(users){
@@ -191,12 +189,91 @@ console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
         if( !users || users.length < 50) {
           $scope.modal.visible = false;
         }
-
       });
-
     }
+  };
+})
 
+.controller('FriendsModalCtrl', function($scope, $rootScope, $state, Users, Friends, Chat, UTIL, ChannelDao, Sign) {
+  var loginUser = Sign.getUser();
 
+  $scope.toggleSelection = function( friendId ){
+    var inx = $scope.modal.selection.indexOf( friendId );
+    if( inx > -1 ){
+      $scope.modal.selection.splice(inx, 1);
+    } else {
+      $scope.modal.selection.push( friendId );
+    }
+  };
+
+  $scope.inviteFriends = function() {
+    var res = $scope.modal.selection;
+    var channelUsers = $scope.modal.channelUsers;
+    var channelId = $scope.modal.channelId;
+    var channelName = $scope.modal.channelName;
+
+    if(res.length > 0){
+
+      var joinUsers = [];
+
+      //TO-DO : Only ID
+      for( var key in res ){
+        joinUsers.push( res[key] );
+
+        if( channelUsers.indexOf( res[key] ) < 0 ){
+          channelUsers.push( res[key] );
+        }
+      }
+
+      $scope.modal.channelUsers = channelUsers;
+
+      // channel with 2 people
+      if( channelId.indexOf( "$" ) > -1 ){
+        // Init Controller To Create New Channel
+        $rootScope.$stateParams.friendIds = channelUsers.join( "$" );
+
+        var current = $state.current;
+        console.log( current );
+        $state.transitionTo('chat', {}, { reload: true, inherit: true, notify: true });
+      } else {
+        channelName = channelName + ","+UTIL.getNames( joinUsers );      
+        $scope.modal.channelName = channelName;
+
+        var joinObject = { 'U' : joinUsers, 'DT' : { 'NM' : channelName,'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length } };
+        Chat.join( channelId, joinObject, function(data){
+          if( data.status == 'ok' ){
+            var iMsg = UTIL.getInviteMessage( joinUsers );
+
+            Chat.send( iMsg, 'J' );
+            ChannelDao.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );
+          }
+        });
+      }
+
+      $scope.modal.changed = true;
+      $scope.modal.hide();      
+    }
+  };
+
+  $scope.retrieveFriends = function() {
+
+    console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
+    if($scope.modal.visible){
+
+      Friends.list(function(friends){
+
+        if( friends != undefined ){
+          $scope.modal.datas =  [];
+          $scope.modal.datas = $scope.modal.datas.concat(friends);
+        }
+
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+
+        if( !friends || friends.length < 1) {
+          $scope.modal.visible = false;
+        }
+      });
+    }
   };
 })
 
@@ -333,7 +410,7 @@ console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicFrostedDelegate, $ionicScrollDelegate,  $ionicPopup, $window, Friends, Sign, Chat, ChannelDao, UTIL, Emoticons) {
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicFrostedDelegate, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, ChannelDao, UTIL, Emoticons) {
   $rootScope.currentScope = $scope;
 
   var loginUser = Sign.getUser();
@@ -406,6 +483,7 @@ console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
   $rootScope.$stateParams = {};
   $scope.channelName = channelName;
   $scope.channelId = channelId;
+  $scope.channelUsers = channelUsers;
 
   $scope.add = function( nextMessage ) {
     $scope.messages.push(angular.extend({}, nextMessage));
@@ -439,74 +517,38 @@ console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
     }
   };
 
-  $scope.openFriendsModal  = function() {
-    $scope.datas = [];
-    $scope.selection = [];
-    $scope.channelUsers = channelUsers;
-
-    Friends.list(function(friends){
-      if( friends != undefined ){
-        $scope.datas = friends;
-      }
-    });
-
-    // An elaborate, custom popup
-    var myPopup = $ionicPopup.show({
-      templateUrl: "templates/popup-friends.html",
-      title: 'Select Friends',
-      //subTitle: 'Please use normal things',
-      scope: $scope,
-      buttons: [
-        { text: 'Cancel' },
-        {
-          text: '<b>Save</b>',
-          type: 'button-positive',
-          onTap: function(e) {
-            return $scope.selection;
-          }
-        },
-      ]
-    });
-
-    myPopup.then(function(res) {
-      if( res != undefined ){
-
-        var joinUsers = [];
-
-        //TO-DO : Only ID
-        for( var key in res ){
-          joinUsers.push( res[key] );
-
-          if( channelUsers.indexOf( res[key] ) < 0 ){
-            channelUsers.push( res[key] );
-          }
-        }
-
-        // channel with 2 people
-        if( channelId.indexOf( "$" ) > -1 ){
-
-          // Init Controller To Create New Channel
-          $rootScope.$stateParams.friendIds = channelUsers.join( "$" );
-
-          var current = $state.current;
-          $state.transitionTo(current, {}, { reload: true, inherit: true, notify: true });
-        } else {
-          channelName = $scope.channelName + ","+UTIL.getNames( joinUsers );
-          $scope.channelName = channelName;
-
-          var joinObject = { 'U' : joinUsers, 'DT' : { 'NM' : channelName,'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length } };
-          Chat.join( joinObject, function(data){
-            if( data.status == 'ok' ){
-              var iMsg = UTIL.getInviteMessage( joinUsers );
-
-              Chat.send( iMsg, 'I' );
-              ChannelDao.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );
-            }
-          });
-        }
-      }
-    });
+  $scope.showPopup = function() {
+    $scope.modal.datas = [];
+    $scope.modal.selection = [];
+    $scope.modal.num = 1;
+    $scope.modal.changed = false;
+    $scope.modal.visible = true;
+    $scope.modal.show();
+    $scope.modal.channelUsers = $scope.channelUsers;
+    $scope.modal.channelName = $scope.channelName;
+    $scope.modal.channelId = $scope.channelId;
   };
+
+  $ionicModal.fromTemplateUrl('templates/modal-friends.html', function(modal) {
+    $scope.modal = modal;
+    $scope.modal.changed = false;
+    $scope.modal.visible = false;
+  }, {
+    animation: 'slide-in-up',
+    focusFirstInput: true
+  });
+  $scope.$on('modal.hidden', function() {
+    $scope.modal.visible = false;
+
+    if($scope.modal.changed){
+      $scope.modal.changed = false;
+      $scope.channelName = $scope.modal.channelName;
+      $scope.channelUsers = $scope.modal.channelUsers;
+    }
+  });
+  $scope.$on('modal.shown', function() {
+    // do nothing...
+  });
 
   $scope.$on('$destroy', function() {
      window.onbeforeunload = undefined;

@@ -128,7 +128,9 @@ angular.module('starter.services', [])
                 data.MG = decodeURIComponent(data.MG);
 
                 var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
-                if( data.T != undefined ){
+                if( data.T == 'J' ){
+                  data.type = data.T;
+                } else if( data.T != undefined){
                   data.type = sr + data.T;
                 } else {
                   data.type = sr;
@@ -406,8 +408,8 @@ angular.module('starter.services', [])
 
       $rootScope.xpush.send(CONF._channel, 'message', DT );
     },
-    join : function(param, callback){
-      channelSocket.emit('join', param, function (data) {
+    join : function(channelId, param, callback){
+      $rootScope.xpush.joinChannel( channelId, param, function (data) {
         callback( data );
       });
     },

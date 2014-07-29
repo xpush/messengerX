@@ -64,6 +64,7 @@
     <input type="file" id="file"/>
   </ion-content>
   <ion-footer-bar class="bar-frosted" >
+    <button class="button icon ion-plus" ng-click="showPopup()"></button>
     <button ng-if=" showExt == 'true' " class="button icon ion-close-round" ng-click="toggleExt('false')"></button>
     <button ng-if=" showExt =='false' " class="button icon ion-plus-round" ng-click="toggleExt('true')"></button>
     <button ng-if=" showEmo == 'true' " class="button icon ion-sad" ng-click="toggleEmoticons('false')"></button>
