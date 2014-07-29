@@ -1,4 +1,7 @@
 <ion-view title="{{channelName}}">
+  <ion-nav-buttons side="right">
+    <button class="button icon ion-navicon" ng-click="showPopup();"></button>
+  </ion-nav-buttons>
   <ion-content padding="true" class="has-header" start-y="120">
     <ol class="messages">
       <li ng-repeat="message in messages" ng-class="message.type">
@@ -64,7 +67,6 @@
     <input type="file" id="file"/>
   </ion-content>
   <ion-footer-bar class="bar-frosted" >
-    <button class="button icon ion-plus" ng-click="showPopup()"></button>
     <button ng-if=" showExt == 'true' " class="button icon ion-close-round" ng-click="toggleExt('false')"></button>
     <button ng-if=" showExt =='false' " class="button icon ion-plus-round" ng-click="toggleExt('true')"></button>
     <button ng-if=" showEmo == 'true' " class="button icon ion-sad" ng-click="toggleEmoticons('false')"></button>

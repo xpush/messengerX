@@ -20,8 +20,8 @@
 
     <ion-infinite-scroll ng-if="modal.visible" on-infinite="retrieveFriends()"  distance="1%"></ion-infinite-scroll>
 
-    <div class="card">
-      <div class="item item-text-wrap" ng-if="modal.datas.length == 0">
+    <div class="card" ng-if="modal.datas.length == 0">
+      <div class="item item-text-wrap">
         User is not existed.
       </div>
     </div>

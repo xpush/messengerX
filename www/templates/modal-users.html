@@ -1,0 +1,30 @@
+<div class="modal" ng-controller="UsersModalCtrl">
+
+  <ion-header-bar class="bar bar-header bar-positive">
+    <button class="button button-icon ion-close" ng-click="modal.hide()"></button>
+    <h1 class="title">Select your friends({{modal.datas.length}})</h1>
+    <button class="button button-icon icon-right ion-checkmark" ng-click="addFriends()" ng-disabled='modal.selection.length == 0'>OK&nbsp;</button>
+  </ion-header-bar>
+
+  <ion-content> <!-- class="has-header" -->
+    <ion-list>
+      <ion-item class="item item-checkbox" ng-repeat="data in modal.datas">
+        <label class="checkbox" >
+          <input type="checkbox" ng-click='toggleSelection("{{data.U}}")' ng-checked='modal.selection.indexOf("{{data.U}}") > -1 || modal.channelUsers.indexOf("{{data.U}}") > -1 ' ng-disabled='modal.channelUsers.indexOf("{{data.U}}") > -1'/>
+        </label>
+        <img class="img-friend" ng-src="{{data.DT.I}}" />
+        <h2>{{data.DT.NM}}</h2>
+        <p>{{data.DT.MS}}</p>
+      </ion-item>
+    </ion-list>
+
+    <ion-infinite-scroll ng-if="modal.visible" on-infinite="retrieveUsers()"  distance="1%"></ion-infinite-scroll>
+
+    <div class="card" ng-if="modal.datas.length == 0">
+      <div class="item item-text-wrap">
+        User is not existed.
+      </div>
+    </div>
+  </ion-content>
+
+</div>
