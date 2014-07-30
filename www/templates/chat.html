@@ -60,7 +60,7 @@
         <div ng-if="message.type=='SVP'" id="progress_div{{message.inx}}">
           <span>            
             <img ng-src="{{rootImgPath}}/video.png" />
-            <progress id="progress_bar{{message.inx}}" class="progressbar" value="0" max="1000"></progress>            
+            <progress id="progress_bar{{message.inx}}" class="progressbar" value="0" max="100"></progress>            
           </span>
         </div>        
         <div ng-if="message.type=='RVI'">
@@ -97,7 +97,7 @@
   </ion-footer-bar>
   <div class="chat-extends row hide" id="chat-extends">
     <div class="col">
-      <img ng-src="{{rootImgPath}}/image.png" ng-click="showProgress('2')"/>
+      <img ng-src="{{rootImgPath}}/image.png" ng-click="openFileDialog('2')"/>
     </div>
     <div class="col" ng-if=" cameraFlag ">
       <img ng-src="{{rootImgPath}}/camera.png" ng-click="openFileDialog('1')"/>
