@@ -706,8 +706,6 @@ angular.module('starter.controllers', [])
       options.type = "image";
     }
 
-    var progressbar;
-    var tempDiv;
     if( type == 'video' ){
       var nextMessage = { type : 'SVP', inx : itemInx };
       var thisInx = itemInx;
@@ -715,17 +713,28 @@ angular.module('starter.controllers', [])
       $scope.messages.push(angular.extend({}, nextMessage));
       itemInx++;
 
+      $ionicFrostedDelegate.update();
+      $ionicScrollDelegate.scrollBottom(true);
+
       setTimeout( function(){
-        progressbar = document.getElementById( "progress_bar"+thisInx );
-        tempDiv = document.getElementById( "progress_div"+thisInx );
+        uploadStream( options, itemInx );
       }, 100 );
+    } else {
+      uploadStream( options );
     }
+  });
+
+  uploadStream = function( options, itemJnx ){
+    var progressbar = document.getElementById( "progress_bar"+itemJnx );
+    var tempDiv = document.getElementById( "progress_div"+itemJnx );
 
     $rootScope.xpush.uploadStream( channelId, options, function(data, idx){
       inputObj.value = "";
       console.log("progress  ["+idx+"]: "+data);
 
-      progressbar.value = data;
+      if( itemJnx != undefined ){
+        progressbar.value = data;
+      }      
     }, function(data,idx){
       var fname;
       var msgType;
@@ -747,8 +756,8 @@ angular.module('starter.controllers', [])
       var imageUrl = $rootScope.xpush.getFileUrl(channelId, fname );
 
       Chat.send( imageUrl, msgType );
-    });
-  });
+    });    
+  }
 
   $scope.postDatas = function(users){
     if( users != undefined ){
