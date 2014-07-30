@@ -236,11 +236,10 @@ angular.module('starter.controllers', [])
 
       // channel with 2 people
       if( channelId.indexOf( "$" ) > -1 ){
-        // Init Controller To Create New Channel
+        // Init Controller ToCreate New Channel
         $rootScope.$stateParams.friendIds = channelUsers.join( "$" );
 
         var current = $state.current;
-        console.log( current );
         $state.transitionTo('chat', {}, { reload: true, inherit: true, notify: true });
       } else {
         channelName = channelName + ","+UTIL.getNames( joinUsers );
@@ -271,7 +270,7 @@ angular.module('starter.controllers', [])
 
         if( friends != undefined ){
           $scope.modal.datas =  [];
-          $scope.modal.datas = $scope.modal.datas.concat(friends);
+          $scope.modal.datas = friends;
         }
 
         $scope.$broadcast('scroll.infiniteScrollComplete');
@@ -281,6 +280,22 @@ angular.module('starter.controllers', [])
         }
       });
     }
+  };
+
+  $scope.postFriends = function(friends){
+    if( friends != undefined ){
+      $scope.modal.datas = [];
+      $scope.modal.datas = friends;
+    }
+  };
+
+  $scope.resetFriends = function(){
+    Friends.list(function(friends){
+      if( friends != undefined ){
+        $scope.modal.datas = [];
+        $scope.modal.datas= friends;
+      }
+    });
   };
 })
 
@@ -433,7 +448,10 @@ angular.module('starter.controllers', [])
     Chat.init( param, loginUser, inviteMsg, $scope, function( messages ){
       if( messages != undefined ){
         $scope.messages = $scope.messages.concat(messages);
-        $ionicScrollDelegate.scrollBottom(true);
+        setTimeout( function(){
+          $ionicFrostedDelegate.update();
+          $ionicScrollDelegate.scrollBottom(true);
+        }, 300 );
       }
     });
   };
@@ -769,20 +787,4 @@ angular.module('starter.controllers', [])
       Chat.send( imageUrl, msgType );
     });    
   }
-
-  $scope.postDatas = function(users){
-    if( users != undefined ){
-      $scope.datas = [];
-      $scope.datas = users;
-    }
-  };
-
-  $scope.resetDatas = function(){
-    Friends.list(function(users){
-      if( users != undefined ){
-        $scope.datas = [];
-        $scope.datas = users;
-      }
-    });
-  };
 });

@@ -8,6 +8,10 @@
 
   <ion-content> <!-- class="has-header" -->
     <ion-list>
+      <div class="item item-input">
+          <i class="icon ion-search placeholder-icon"></i>
+          <input type="text" placeholder="Search" search-by-key post="postFriends" reset="resetFriends" items="modal.datas">
+      </div>
       <ion-item class="item item-checkbox" ng-repeat="data in modal.datas">
         <label class="checkbox" >
           <input type="checkbox" ng-click='toggleSelection("{{data.user_id}}")' ng-checked='modal.selection.indexOf("{{data.user_id}}") > -1 || modal.channelUsers.indexOf("{{data.user_id}}") > -1 ' ng-disabled='modal.channelUsers.indexOf("{{data.user_id}}") > -1'/>

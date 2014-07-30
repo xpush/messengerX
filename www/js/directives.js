@@ -141,8 +141,19 @@ angular.module('starter.directives', [])
           matches = [];
           var separated = UTIL.getMorphemes( searchKey );
 
-          for( var key in scope[attrs.items] ){
-            var data = scope[attrs.items][key];
+          var datas = [];
+
+          var items =attrs.items.split('.');
+          if( items.length == 2  ){
+            var item1 = items[0];
+            var item2 = items[1];
+            datas= scope[item1][item2];
+          } else {
+            datas = scope[attrs.items];
+          }
+
+          for( var key in datas ){
+            var data = datas[key];
             if( UTIL.getMorphemes( data.user_name ).indexOf( separated ) > -1
               || data.chosung.indexOf( searchKey ) > -1 ){
               matches.push( data );

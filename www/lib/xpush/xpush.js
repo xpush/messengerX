@@ -256,14 +256,15 @@
     var ch = self.getChannel(channel);
     if(!ch){
       self._channels[channel] = ch;
-      ch = self._makeChannel();
+      ch = self._makeChannel(channel);
       self.getChannelInfo(channel,function(err,data){
         if(err){
           console.log(" == node channel " ,err);
           cb(err);
         }else if ( data.status == 'ok'){
-          ch.setServerInfo(data.result);
-          cb(false, ch);
+          ch.setServerInfo(data.result, function(){
+            cb(false, ch);
+          });
         }
       });
     }else{
@@ -438,25 +439,11 @@
   };
 
   XPush.prototype.send = function(channel, name, data){
-    // 채널이 생성되어 있지 않으면
     var self = this;
-    var ch = self.getChannel(channel);
 
-    if(!ch){
-      self._channels[channel] = ch;
-      ch = self._makeChannel(channel);
-      self.getChannelInfo(channel,function(err,json){
-        if(err){
-          console.log(" == node channel " ,err);
-        }else if ( json.status == 'ok'){
-          ch.setServerInfo(json.result);
-          ch.send(name,data);
-        }
-      });
-    }else{
+    self._getChannelAsync(channel, function (err, ch){
       ch.send(name,data);
-    }
-
+    });
   };
 
   XPush.prototype.getUnreadMessage = function(cb){
