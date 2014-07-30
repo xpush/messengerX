@@ -711,20 +711,23 @@ angular.module('starter.controllers', [])
       var thisInx = itemInx;
 
       $scope.messages.push(angular.extend({}, nextMessage));
+      $scope.$apply();
       itemInx++;
 
       $ionicFrostedDelegate.update();
       $ionicScrollDelegate.scrollBottom(true);
 
       setTimeout( function(){
-        uploadStream( options, itemInx );
+        $ionicFrostedDelegate.update();
+        $ionicScrollDelegate.scrollBottom(true);
+        uploadStream( options, type, thisInx );
       }, 100 );
     } else {
-      uploadStream( options );
+      uploadStream( options, type );
     }
   });
 
-  uploadStream = function( options, itemJnx ){
+  uploadStream = function( options, type, itemJnx ){
     var progressbar = document.getElementById( "progress_bar"+itemJnx );
     var tempDiv = document.getElementById( "progress_div"+itemJnx );
 
@@ -752,7 +755,6 @@ angular.module('starter.controllers', [])
 
       inputObj.value = "";
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
-
       var imageUrl = $rootScope.xpush.getFileUrl(channelId, fname );
 
       Chat.send( imageUrl, msgType );

@@ -159,7 +159,7 @@ angular.module('starter.services', [])
                     param.message = "@image@";
                   } else if( data.T == 'E' ){
                     param.message = "@emoticon@";
-                  } else if ( data.T == 'VI' ) {
+                  } else if ( data.T == 'VI' || data.T == 'V' ) {
                     param.message = "@video@";
                   } else {
                     param.message = data.MG;
@@ -184,7 +184,7 @@ angular.module('starter.services', [])
                       channel.message = "@image@";
                     } else if( data.T == 'E' ){
                       channel.message = "@emoticon@";
-                    } else if ( data.T == 'VI' ) {
+                    } else if ( data.T == 'VI' || data.T == 'V' ) {
                       param.message = "@video@";
                     } else {
                       channel.message = data.MG;
