@@ -2,34 +2,6 @@ angular.module('starter.dao', [])
 
 .factory('UserDao', function(Sign, DB) {
   return {
-    addFriend : function( userIds ){
-      var loginUserId = Sign.getUser().userId;
-
-      var inUserId = "";
-      for( var inx = 0 ; inx < userIds.length ; inx++ ){
-        inUserId += "'"+userIds[inx]+"'";
-
-        if( inx < userIds.length-1 ){
-          inUserId += ", ";
-        }
-      }
-
-      var query =
-        "UPDATE TB_USER "+
-        "SET friend_flag = 'Y' "+
-        "WHERE user_id in ( "+
-        inUserId +
-        " ) "+
-        "AND owner_id = ? ";
-
-      var cond = [
-        loginUserId
-      ];
-
-      return DB.query(query, cond).then(function(result) {
-        return result;
-      });      
-    },
     add : function(jsonObj, friendFlag){
       var loginUserId = Sign.getUser().userId;
 

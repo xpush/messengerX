@@ -124,14 +124,8 @@ angular.module('starter.controllers', [])
     $scope.modal.visible = false;
 
     if($scope.modal.changed){
-      Friends.list(function(friends){
-        if( friends != undefined ){
-          $scope.friends = [];
-          $scope.friends = friends;
-          $scope.friendCount = friends.length;
-          $scope.modal.changed = false;
-        }
-      });
+      $scope.syncFriends();
+      $scope.modal.changed = false;
     }
   });
   $scope.$on('modal.shown', function() {
@@ -397,9 +391,8 @@ angular.module('starter.controllers', [])
         Cache.add(user.userId, {'NM':loginUser.userName, 'I':loginUser.image});
         $state.go('tab.friends');
       }
-
     });
-  };
+  };      
 })
 .controller('SignUpCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
   $scope.signUp = function(user) {
@@ -605,8 +598,6 @@ angular.module('starter.controllers', [])
         "02" : [rootImgPath+'/emo/s2/shout.PNG', rootImgPath+'/emo/s2/smile.PNG']}}
     );
     $scope.emoticons = $scope.emoticons.concat( emoticons );
-
-    console.log( $scope.emoticons );
     //$scope.emoticons['b2'] = [rootImgPath+'/emo/b2/anger.png', rootImgPath+'/emo/b2/cry.png',  rootImgPath+'/emo/b2/haha.png', rootImgPath+'/emo/b2/money.png'];
   });
 
@@ -717,11 +708,10 @@ angular.module('starter.controllers', [])
       var fname;
       var msgType;
 
-      console.log( type );
       if( type == 'image' ){
         fname = data.result.tname;
         msgType = 'I';
-      } else if ( type == 'movie' ) {
+      } else if ( type == 'video' ) {
         fname = data.result.name;
         msgType = 'V';
       } else {

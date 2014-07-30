@@ -28,7 +28,7 @@ angular.module('starter.services', [])
       loginUserId = Sign.getUser().userId;
       $rootScope.xpush.addUserToGroup( loginUserId, userIds, function( err, data ){
         // Multi Add Friend
-        UserDao.addFriend( userIds );
+        //UserDao.addFriend( userIds );
         callback( data );
       });
     },
@@ -671,7 +671,7 @@ angular.module('starter.services', [])
       if( images.indexOf( ext.toLowerCase() ) > -1 ){
         result = "image";
       } else if( movies.indexOf( ext.toLowerCase() ) > -1){
-        result = "movie";
+        result = "video";
       }
 
       return result;
