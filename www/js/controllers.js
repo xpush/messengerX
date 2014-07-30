@@ -490,6 +490,37 @@ angular.module('starter.controllers', [])
     }
   };
 
+  var inputObj = document.getElementById('file');
+  angular.element( inputObj )  
+
+  var itemInx = 0;
+  $scope.showProgress = function() {
+    var nextMessage = { type : 'SVP', inx : itemInx };
+    var thisInx = itemInx;
+    $scope.messages.push(angular.extend({}, nextMessage));
+    itemInx++;
+
+    setTimeout( function(){
+      $scope.toggleExt( "false" );
+      $ionicFrostedDelegate.update();
+      $ionicScrollDelegate.scrollBottom(true);
+
+      var progressbar = document.getElementById( "progress_bar"+thisInx );
+      var tempDiv = document.getElementById( "progress_div"+thisInx );
+
+      var inx = 0;
+      var setProgress = setInterval( function(){
+        inx++;
+        progressbar.value = inx;
+        if( inx > 1000 ){
+          clearInterval(setProgress);
+          angular.element( tempDiv ).remove();          
+          Chat.send( 'http://www.naver.com', 'V' );
+        }
+      }, 10 );    
+    }, 250 );
+  };
+
   $scope.send = function() {
     if( $scope.inputMessage != '' ){
       var msg = $scope.inputMessage;

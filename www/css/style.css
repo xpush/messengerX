@@ -23,7 +23,7 @@ body {
 	max-width:100%;
 }
 
-.messages li.S, .messages li.SI, .messages li.SVI, .messages li.SE, .messages li.SV{
+.messages li.S, .messages li.SI, .messages li.SVI, .messages li.SE, .messages li.SV, .messages li.SVP{
 	float:right;
 }
 
@@ -94,7 +94,7 @@ body {
 	font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
 }
 
-.messages li.S span, .messages li.SI span, .messages li.SVI span, .messages li.SV span {
+.messages li.S span, .messages li.SI span, .messages li.SVI span, .messages li.SV span, .messages li.SVP span {
 	background:#158ffe;
 	color:#fff;
 }
