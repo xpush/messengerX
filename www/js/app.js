@@ -95,7 +95,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
               message: e.payload.MG,  // The message that is displayed
               title: e.payload.UO.NM,  // The title of the message
               autoCancel: true // Setting this flag and the notification is automatically canceled when the user clicks it
-            });d
+            });
           }else{   // otherwise we were launched because the user touched a notification in the notification tray.
             if (e.coldstart){
               //$("#app-status-ul").append('<li>--COLDSTART NOTIFICATION--' + '</li>');
