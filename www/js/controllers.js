@@ -25,7 +25,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, Friends, Users, UTIL, Manager) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, Users, UTIL, Manager) {
   $rootScope.currentChannel = '';
   $scope.listFriend = function(){
     Friends.list(function(friends){
@@ -112,13 +112,14 @@ angular.module('starter.controllers', [])
     $scope.modal.show();
   };
 
-  $ionicModal.fromTemplateUrl('templates/modal-users.html', function(modal) {
+  $ionicModal.fromTemplateUrl('templates/modal-users.html', {
+    scope: $scope,
+    animation: 'slide-in-up',
+    focusFirstInput: true
+  }).then(function(modal) {
     $scope.modal = modal;
     $scope.modal.changed = false;
     $scope.modal.visible = false;
-  }, {
-    animation: 'slide-in-up',
-    focusFirstInput: true
   });
   $scope.$on('modal.hidden', function() {
     $scope.modal.visible = false;
@@ -129,7 +130,7 @@ angular.module('starter.controllers', [])
     }
   });
   $scope.$on('modal.shown', function() {
-    // do nothing...
+    $ionicScrollDelegate.$getByHandle('modalContent').scrollTop(true);
   });
 })
 
@@ -173,8 +174,11 @@ angular.module('starter.controllers', [])
           if($scope.modal.num > 1) {
             $scope.modal.datas = $scope.modal.datas.concat(users);
           }else{
+            $scope.modal.datas = [];
             $scope.modal.datas = users;
+            $scope.$apply();
           }
+
           $scope.modal.num = $scope.modal.num + 1;
         }
 
@@ -230,7 +234,7 @@ angular.module('starter.controllers', [])
         console.log( current );
         $state.transitionTo('chat', {}, { reload: true, inherit: true, notify: true });
       } else {
-        channelName = channelName + ","+UTIL.getNames( joinUsers );      
+        channelName = channelName + ","+UTIL.getNames( joinUsers );
         $scope.modal.channelName = channelName;
 
         var joinObject = { 'U' : joinUsers, 'DT' : { 'NM' : channelName,'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length } };
@@ -245,7 +249,7 @@ angular.module('starter.controllers', [])
       }
 
       $scope.modal.changed = true;
-      $scope.modal.hide();      
+      $scope.modal.hide();
     }
   };
 
@@ -392,7 +396,7 @@ angular.module('starter.controllers', [])
         $state.go('tab.friends');
       }
     });
-  };      
+  };
 })
 .controller('SignUpCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
   $scope.signUp = function(user) {

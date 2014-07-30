@@ -2,11 +2,21 @@
 
   <ion-header-bar class="bar bar-header bar-positive">
     <button class="button button-icon ion-close" ng-click="modal.hide()"></button>
-    <h1 class="title">Select your friends({{modal.datas.length}})</h1>
+    <h1 class="title">Select your friends ({{modal.datas.length}})</h1>
     <button class="button button-icon icon-right ion-checkmark" ng-click="addFriends()" ng-disabled='modal.selection.length == 0'>OK&nbsp;</button>
   </ion-header-bar>
 
-  <ion-content> <!-- class="has-header" -->
+  <ion-header-bar class="bar bar-subheader item-input-inset">
+    <label class="item-input-wrapper input-search">
+          <i class="icon ion-ios7-search placeholder-icon"></i>
+          <input id="searchKey" type="search" placeholder="Search" ng-model="searchKey" autocorrect="off">
+    </label>
+    <button class="button button-positive button-search" ng-click="retrieveUsers()">
+          <i class="icon ion-search"></i>
+    </button>
+  </ion-header-bar>
+
+  <ion-content class="has-header" delegate-handle="modalContent">
     <ion-list>
       <ion-item class="item item-checkbox" ng-repeat="data in modal.datas">
         <label class="checkbox" >
@@ -18,7 +28,7 @@
       </ion-item>
     </ion-list>
 
-    <ion-infinite-scroll ng-if="modal.visible" on-infinite="retrieveUsers()"  distance="1%"></ion-infinite-scroll>
+    <ion-infinite-scroll ng-if="modal.visible" on-infinite="retrieveUsers()"></ion-infinite-scroll>
 
     <div class="card" ng-if="modal.datas.length == 0">
       <div class="item item-text-wrap">
