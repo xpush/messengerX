@@ -663,7 +663,7 @@ angular.module('starter.services', [])
     },
     getType : function( inputObj ){
       var images = ['bmp','jpeg','jpg','png'];
-      var movies = ['mp4','avi'];
+      var movies = ['mp4','avi','asf','mov'];
       var filename = inputObj.value;
       var ext = filename.substr( filename.lastIndexOf('.')+1 );
 

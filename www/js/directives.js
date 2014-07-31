@@ -60,7 +60,7 @@ angular.module('starter.directives', [])
   return {
     link: function(scope, element, attrs) {
 
-      if( attrs.imageLink == "true" ){
+      if( attrs.popupLink == "true" ){
         element.bind("load" , function(event){
           $ionicFrostedDelegate.update();
           $ionicScrollDelegate.scrollBottom(true);
