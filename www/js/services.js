@@ -483,7 +483,7 @@ angular.module('starter.services', [])
       var groupKey = param.group;
 
       if( jsonObject === undefined || jsonObject.length == 0 ){
-        jsonObject = {group:group};
+        jsonObject = {group:groupKey};
         jsonObject.metas = 0;
         jsonObject.items = [];
       }
@@ -491,7 +491,7 @@ angular.module('starter.services', [])
       var groupInx = jsonObject.metas;
 
       if( groupInx != 0 ){
-        groupKey = group + groupInx;
+        groupKey = groupKey + groupInx;
       }
 
       if( jsonObject.items[groupKey].length < 4 ){
