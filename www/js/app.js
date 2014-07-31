@@ -141,10 +141,9 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
     // tootScope function
     $rootScope.logout = function(){
-      $rootScope.totalUnreadCount = 0;
+
       Sign.logout();
       $rootScope.xpush.logout();
-      $rootScope.firstFlag = true;
     };
 
     $rootScope.totalUnreadCount = 0;

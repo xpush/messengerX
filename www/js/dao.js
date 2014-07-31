@@ -323,10 +323,11 @@ angular.module('starter.dao', [])
     }
   }
 })
-.factory('DB', function($q, DB_CONFIG) {
+.factory('DB', function($q, $rootScope, DB_CONFIG) {
   var self = this;
   self.db = null;
   var changeDBFlag = false;
+  $rootScope.syncFlag = false;
 
   self.init = function() {
 
@@ -363,6 +364,16 @@ angular.module('starter.dao', [])
       });
     }
 
+    if( !changeDBFlag ){
+      var query = "SELECT name FROM sqlite_master WHERE type='table' AND name='TB_USER'";      
+      self.query(query).then(function(result) {
+        var result = self.fetchAll(result);
+        if ( result.length == 0 ) {
+          $rootScope.syncFlag = true;
+        }
+      });
+    }
+
     angular.forEach(DB_CONFIG.tables, function(table) {
       var columns = [];
 
@@ -370,7 +381,8 @@ angular.module('starter.dao', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( changeDBFlag ){
+      if( !changeDBFlag ){
+        $rootScope.syncFlag = true;
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
       }
@@ -395,8 +407,6 @@ angular.module('starter.dao', [])
       transaction.executeSql(query, bindings, function(transaction, result) {
         deferred.resolve(result);
       }, function(transaction, error) {
-        console.log( query );
-        console.log( error );
         deferred.reject(error);
       });
     });

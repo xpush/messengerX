@@ -301,8 +301,6 @@ angular.module('starter.services', [])
         callback( data );
       })
       .error(function(data, status, headers, config) {
-        // called asynchronously if an error occurs
-        // or server returns response with an error status.
       });
     },
     logout : function(){
@@ -310,7 +308,10 @@ angular.module('starter.services', [])
       // Clear login
       loginUser = {};
       $rootScope.loginUser = {};
-      //$state.go('signin');
+      $rootScope.currentChannel = '';
+      $rootScope.totalUnreadCount = 0;
+      $rootScope.firstFlag = true;
+
       $state.transitionTo('signin', {}, { reload: true, notify: true });
     },
     register : function( params, callback ){
@@ -319,8 +320,6 @@ angular.module('starter.services', [])
         callback( data );
       })
       .error(function(data, status, headers, config) {
-        // called asynchronously if an error occurs
-        // or server returns response with an error status.
       });
     },
     update : function( params, callback ){
@@ -329,8 +328,6 @@ angular.module('starter.services', [])
         callback( data );
       })
       .error(function(data, status, headers, config) {
-        // called asynchronously if an error occurs
-        // or server returns response with an error status.
       });
     },
 
@@ -392,7 +389,6 @@ angular.module('starter.services', [])
           }
 
           $rootScope.currentChannelLatestDate = latestDate;
-
           callback(messages);
         });
       } else {
@@ -400,7 +396,7 @@ angular.module('starter.services', [])
       }
     },
     send : function(msg, type){
-      var DT = {UO:CONF._user,MG:encodeURIComponent(msg),S : CONF._user.U};
+      var DT = { UO : CONF._user, MG : encodeURIComponent(msg), S : CONF._user.U };
 
       if( type !=undefined ){
         DT.T = type;

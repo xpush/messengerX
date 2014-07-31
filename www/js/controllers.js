@@ -58,11 +58,12 @@ angular.module('starter.controllers', [])
   $scope.searchKey = "";
 
   // Init Socket
-  if( $rootScope.firstFlag ){
+  if( $rootScope.syncFlag ) {
+    $scope.syncFriends();
+    $rootScope.syncFlag = false;
+  } else if( $rootScope.firstFlag ){
     $scope.listFriend();
-    //$scope.syncFriends();
     Manager.init();
-    $rootScope.firstFlag = false;
   } else {
     $scope.listFriend();
   }
