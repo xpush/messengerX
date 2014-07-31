@@ -774,7 +774,7 @@ angular.module('starter.controllers', [])
         msgType = 'I';
       } else if ( type == 'video' ) {
         angular.element( tempDiv ).remove();
-        msg = $rootScope.xpush.getFileUrl(channelId, data.result.name );
+        msg = data.result.name;
         msgType = 'V';
       } else {
         return;
