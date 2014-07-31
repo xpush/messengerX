@@ -766,15 +766,15 @@ angular.module('starter.controllers', [])
         progressbar.value = data;
       }      
     }, function(data,idx){
-      var fname;
       var msgType;
+      var msg;
 
       if( type == 'image' ){
-        fname = data.result.tname;
+        msg = $rootScope.xpush.getFileUrl(channelId, data.result.tname );
         msgType = 'I';
       } else if ( type == 'video' ) {
         angular.element( tempDiv ).remove();
-        fname = data.result.name;
+        msg = $rootScope.xpush.getFileUrl(channelId, data.result.name );
         msgType = 'V';
       } else {
         return;
@@ -782,9 +782,9 @@ angular.module('starter.controllers', [])
 
       inputObj.value = "";
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
-      var imageUrl = $rootScope.xpush.getFileUrl(channelId, fname );
 
-      Chat.send( imageUrl, msgType );
+
+      Chat.send( msg, msgType );
     });    
   }
 });

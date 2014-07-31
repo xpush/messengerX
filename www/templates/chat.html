@@ -54,13 +54,13 @@
         </div>
         <div ng-if="message.type=='SV'">
           <span>
-            <img ng-src="{{rootImgPath}}/video.png" popup-link="{{message.active}}" popup="{{message.message}}"  />
+            <img ng-src="{{rootImgPath}}/video.png" popup-link="{{message.active}}" file-name="{{message.message}}"  />
           </span>
         </div>
         <div ng-if="message.type=='SVP'" id="progress_div{{message.inx}}">
           <span>            
             <img ng-src="{{rootImgPath}}/video.png" />
-            <progress id="progress_bar{{message.inx}}" class="progressbar" value="0" max="100"></progress>            
+            <progress id="progress_bar{{message.inx}}" class="progressbar" value="0" max="10"></progress>            
           </span>
         </div>        
         <div ng-if="message.type=='RVI'">
@@ -78,7 +78,7 @@
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
             <span>
-              <img ng-src="{{rootImgPath}}/video.png" popup-link="{{message.active}}" popup="{{message.message}}" class="from" />
+              <img ng-src="{{rootImgPath}}/video.png" popup-link="{{message.active}}" file-name="{{message.message}}" class="from" />
             </span>
           </div>
         </div>              

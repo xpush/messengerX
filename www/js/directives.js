@@ -68,16 +68,28 @@ angular.module('starter.directives', [])
       }
 
       element.bind("click" , function(event){
-        var url;
-        if( attrs.popup != undefined ){
-          url = attrs.popup;
-        } else {
-          url = attrs.src.replace( "T_", "" );
-        }
+        var xpush = $rootScope.xpush;
+                        
+        xpush._getChannelAsync( scope.channelId, function(ch){
+          var fileNm;
+          
+          console.log(  attrs.fileName );
+          if( attrs.fileName != undefined ){
+            var srcUrl = attrs.fileName;
+            fileNm = srcUrl.indexOf(".") > 0 ? srcUrl.substr( srcUrl.lastIndexOf(".") + 1 ) : srcUrl;
+          } else {
+            var tnUrl = attrs.src;
+            fileNm = tnUrl.substr( tnUrl.lastIndexOf( ".") + 1 ).replace( "T_", "" );        
+          }
 
-        var left = screen.width/2 - 400
-            , top = screen.height/2 - 300
-            , popup = $window.open(url, '', "top=" + top + ",left=" + left + ",width=800,height=600");
+          console.log( scope.channelId );
+          console.log( fileNm );
+          var url = xpush.getFileUrl( scope.channelId, fileNm );
+
+          var left = screen.width/2 - 400
+              , top = screen.height/2 - 300
+              , popup = $window.open(url, '', "top=" + top + ",left=" + left + ",width=800,height=600");          
+        });    
       });
     }
   }
