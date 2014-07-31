@@ -73,7 +73,6 @@ angular.module('starter.directives', [])
         xpush._getChannelAsync( scope.channelId, function(ch){
           var fileNm;
 
-          console.log(  attrs.fileName );
           if( attrs.fileName != undefined ){
             var srcUrl = attrs.fileName;
             fileNm = srcUrl.indexOf("/") > 0 ? srcUrl.substr( srcUrl.lastIndexOf("/") + 1 ) : srcUrl;
@@ -82,8 +81,6 @@ angular.module('starter.directives', [])
             fileNm = tnUrl.substr( tnUrl.lastIndexOf( "/") + 1 ).replace( "T_", "" );
           }
 
-          console.log( scope.channelId );
-          console.log( fileNm );
           var url = xpush.getFileUrl( scope.channelId, fileNm );
 
           var left = screen.width/2 - 400

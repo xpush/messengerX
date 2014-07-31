@@ -769,15 +769,13 @@ angular.module('starter.controllers', [])
       var msgType;
       var msg;
 
-      if( type == 'image' ){
-        msg = $rootScope.xpush.getFileUrl(channelId, data.result.tname );
-        msgType = 'I';
-      } else if ( type == 'video' ) {
+      if( type == 'video' ) {
         angular.element( tempDiv ).remove();
         msg = data.result.name;
         msgType = 'V';
       } else {
-        return;
+        msg = $rootScope.xpush.getFileUrl(channelId, data.result.tname );
+        msgType = 'I';
       }
 
       inputObj.value = "";
@@ -785,6 +783,6 @@ angular.module('starter.controllers', [])
 
 
       Chat.send( msg, msgType );
-    });    
+    });
   }
 });
