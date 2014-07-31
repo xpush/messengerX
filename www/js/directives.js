@@ -72,14 +72,14 @@ angular.module('starter.directives', [])
                         
         xpush._getChannelAsync( scope.channelId, function(ch){
           var fileNm;
-          
+
           console.log(  attrs.fileName );
           if( attrs.fileName != undefined ){
             var srcUrl = attrs.fileName;
-            fileNm = srcUrl.indexOf(".") > 0 ? srcUrl.substr( srcUrl.lastIndexOf(".") + 1 ) : srcUrl;
+            fileNm = srcUrl.indexOf("/") > 0 ? srcUrl.substr( srcUrl.lastIndexOf("/") + 1 ) : srcUrl;
           } else {
             var tnUrl = attrs.src;
-            fileNm = tnUrl.substr( tnUrl.lastIndexOf( ".") + 1 ).replace( "T_", "" );        
+            fileNm = tnUrl.substr( tnUrl.lastIndexOf( "/") + 1 ).replace( "T_", "" );
           }
 
           console.log( scope.channelId );
