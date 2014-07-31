@@ -14,7 +14,7 @@
 
   var RMKEY = 'message';
 
-  var XPush = function(host, appId, eventHandler){
+  var XPush = function(host, appId, eventHandler, autoInitFlag){
     if(!host){alert('params(1) must have hostname'); return;}
     if(!appId){alert('params(2) must have appId'); return;}
     var self = this;
@@ -31,6 +31,11 @@
     self.hostname = host;
     self.receiveMessageStack = [];
     self.isExistUnread = true;
+    self.autoInitFlag = true;
+ 
+    if( autoInitFlag !=undefined ){
+      self.autoInitFlag = autoInitFlag;
+    }
 
     self.on('newChannel',function(data){
       self.channelNameList.push( data.chNm );
@@ -570,30 +575,37 @@
       console.log('xpush : session receive ', CHANNEL, arguments, self.userId);
     });
 
-    self.getChannels(function(err,data){
-      self.channelNameList = data;
-      if(cb) cb();
-    });
 
-    //socket.on('connect',function(){
-      self.getUnreadMessage(function(err, data){
-        if(data && data.length > 0 ){
-          for(var i = data.length-1 ; i >= 0; i--){
-
-            data[i].MG.DT = JSON.parse(data[i].MG.DT);
-            self.receiveMessageStack.unshift([RMKEY,  data[i].MG.DT.C, data[i].NM,  data[i].MG.DT]);
-            //self.emit(RMKEY,  data[i].message.data.channel, data[i].name,  data[i].message.data);
-          }
-          self.isExistUnread = false;
-          while(self.receiveMessageStack.length > 0 ){
-            var t = self.receiveMessageStack.shift();
-            self.emit.apply(self, t );
-          }
-        }else{
-          self.isExistUnread = false;
-        }
+    if( self.autoInitFlag ){
+      self.getChannels(function(err,data){
+        self.channelNameList = data;
+        if(cb) cb();
       });
-    //});
+    } else {
+      if(cb) cb();
+    }
+
+    if( self.autoInitFlag ){
+      socket.on('connect',function(){
+        self.getUnreadMessage(function(err, data){
+          if(data && data.length > 0 ){
+            for(var i = data.length-1 ; i >= 0; i--){
+
+              data[i].MG.DT = JSON.parse(data[i].MG.DT);
+              self.receiveMessageStack.unshift([RMKEY,  data[i].MG.DT.C, data[i].NM,  data[i].MG.DT]);
+              //self.emit(RMKEY,  data[i].message.data.channel, data[i].name,  data[i].message.data);
+            }
+            self.isExistUnread = false;
+            while(self.receiveMessageStack.length > 0 ){
+              var t = self.receiveMessageStack.shift();
+              self.emit.apply(self, t );
+            }
+          }else{
+            self.isExistUnread = false;
+          }
+        });
+      });
+    }
 
     socket.on('disconnect',function(){
       self.isExistUnread = true;

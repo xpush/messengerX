@@ -6,10 +6,9 @@ angular.module('starter.constants', [])
     appKey : 'messengerx'
   })
   .constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
-  //.constant('BASE_URL', 'localhost')
   .constant('DB_CONFIG', {
     name: 'stalk.db',
-    version: '1.2',
+    version: '0.1',
     tables: [
       {
         name: 'TB_MESSAGE',
@@ -48,10 +47,12 @@ angular.module('starter.constants', [])
           {name: 'message',    type: 'text'},
           {name: 'image', type: 'text'},
           {name: 'chosung', type: 'text'},
-          {name: 'owner_id', type: 'text'},
-          {name: 'friend_flag', type: 'text DEFAULT "N" '}
+          {name: 'owner_id', type: 'text'}
         ],
-        table_index : [{ type : 'UNIQUE', name : 'IDX_TB_USER', columns : [ 'user_id', 'owner_id' ] }]
+        table_index : [
+          { type : 'UNIQUE', name : 'IDX_U_TB_USER', columns : [ 'user_id', 'owner_id' ] },
+          { type : '', name : 'IDX_TB_USER', columns : [ 'owner_id' ] }
+        ]
       },
       {
         name: 'TB_EMOTICON',

@@ -1,36 +1,48 @@
 angular.module('starter.dao', [])
 
-.factory('UserDao', function(Sign, DB) {
+.factory('UserDao', function(Sign, DB, UTIL) {
   return {
-    add : function(jsonObj, friendFlag){
+    addAll : function(jsonArray, callback){
       var loginUserId = Sign.getUser().userId;
 
-      var query = "INSERT OR ";
+      var querys = [];
+      var conds = [];
 
-      if(jsonObj.friendFlag){
-        query +="REPLACE ";
-      } else {
-        query +="IGNORE ";
+      for( var inx = 0 ; inx < jsonArray.length ; inx++ ){
+        var jsonObj = jsonArray[inx];
+        jsonObj.chosung = UTIL.getChosung( jsonObj.DT.NM );
+
+        var query = "INSERT OR REPLACE INTO TB_USER (user_id, user_name, message, image, chosung, owner_id ) ";
+        query +=" VALUES ( ?, ?, ?, ?, ?, ? )";
+
+        var currentTimestamp = Date.now();
+        var cond = [
+          jsonObj.U,
+          jsonObj.DT.NM,
+          jsonObj.DT.MG,
+          jsonObj.DT.I,
+          jsonObj.chosung,
+          loginUserId
+        ];
+
+        querys.push( query );
+        conds.push( cond );
       }
 
-      query += "INTO TB_USER (user_id, user_name, message, image, chosung, owner_id ";
+      DB.queryAll(querys, conds).then(function(result) {
+        callback( result );
+      });      
+    },
+    add : function(jsonObj){
+      var loginUserId = Sign.getUser().userId;
 
-      if(jsonObj.friendFlag){
-        query += ", friend_flag ";
-      }
-
-      query += ") VALUES ( ?, ?, ?, ?, ?, ? ";
-
-      if(friendFlag){
-        query += ", 'Y' ";
-      }
-
-      query += ") ";
+      var query = "INSERT OR REPLACE INTO TB_USER (user_id, user_name, message, image, chosung, owner_id ) ";
+      query +=" VALUES ( ?, ?, ?, ?, ?, ? )";
 
       var currentTimestamp = Date.now();
       var cond = [
-        jsonObj.userId,
-        jsonObj.userName,
+        jsonObj.user_id,
+        jsonObj.user_name,
         jsonObj.message,
         jsonObj.image,
         jsonObj.chosung,
@@ -44,7 +56,7 @@ angular.module('starter.dao', [])
     list : function( jsonObj ){
       var loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT user_id, user_name, message, image, chosung, owner_id, friend_flag FROM TB_USER where owner_id = ? and friend_flag = ? ORDER BY user_name', [loginUserId, jsonObj.friendFlag]
+        'SELECT user_id, user_name, message, image, chosung, owner_id FROM TB_USER where owner_id = ? ORDER BY user_name', [loginUserId]
       ).then(function(result) {
         return DB.fetchAll(result);
       });
@@ -259,12 +271,10 @@ angular.module('starter.dao', [])
       }
 
       return DB.query( query, cond ).then(function(result) {
-        console.log( result );
         return DB.fetchAll(result);
       });
     },
     add : function(jsonObj){
-      console.log( jsonObj );   
       var loginUserId = Sign.getUser().userId;
       var query =
         "INSERT OR REPLACE INTO TB_EMOTICON "+
@@ -359,10 +369,16 @@ angular.module('starter.dao', [])
     }
 
     if( self.db.version != DB_CONFIG.version ){    
-      self.db.changeVersion(self.db.version, DB_CONFIG.version, function (t) {        
+      self.db.changeVersion(self.db.version, DB_CONFIG.version, function (t) {
         changeDBFlag = true;
+        self.createTable( changeDBFlag );
       });
+    } else {
+      self.createTable( changeDBFlag );
     }
+  };
+
+  self.createTable = function( changeDBFlag ){
 
     if( !changeDBFlag ){
       var query = "SELECT name FROM sqlite_master WHERE type='table' AND name='TB_USER'";      
@@ -381,7 +397,7 @@ angular.module('starter.dao', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( !changeDBFlag ){
+      if( changeDBFlag ){
         $rootScope.syncFlag = true;
         var query = 'DROP TABLE ' + table.name;
         self.query(query);
@@ -400,11 +416,31 @@ angular.module('starter.dao', [])
     });
   };
 
-  self.query = function(query, bindings) {
-    bindings = typeof bindings !== 'undefined' ? bindings : [];
+  self.query = function(query, binding) {
+    binding = typeof binding !== 'undefined' ? binding : [];
     var deferred = $q.defer();
     self.db.transaction(function(transaction) {
-      transaction.executeSql(query, bindings, function(transaction, result) {
+      transaction.executeSql(query, binding, function(transaction, result) {
+        deferred.resolve(result);
+      }, function(transaction, error) {
+        deferred.reject(error);
+      });
+    });
+
+    return deferred.promise;
+  };
+
+  self.queryAll = function(querys, bindings) {
+    var deferred = $q.defer();
+    self.db.transaction(function(transaction) {
+      var until = querys.length-1;
+      for( var inx = 0 ; inx < until ; inx++ ){
+        var query = querys[inx];
+        var binding = bindings[inx];
+        transaction.executeSql(query, binding);
+      }
+
+      transaction.executeSql(querys[until] , bindings[until], function(transaction, result) {
         deferred.resolve(result);
       }, function(transaction, error) {
         deferred.reject(error);

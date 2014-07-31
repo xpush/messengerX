@@ -137,7 +137,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         window.location = $rootScope.rootPath + 'err.html?LOGOUT';
       }
 
-    });
+    }, false );
 
     // tootScope function
     $rootScope.logout = function(){

@@ -27,28 +27,19 @@ angular.module('starter.controllers', [])
 })
 .controller('FriendsCtrl', function($scope, $ionicLoading, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, Users, UTIL, Manager) {
   $rootScope.currentChannel = '';
-  $scope.listFriend = function( cb ){
+  $scope.listFriend = function(){
     Friends.list(function(friends){
       if( friends != undefined ){
         $scope.friends = [];
         $scope.friends = friends;
         $scope.friendCount = $scope.friends.length;
       }
-
-      if( cb != undefined && typeof(cb) == 'function' ){
-        cb();
-      }
     });
   };
 
   $scope.syncFriends = function(){
-    $ionicLoading.show({
-      template: 'Refreshing...'
-    });    
-    Friends.refresh( function(result){
-      $scope.listFriend( function(){
-        $ionicLoading.hide();
-      });
+    Friends.refresh(function(result){
+      $scope.listFriend();
     });
   };
 

@@ -27,8 +27,6 @@ angular.module('starter.services', [])
     add: function(userIds, callback) {
       loginUserId = Sign.getUser().userId;
       $rootScope.xpush.addUserToGroup( loginUserId, userIds, function( err, data ){
-        // Multi Add Friend
-        //UserDao.addFriend( userIds );
         callback( data );
       });
     },
@@ -36,7 +34,9 @@ angular.module('starter.services', [])
       UserDao.list( { 'friendFlag' : 'Y'} ).then( function ( result ){
         friends = {};
         for( var key in result ){
-          Cache.add( result[key].user_id, { 'NM' : result[key].user_name, 'I': result[key].image });
+          if( result[key].user_id != undefined ){
+            Cache.add( result[key].user_id, { 'NM' : result[key].user_name, 'I': result[key].image });
+          }
         }
 
         callback( result );
@@ -44,16 +44,11 @@ angular.module('starter.services', [])
     },
     refresh : function(callback){
       var loginUserId = Sign.getUser().userId;
-
       $rootScope.xpush.getGroupUsers( loginUserId, function( err, users ){
-        for( var inx = 0 ; inx < users.length ; inx++ ){
-          if( users[inx].userId != loginUserId ){
-            var user = { 'userId' : users[inx].U, 'userName': users[inx].DT.NM,
-              'message' : users[inx].DT.MG, 'image': users[inx].DT.I, 'chosung' : UTIL.getChosung( users[inx].DT.NM ), 'friendFlag' : 'Y' };
-            UserDao.add( user, true );
-          }
-        }
-        callback( {'status':'ok'} );
+        UserDao.addAll( users, function( result ){
+          console.log( result );
+          callback( {'status':'ok'} );
+        });        
       });
     }
   }
