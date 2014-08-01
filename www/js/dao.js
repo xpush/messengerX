@@ -2,9 +2,29 @@ angular.module('starter.dao', [])
 
 .factory('UserDao', function(Sign, DB, UTIL) {
   return {
-    createVersionTable : function(){
-      var query = 'CREATE TABLE IF NOT EXISTS TB_USER_VERSION ( time integer ) ';
-      DB.query(query);
+    getRefreshHistory : function(){
+      var loginUserId = Sign.getUser().userId;
+      var query = 'SELECT time from TB_REFRESH_HISTORY where owner_id = ? ';
+      var cond = [loginUserId];
+
+      return DB.query(query, cond).then(function(result) {
+        return DB.fetch(result);
+      });
+    },
+    updateRefreshHistory : function(){
+      var loginUserId = Sign.getUser().userId;
+
+      var query = "INSERT OR REPLACE INTO TB_REFRESH_HISTORY ( time, owner_id ) ";
+      query +=" VALUES ( ?, ? )";
+
+      var cond = [
+        Date.now(),
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
     },
     addAll : function(jsonArray, callback){
       var loginUserId = Sign.getUser().userId;
@@ -384,16 +404,6 @@ angular.module('starter.dao', [])
 
   self.createTable = function( changeDBFlag ){
 
-    if( !changeDBFlag ){
-      var query = "SELECT name FROM sqlite_master WHERE type='table' AND name='TB_USER_VERSION' ";
-      self.query(query).then(function(result) {
-        var result = self.fetchAll(result);
-        if ( result.length == 0 ) {
-          $rootScope.syncFlag = true;
-        }
-      });
-    }
-
     angular.forEach(DB_CONFIG.tables, function(table) {
       var columns = [];
 
@@ -445,8 +455,10 @@ angular.module('starter.dao', [])
       }
 
       transaction.executeSql(querys[until] , bindings[until], function(transaction, result) {
+        console.log( result );
         deferred.resolve(result);
       }, function(transaction, error) {
+        console.log( error );
         deferred.reject(error);
       });
     });
