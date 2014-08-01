@@ -24,6 +24,7 @@ angular.module('starter.constants', [])
         ],
         table_index : [{ type : '', name : 'IDX_TB_MESSAGE', columns : [ 'channel_id', 'owner_id' ] }]
       },
+
       {
         name: 'TB_CHANNEL',
         columns: [
@@ -52,6 +53,16 @@ angular.module('starter.constants', [])
         table_index : [
           { type : 'UNIQUE', name : 'IDX_U_TB_USER', columns : [ 'user_id', 'owner_id' ] },
           { type : '', name : 'IDX_TB_USER', columns : [ 'owner_id' ] }
+        ]
+      },
+      {
+        name: 'TB_REFRESH_HISTORY',
+        columns: [
+          {name: 'time',   type: 'integer'},
+          {name: 'owner_id',   type: 'text'}
+        ],
+        table_index : [
+          { type : 'UNIQUE', name : 'IDX_TB_USER_VERSION', columns : [ 'owner_id' ] }
         ]
       },
       {

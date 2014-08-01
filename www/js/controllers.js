@@ -38,6 +38,7 @@ angular.module('starter.controllers', [])
   };
 
   $scope.syncFriends = function(){
+    console.log( " refresh " );
     Friends.refresh(function(result){
       $scope.listFriend();
     });
@@ -49,6 +50,7 @@ angular.module('starter.controllers', [])
   $scope.searchKey = "";
 
   // Init Socket
+  console.log( $rootScope.syncFlag );
   if( $rootScope.syncFlag ) {
     $scope.syncFriends();
     $rootScope.syncFlag = false;
@@ -359,7 +361,7 @@ angular.module('starter.controllers', [])
     });
   });
 })
-.controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $http, $ionicPopup, Sign, Cache) {
+.controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $ionicPopup, Friends, Sign, Cache) {
 
   $scope.signIn = function(user) {
 		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
@@ -393,7 +395,16 @@ angular.module('starter.controllers', [])
         Sign.setUser( loginUser );
 
         Cache.add(user.userId, {'NM':loginUser.userName, 'I':loginUser.image});
-        $state.go('tab.friends');
+
+        Friends.getRefreshHistory(function(history){
+          if( history != undefined && ( history.time - Date.now() ) < 3600 ){
+            $rootScope.syncFlag = false;
+          } else {
+            $rootScope.syncFlag = true;
+          }
+
+          $state.go('tab.friends');
+        });
       }
     });
   };

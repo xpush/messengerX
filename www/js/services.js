@@ -24,6 +24,11 @@ angular.module('starter.services', [])
   var scope;
 
   return {
+    getRefreshHistory : function(callback){
+      UserDao.getRefreshHistory().then( function ( result ){
+        callback( result );
+      });
+    },
     list : function(callback){
       UserDao.list( { 'friendFlag' : 'Y'} ).then( function ( result ){
         friends = {};
@@ -39,8 +44,9 @@ angular.module('starter.services', [])
     refresh : function(callback){
       var loginUserId = Sign.getUser().userId;
       $rootScope.xpush.getGroupUsers( loginUserId, function( err, users ){
+        console.log( users );
         UserDao.addAll( users, function( result ){
-          UserDao.createVersionTable();
+          UserDao.updateRefreshHistory();
           callback( {'status':'ok'} );
         });
       });
@@ -120,7 +126,6 @@ angular.module('starter.services', [])
                   MessageDao.add( data );
 
                   // 2 people Channel
-
                   var param = { 'channel':data.C, 'reset' : true };
                   if( data.T == 'I' ){
                     param.message = "@image@";
