@@ -56,7 +56,7 @@ angular.module('starter.services', [])
 .factory('Users', function($rootScope, Sign, UserDao, UTIL, Cache) {
   var loginUserId;
 
-  return {  
+  return {
     list : function(callback){
       UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
         callback( result );
@@ -643,6 +643,6 @@ angular.module('starter.services', [])
       }
 
       return result;
-    }    
+    }
   }
 });
