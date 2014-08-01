@@ -18,12 +18,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
       $rootScope.cameraFlag = true;
 
-      var pushNotification = window.plugins.pushNotification;
+      if( device.model.indexOf('x86') === 0){ // emulator or desktop pc
+        console.log('emulator or desktop pc');
+      }else{
+        var pushNotification = window.plugins.pushNotification;
 
-      if (device.platform == 'android' || device.platform == 'Android') {
-        pushNotification.register(successHandler, errorHandler,{"senderID":"944977353393","ecb":"onNotification"});
-      } else {
-        pushNotification.register(tokenHandler, errorHandler,{"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});
+        if (device.platform == 'android' || device.platform == 'Android') {
+          pushNotification.register(successHandler, errorHandler,{"senderID":"944977353393","ecb":"onNotification"});
+        } else {
+          pushNotification.register(tokenHandler, errorHandler,{"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});
+        }
       }
 
       document.addEventListener("resume", onResume, false);
@@ -117,16 +121,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
     // result contains any message sent from the plugin call
     function successHandler(result) {
-      console.log( 'result = '+result );
+      console.log( 'result = ', result );
     }
 
     // result contains any error description text returned from the plugin call
-    function errorHandler(error) {
-      console.log( 'error = '+result );
+    function errorHandler(result) {
+      console.log( 'error = ', result );
     }
 
     function tokenHandler(result) {
-      console.log( 'device token = '+result );
+      console.log( 'device token = ', result );
     }
 
     DB.init();
@@ -227,3 +231,13 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
   $urlRouterProvider.otherwise('/sign-in');
 });
+
+angular.module('ionic.contrib.frostedGlass', ['ionic'])
+
+.factory('$ionicFrostedDelegate', ['$rootScope', function($rootScope) {
+  return {
+    update: function() {
+      $rootScope.$emit('ionicFrosted.update');
+    }
+  }
+}]);

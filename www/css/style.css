@@ -342,7 +342,7 @@ img.emoticon{
 .tab-emoticon {
 	position: relative;
 	top : 0px;
-	background: #F0F3F8;	
+	background: #F0F3F8;
 }
 
 .flex {
@@ -363,4 +363,8 @@ img.emoticon{
 
 .center {
 	text-align: center;
+}
+
+.bar-frosted {
+  background-color: #F7F7F7;
 }

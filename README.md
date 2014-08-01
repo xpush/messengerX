@@ -36,7 +36,7 @@ $ npm install
 $ gulp install
 $ cordova plugin add org.apache.cordova.console  // only for developing
 $ cordova plugin add org.apache.cordova.device
-$ cordova plugin add de.appplant.cordova.plugin.local-notification
+$ cordova plugin add https://github.com/driftyco/ionic-plugins-keyboard
 $ cordova plugin add de.appplant.cordova.plugin.local-notification
 $ cordova plugin add https://github.com/phonegap-build/PushPlugin.git
 
