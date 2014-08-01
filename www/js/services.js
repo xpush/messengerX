@@ -24,12 +24,6 @@ angular.module('starter.services', [])
   var scope;
 
   return {
-    add: function(userIds, callback) {
-      loginUserId = Sign.getUser().userId;
-      $rootScope.xpush.addUserToGroup( loginUserId, userIds, function( err, data ){
-        callback( data );
-      });
-    },
     list : function(callback){
       UserDao.list( { 'friendFlag' : 'Y'} ).then( function ( result ){
         friends = {};
@@ -46,9 +40,9 @@ angular.module('starter.services', [])
       var loginUserId = Sign.getUser().userId;
       $rootScope.xpush.getGroupUsers( loginUserId, function( err, users ){
         UserDao.addAll( users, function( result ){
-          console.log( result );
+          UserDao.createVersionTable();
           callback( {'status':'ok'} );
-        });        
+        });
       });
     }
   }
@@ -56,29 +50,7 @@ angular.module('starter.services', [])
 .factory('Users', function($rootScope, Sign, UserDao, UTIL, Cache) {
   var loginUserId;
 
-  return {
-    refresh : function(callback){
-
-      loginUserId = Sign.getUser().userId;
-
-      $rootScope.xpush.getUserList({}, function( err, userArray ){
-
-        for( var inx = 0 ; inx < userArray.length ; inx++ ){
-          var cUserId = userArray[inx].U;
-
-          if( cUserId != loginUserId ){
-            var user = { 'userId' : userArray[inx].U, 'userName': userArray[inx].DT.NM, 'image': userArray[inx].DT.I,
-              'message' : userArray[inx].DT.MG, 'chosung' : UTIL.getChosung( userArray[inx].DT.NM ) };
-            UserDao.add( user );
-            Cache.add( userArray[inx].U, { 'NM' : userArray[inx].DT.NM, 'I': userArray[inx].DT.I } );
-          }
-        }
-
-        UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
-          callback( result );
-        });
-      });
-    },
+  return {  
     list : function(callback){
       UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
         callback( result );

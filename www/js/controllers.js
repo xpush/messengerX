@@ -25,7 +25,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $ionicLoading, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, Users, UTIL, Manager) {
+.controller('FriendsCtrl', function($scope, $ionicLoading, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, UTIL, Manager) {
   $rootScope.currentChannel = '';
   $scope.listFriend = function(){
     Friends.list(function(friends){
@@ -77,22 +77,6 @@ angular.module('starter.controllers', [])
         $scope.friends = [];
         $scope.friends = friends;
         $scope.friendCount = friends.length;
-      }
-    });
-  };
-
-  $scope.postDatas = function(users){
-    if( users != undefined ){
-      $scope.datas = [];
-      $scope.datas = users;
-    }
-  };
-
-  $scope.resetDatas = function(){
-    Users.list(function(users){
-      if( users != undefined ){
-        $scope.datas = [];
-        $scope.datas = users;
       }
     });
   };

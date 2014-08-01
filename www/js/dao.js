@@ -2,6 +2,10 @@ angular.module('starter.dao', [])
 
 .factory('UserDao', function(Sign, DB, UTIL) {
   return {
+    createVersionTable : function(){
+      var query = 'CREATE TABLE IF NOT EXISTS TB_USER_VERSION ( time integer ) ';
+      DB.query(query);
+    },
     addAll : function(jsonArray, callback){
       var loginUserId = Sign.getUser().userId;
 
@@ -381,7 +385,7 @@ angular.module('starter.dao', [])
   self.createTable = function( changeDBFlag ){
 
     if( !changeDBFlag ){
-      var query = "SELECT name FROM sqlite_master WHERE type='table' AND name='TB_USER'";      
+      var query = "SELECT name FROM sqlite_master WHERE type='table' AND name='TB_USER_VERSION' ";
       self.query(query).then(function(result) {
         var result = self.fetchAll(result);
         if ( result.length == 0 ) {
@@ -403,7 +407,7 @@ angular.module('starter.dao', [])
         self.query(query);
       }
 
-      var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';      
+      var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
       self.query(query);
 
       if( table.table_index != undefined ){      
