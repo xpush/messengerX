@@ -77,14 +77,13 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         });
       }
     }
-    // Android
+    // For android notification
     onNotification = function(e) {
       switch( e.event ){
         case 'registered':
           if ( e.regid.length > 0 ){
             console.log("regID = " + e.regid);
             $rootScope.notiId = e.regid;
-            //$rootScope.deviceId =
           }
           break;
 
@@ -92,8 +91,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           if (e.foreground){
             window.plugin.notification.local.add({
               id: e.payload.TS,  // A unique id of the notifiction
-              message: e.payload.MG,  // The message that is displayed
-              title: e.payload.UO.NM,  // The title of the message
+              message: encodeURIComponent( e.payload.MG ),  // The message that is displayed
+              title: encodeURIComponent( e.payload.UO.NM ),  // The title of the message
               autoCancel: true // Setting this flag and the notification is automatically canceled when the user clicks it
             });
           }else{   // otherwise we were launched because the user touched a notification in the notification tray.
@@ -136,12 +135,10 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       if(type == 'LOGOUT'){
         window.location = $rootScope.rootPath + 'err.html?LOGOUT';
       }
-
     }, false );
 
     // tootScope function
     $rootScope.logout = function(){
-
       Sign.logout();
       $rootScope.xpush.logout();
     };

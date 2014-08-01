@@ -62,14 +62,19 @@
             <img ng-src="{{rootImgPath}}/video.png" />
             <progress id="progress_bar{{message.inx}}" class="progressbar" value="0" max="100"></progress>
           </span>
-        </div>        
+        </div>
+        <div ng-if="message.type=='SFP'" id="progress_div{{message.inx}}">
+          <span style=''>
+            <progress id="progress_bar{{message.inx}}" class="progressbar_only" value="0" max="100"></progress>
+          </span>
+        </div>
         <div ng-if="message.type=='RVI'">
           <div class="small">{{message.name}}</div>
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
             <span>
               <img ng-src="{{rootImgPath}}/webcam.png" ng-if="message.active == 'true'" ng-click="openWebRTC('{{message.message}}')" class="from"/>
-              <img ng-src="{{rootImgPath}}/webcam.png" ng-if="message.active =='false'"class="from"/>
+              <img ng-src="{{rootImgPath}}/webcam.png" ng-if="message.active =='false'" class="from"/>
             </span>
           </div>
         </div>

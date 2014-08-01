@@ -50,7 +50,6 @@ angular.module('starter.controllers', [])
   $scope.searchKey = "";
 
   // Init Socket
-  console.log( $rootScope.syncFlag );
   if( $rootScope.syncFlag ) {
     $scope.syncFriends();
     $rootScope.syncFlag = false;
@@ -516,7 +515,6 @@ angular.module('starter.controllers', [])
     }
   };
 
-  // Triggered on a button click, or some other target
   $scope.selection = [];
 
   $scope.toggleSelection = function( friendId ){
@@ -629,7 +627,6 @@ angular.module('starter.controllers', [])
   $scope.toggleEmoticons = function( flag ){
     $scope.showEmo = flag;
     if( $scope.showEmo == "true" ){
-      //document.getElementById( 'tabbody'+$scope.curEmoTabId ).className = "row flex";
       document.getElementById( 'tabbody'+$scope.curEmoTabId ).style.display = "block";
       document.getElementById( 'chat-emoticons' ).style.display = "block";
       document.getElementById( "chat-extends" ).className = "chat-extends row hide";
@@ -663,11 +660,9 @@ angular.module('starter.controllers', [])
     for( var inx = 0 ; inx < tabs.length;inx++ ){
       if( tabs[inx].id == "tab"+tabId ){
         tabs[inx].className = "tab-item tab-item-active";
-        //document.getElementById( "tabbody"+inx ).className = "row flex";
         document.getElementById( "tabbody"+inx ).style.display = "block";
       } else {
         tabs[inx].className = "tab-item";
-        //document.getElementById( "tabbody"+inx ).className = "row hide";
         document.getElementById( "tabbody"+inx ).style.display = "none";
       }
     }
@@ -720,25 +715,28 @@ angular.module('starter.controllers', [])
       options.type = "image";
     }
 
+    var tp = "";
     if( type == 'video' ){
-      var nextMessage = { type : 'SVP', inx : itemInx };
-      var thisInx = itemInx;
+      tp = "SVP";
+    } else {
+      tp = "SFP";
+    }
 
-      $scope.messages.push(angular.extend({}, nextMessage));
-      $scope.$apply();
-      itemInx++;
+    var nextMessage = { type : tp, inx : itemInx, message : inputObj.value };
+    var thisInx = itemInx;
 
+    $scope.messages.push(angular.extend({}, nextMessage));
+    $scope.$apply();
+    itemInx++;
+
+    $ionicFrostedDelegate.update();
+    $ionicScrollDelegate.scrollBottom(true);
+
+    setTimeout( function(){
       $ionicFrostedDelegate.update();
       $ionicScrollDelegate.scrollBottom(true);
-
-      setTimeout( function(){
-        $ionicFrostedDelegate.update();
-        $ionicScrollDelegate.scrollBottom(true);
-        uploadStream( options, type, thisInx );
-      }, 100 );
-    } else {
-      uploadStream( options, type );
-    }
+      uploadStream( options, type, thisInx );
+    }, 100 );
   });
 
   uploadStream = function( options, type, itemJnx ){
@@ -749,18 +747,15 @@ angular.module('starter.controllers', [])
       inputObj.value = "";
       console.log("progress  ["+idx+"]: "+data);
 
-      if( itemJnx != undefined ){
-        progressbar.value = data;
-      }      
+      progressbar.value = data;   
     }, function(data,idx){
-      var msgType;
       var msg;
+      var msgType;
 
       if( type == 'image' ){
         msg = $rootScope.xpush.getFileUrl(channelId, data.result.tname );
         msgType = 'I';
       } else if ( type == 'video' ) {
-        angular.element( tempDiv ).remove();
         msg = data.result.name;
         msgType = 'V';
       } else {
@@ -768,9 +763,9 @@ angular.module('starter.controllers', [])
         msgType = 'I';
       }
 
+      angular.element( tempDiv ).remove();
       inputObj.value = "";
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
-
 
       Chat.send( msg, msgType );
     });    

@@ -23,7 +23,7 @@ body {
 	max-width:100%;
 }
 
-.messages li.S, .messages li.SI, .messages li.SVI, .messages li.SE, .messages li.SV, .messages li.SVP{
+.messages li.S, .messages li.SI, .messages li.SVI, .messages li.SE, .messages li.SV, .messages li.SVP, .messages li.SFP{
 	float:right;
 }
 
@@ -98,13 +98,16 @@ body {
 	background:#158ffe;
 	color:#fff;
 }
+.messages li.SFP span {
+	background:transparent;
+}
 
 .messages li.SE span, .messages li.RE span{
 	background:transparent;
 	color:#fff;
 }
 
-.messages li.SI img {
+.messages li.SI img, .messages li.SFP img {
 	display:block;
 	border-radius:.75rem;
 	max-width: 200px;
@@ -363,4 +366,10 @@ img.emoticon{
 
 .center {
 	text-align: center;
+}
+
+.progressbar_only {
+	display: block;
+	margin: 15px auto;
+	width: 10em;
 }
