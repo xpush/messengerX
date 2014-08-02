@@ -51,6 +51,15 @@ angular.module('starter.controllers', [])
 })
 .controller('FriendsCtrl', function($scope, $ionicLoading, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, UTIL, Manager) {
   $rootScope.currentChannel = '';
+
+  /**
+   * @ngdoc function
+   * @name listFriend
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Retrieve friends in database
+   */
   $scope.listFriend = function(){
     Friends.list(function(friends){
       if( friends != undefined ){
@@ -61,6 +70,14 @@ angular.module('starter.controllers', [])
     });
   };
 
+  /**
+   * @ngdoc function
+   * @name syncFriends
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Sync friends with server
+   */
   $scope.syncFriends = function(){
     Friends.refresh(function(result){
       $rootScope.syncFlag = false;
@@ -144,7 +161,15 @@ angular.module('starter.controllers', [])
     $state.go( 'chat' );
   };
 
-  $scope.showPopup = function() {
+  /**
+   * @ngdoc function
+   * @name openUserModal
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Open User modal to friend management
+   */
+  $scope.openUserModal = function() {
     $scope.modal.datas = [];
     $scope.modal.selection = [];
     $scope.modal.num = 1;
@@ -153,6 +178,9 @@ angular.module('starter.controllers', [])
     $scope.modal.show();
   };
 
+  /**
+   * @description make template for modal-user
+   */
   $ionicModal.fromTemplateUrl('templates/modal-users.html', {
     scope: $scope,
     animation: 'slide-in-up',
@@ -163,15 +191,32 @@ angular.module('starter.controllers', [])
     $scope.modal.visible = false;
   });
 
+  /**
+   * @ngdoc eventHandler
+   * @name modal.hidden
+   * @module starter.controllers
+   * @kind eventHandler
+   *
+   * @description event called when modal closing
+   */
   $scope.$on('modal.hidden', function() {
     $scope.modal.visible = false;
 
     if($scope.modal.changed){
+      // Sync friends with Server
       $scope.syncFriends();
       $scope.modal.changed = false;
     }
   });
 
+  /**
+   * @ngdoc eventHandler
+   * @name modal.shown
+   * @module starter.controllers
+   * @kind eventHandler
+   *
+   * @description event called when modal opening
+   */
   $scope.$on('modal.shown', function() {
     $ionicScrollDelegate.$getByHandle('modalContent').scrollTop(true);
   });
@@ -179,6 +224,15 @@ angular.module('starter.controllers', [])
 
 .controller('UsersModalCtrl', function($scope, Users, Friends) {
 
+  /**
+   * @ngdoc function
+   * @name toggleSelection
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Push selected userId into selection array
+   * @param {string} selected userId in user modal
+   */
   $scope.toggleSelection = function( friendId ){
     var inx = $scope.modal.selection.indexOf( friendId );
     if( inx > -1 ){
@@ -188,6 +242,14 @@ angular.module('starter.controllers', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name addFriends
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Save selected friends into server
+   */
   $scope.addFriends = function() {
     var res = $scope.modal.selection;
 
@@ -206,9 +268,15 @@ angular.module('starter.controllers', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name retrieveUsers
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Search user from server
+   */
   $scope.retrieveUsers = function() {
-
-    console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
     if($scope.modal.visible){
 
       Users.search([], [], $scope.modal.num, function(users){
@@ -234,10 +302,18 @@ angular.module('starter.controllers', [])
     }
   };
 })
-
 .controller('FriendsModalCtrl', function($scope, $rootScope, $state, Users, Friends, Chat, UTIL, ChannelDao, Sign) {
   var loginUser = Sign.getUser();
 
+  /**
+   * @ngdoc function
+   * @name toggleSelection
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Push selected userId into selection array
+   * @param {string} selected userId in friend modal
+   */
   $scope.toggleSelection = function( friendId ){
     var inx = $scope.modal.selection.indexOf( friendId );
     if( inx > -1 ){
@@ -247,17 +323,27 @@ angular.module('starter.controllers', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name inviteFriends
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Invite friend to current channel
+   *  1:1 channel : create new channel for multiple channel  
+   *  multiple channel : Add selected friends into current channel and change channel name
+   */
   $scope.inviteFriends = function() {
     var res = $scope.modal.selection;
-    var channelUsers = $scope.modal.channelUsers;
     var channelId = $scope.modal.channelId;
     var channelName = $scope.modal.channelName;
+    var channelUsers = $scope.modal.channelUsers;
 
     if(res.length > 0){
 
       var joinUsers = [];
 
-      //TO-DO : Only ID
+      // selection -> join users
       for( var key in res ){
         joinUsers.push( res[key] );
 
@@ -268,22 +354,24 @@ angular.module('starter.controllers', [])
 
       $scope.modal.channelUsers = channelUsers;
 
-      // channel with 2 people
+      // 1:1 channel
       if( channelId.indexOf( "$" ) > -1 ){
-        // Init Controller ToCreate New Channel
-        $rootScope.$stateParams.friendIds = channelUsers.join( "$" );
 
-        var current = $state.current;
+        // create new channel for multiple user
+        $rootScope.$stateParams.friendIds = channelUsers.join( "$" );
         $state.transitionTo('chat', {}, { reload: true, inherit: true, notify: true });
       } else {
+        // Add selected friends into current channel and change channel name
         channelName = channelName + ","+UTIL.getNames( joinUsers );
         $scope.modal.channelName = channelName;
 
+        // Update channel info server with current channel info
         var joinObject = { 'U' : joinUsers, 'DT' : { 'NM' : channelName,'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length } };
         Chat.join( channelId, joinObject, function(data){
           if( data.status == 'ok' ){
             var iMsg = UTIL.getInviteMessage( joinUsers );
 
+            // Send channel join message and update channel info in local db
             Chat.send( iMsg, 'J' );
             ChannelDao.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );
           }
@@ -295,8 +383,15 @@ angular.module('starter.controllers', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name retrieveFriends
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Push selected userId into selection array
+   */
   $scope.retrieveFriends = function() {
-
     console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
     if($scope.modal.visible){
 
@@ -316,6 +411,15 @@ angular.module('starter.controllers', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name postFriends
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Apply friends display.
+   * @param {array} filtered friends by searchKey;
+   */
   $scope.postFriends = function(friends){
     if( friends != undefined ){
       $scope.modal.datas = [];
@@ -323,6 +427,14 @@ angular.module('starter.controllers', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name resetFriends
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Reset friends list
+   */
   $scope.resetFriends = function(){
     Friends.list(function(friends){
       if( friends != undefined ){
@@ -339,7 +451,16 @@ angular.module('starter.controllers', [])
 
   $scope.newImage = '';
 
-  $scope.changeImage = function(newImage){
+  /**
+   * @ngdoc function
+   * @name changeImage
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Reset friends list
+   * @param {string} new image url;
+   */
+  $scope.updateUserInfo = function(newImage){
     if( newImage != '' ){
       $scope.loginUser.image = newImage;
     }
@@ -347,18 +468,14 @@ angular.module('starter.controllers', [])
     var params = { 'A' : 'messengerx', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
                DT : { 'NM' : $scope.loginUser.userName, 'I': $scope.loginUser.image, 'MG' : $scope.loginUser.message } };
 
+    // update userInfo in server
     Sign.update( params, function(data){
       if( data.status == 'ok' ){
+        // set updated user info current session
         Sign.setUser( $scope.loginUser );
       }
     });
   };
-
-  $scope.syncFriends = function(){
-    Friends.refresh( function(result){
-      console.log( result );
-    });
-  }
 })
 .controller('EmoticonCtrl', function($scope, $rootScope, Sign, ChannelDao, Chat, Emoticons) {
   $rootScope.currentChannel = '';
@@ -371,34 +488,66 @@ angular.module('starter.controllers', [])
     }
   });
 
+  /**
+   * @ngdoc function
+   * @name openFileDialog
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description open file dialog
+   */
   $scope.openFileDialog = function() {
     ionic.trigger('click', { target: document.getElementById('file') });
   };
 
-  var createObject = {};
-  var channelUsers = [loginUser.userId];
-  createObject.U = channelUsers;
-  createObject.DT = { 'US' : channelUsers, 'UC': channelUsers.length };
+  /**
+   * @ngdoc function
+   * @name initSelfChannel
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description make self channel for emoticon file upload
+   */
+  initSelfChannel = function(){
 
-  var channelId = ChannelDao.generateId(createObject);
-  createObject.C = channelId;
+    // channel for loginUser
+    var channelUsers = [loginUser.userId];
+    var channelId = ChannelDao.generateId(createObject);
 
-  $rootScope.xpush.createChannel(channelUsers, channelId, createObject.DT, function(data){
+    var createObject = {};
+    createObject.U = channelUsers;
+    createObject.DT = { 'US' : channelUsers, 'UC': channelUsers.length };
+    createObject.C = channelId;
 
-    var param = {};
-    param.app = loginUser.app;
-    param.channel = channelId;
-    param.userId = loginUser.userId;
-    param.deviceId = loginUser.deviceId;
+    $rootScope.xpush.createChannel(channelUsers, channelId, createObject.DT, function(data){
 
-    // Channel Init
-    Chat.init( param, loginUser, '', $scope, function( messages ){
+      var param = {};
+      param.app = loginUser.app;
+      param.channel = channelId;
+      param.userId = loginUser.userId;
+      param.deviceId = loginUser.deviceId;
+
+      // Channel Init
+      Chat.init( param, loginUser, '', $scope, function( messages ){
+      });
     });
-  });
+  }
 
+  // Initialize this controller
+  initSelfChannel();
+
+  /**
+   * @ngdoc eventHandler
+   * @name inputObj
+   * @module eventHandler
+   * @kind function
+   *
+   * @description make self channel for emoticon file upload
+   */
   var inputObj = document.getElementById('file');
   angular.element( inputObj ).on('change',function(event) {
 
+    // upload file stream
     $rootScope.xpush.uploadStream( channelId, {
       file: inputObj
     }, function(data, idx){
@@ -413,6 +562,8 @@ angular.module('starter.controllers', [])
       var imageUrl = $rootScope.xpush.getFileUrl(channelId, name );
 
       var param = {group:'custom', tag :'', image : imageUrl};
+
+      // save emoticon to local db
       Emoticons.add( param, $scope.emoticon );
     });
   });
