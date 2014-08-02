@@ -62,21 +62,19 @@ angular.module('starter.controllers', [])
   };
 
   $scope.syncFriends = function(){
-    console.log( " refresh " );
     Friends.refresh(function(result){
+      $rootScope.syncFlag = false;
       $scope.listFriend();
     });
   };
 
   $scope.friends = [];
-  $scope.datas = [];
   $scope.friendCount = 0;
   $scope.searchKey = "";
 
   // Init Socket
   if( $rootScope.syncFlag ) {
     $scope.syncFriends();
-    $rootScope.syncFlag = false;
   } else if( $rootScope.firstFlag ){
     $scope.listFriend();
     Manager.init();
@@ -84,10 +82,15 @@ angular.module('starter.controllers', [])
     $scope.listFriend();
   }
 
-  $scope.goProfile = function(){
-    $state.go( 'tab.account' );
-  };
-
+  /**
+   * @ngdoc function
+   * @name postFriends
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Apply friends display.
+   * @param {array} filtered friends by searchKey;
+   */
   $scope.postFriends = function(friends){
     if( friends != undefined ){
       $scope.friends = [];
@@ -96,6 +99,14 @@ angular.module('starter.controllers', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name resetFriends
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Reset friends list
+   */
   $scope.resetFriends = function(){
     Friends.list(function(friends){
       if( friends != undefined ){
@@ -106,9 +117,29 @@ angular.module('starter.controllers', [])
     });
   };
 
-  $scope.goChat = function( friendIds ) {
-    $stateParams.friendIds = friendIds;
+  /**
+   * @ngdoc function
+   * @name gotoAccount
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Navigate to Account Menu.
+   */
+  $scope.gotoAccount = function(){
+    $state.go( 'tab.account' );
+  };
 
+  /**
+   * @ngdoc function
+   * @name gotoChat
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Navigate to Chat screen.
+   * @param {string} filtered friends by searchKey;
+   */
+  $scope.gotoChat = function( friendIds ) {
+    $stateParams.friendIds = friendIds;
     $rootScope.$stateParams = $stateParams;
     $state.go( 'chat' );
   };
@@ -131,6 +162,7 @@ angular.module('starter.controllers', [])
     $scope.modal.changed = false;
     $scope.modal.visible = false;
   });
+
   $scope.$on('modal.hidden', function() {
     $scope.modal.visible = false;
 
@@ -139,6 +171,7 @@ angular.module('starter.controllers', [])
       $scope.modal.changed = false;
     }
   });
+
   $scope.$on('modal.shown', function() {
     $ionicScrollDelegate.$getByHandle('modalContent').scrollTop(true);
   });
