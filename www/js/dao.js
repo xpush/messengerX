@@ -55,7 +55,7 @@ angular.module('starter.dao', [])
 
       DB.queryAll(querys, conds).then(function(result) {
         callback( result );
-      });      
+      });
     },
     add : function(jsonObj){
       var loginUserId = Sign.getUser().userId;
@@ -75,7 +75,7 @@ angular.module('starter.dao', [])
 
       return DB.query(query, cond).then(function(result) {
         return result;
-      });      
+      });
     },
     list : function( jsonObj ){
       var loginUserId = Sign.getUser().userId;
@@ -84,7 +84,7 @@ angular.module('starter.dao', [])
       ).then(function(result) {
         return DB.fetchAll(result);
       });
-    }  
+    }
   }
 })
 .factory('ChannelDao', function(DB, UTIL, APP_INFO, Sign) {
@@ -150,14 +150,14 @@ angular.module('starter.dao', [])
 
       var query = "UPDATE TB_CHANNEL ";
       query += "SET channel_name = ? , channel_users = ? ";
-      query += "WHERE channel_id = ? and owner_id = ? ";     
+      query += "WHERE channel_id = ? and owner_id = ? ";
 
       var cond = [ param.name , param.users, param.channel, loginUserId ];
 
       return DB.query(query, cond).then(function(result) {
         return result;
       });
-    },    
+    },
     update : function(param){
       loginUserId = Sign.getUser().userId;
 
@@ -178,7 +178,7 @@ angular.module('starter.dao', [])
         cond.push( param.image );
       }
 
-      query += "WHERE channel_id = ? and owner_id = ? ";    
+      query += "WHERE channel_id = ? and owner_id = ? ";
 
       cond.push( param.channel );
       cond.push( loginUserId );
@@ -204,7 +204,7 @@ angular.module('starter.dao', [])
 
       return DB.query(query, cond).then(function(result) {
         return result;
-      });        
+      });
 
     },
     add : function(jsonObj){
@@ -228,7 +228,7 @@ angular.module('starter.dao', [])
         " LEFT JOIN ( " +
         "   SELECT channel_id, channel_name, channel_users, channel_image, unread_count + 1 as unread_count, channel_updated, owner_id " +
         "   FROM TB_CHANNEL " +
-        " ) AS old ON new.channel_id = old.channel_id AND old.owner_id = new.owner_id ; ";    
+        " ) AS old ON new.channel_id = old.channel_id AND old.owner_id = new.owner_id ; ";
 
       var currentTimestamp = Date.now();
       var cond = [
@@ -243,7 +243,7 @@ angular.module('starter.dao', [])
 
       if( scope != undefined ){
 
-        var unreadCount = 1;    
+        var unreadCount = 1;
         var searchIndex = -1;
         for( var inx = 0 ; inx < scope.channelArray.length; inx++ ){
           if( scope.channelArray[inx].channel_id == jsonObj.channel ){
@@ -256,11 +256,11 @@ angular.module('starter.dao', [])
           unreadCount = scope.channelArray[ searchIndex ].unread_count + 1;
           scope.channelArray.splice(searchIndex, 1);
         }
-        
+
         var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message, 'channel_users':jsonObj.users.join(','), 'channel_image':jsonObj.image, 'channel_updated': currentTimestamp};
-        
+
         scope.channelArray.unshift( channel );
-        scope.$apply();     
+        scope.$apply();
       }
 
       return DB.query(query, cond).then(function(result) {
@@ -330,7 +330,7 @@ angular.module('starter.dao', [])
         return DB.fetchAll(result);
       });
     },
-    add : function(jsonObj){      
+    add : function(jsonObj){
       var loginUserId = Sign.getUser().userId;
       var query =
         "INSERT INTO TB_MESSAGE "+
@@ -367,32 +367,22 @@ angular.module('starter.dao', [])
 
     try {
       if (!window.openDatabase) {
-        window.plugins.toast.showShortCenter(
-          "죄송합니다. DB를 지원하지 않습니다. \n북마크 기능을 사용하실 수 없습니다.",function(a){},function(b){}
-        );
+        alert( "죄송합니다. DB를 지원하지 않습니다. \n사용하실 수 없습니다.");
       } else {
         var shortName = DB_CONFIG.name;
         var displayName = 'news database';
         var maxSize = 5 * 1024 * 1024; // in bytes
-        self.db = openDatabase(shortName, '', displayName, maxSize);      
+        self.db = openDatabase(shortName, '', displayName, maxSize);
       }
     } catch(e) {
       // Error handling code goes here.
-      if (e == INVALID_STATE_ERR) {
-        // Version number mismatch.
-        window.plugins.toast.showShortCenter(
-          "죄송합니다. DB 버젼을 지원하지 않습니다.\n북마크 기능을 사용하실 수 없습니다.",function(a){},function(b){}
-        );
-        return;
-      } else {
-        window.plugins.toast.showShortCenter(
-          "죄송합니다. "+e+"\n북마크 기능을 사용하실 수 없습니다.",function(a){},function(b){}
-        );
-        return;
-      }
+
+      console.error(e);
+      alert( "죄송합니다. DB를 지원하지 않습니다. \n사용하실 수 없습니다.");
+      return;
     }
 
-    if( self.db.version != DB_CONFIG.version ){    
+    if( self.db.version != DB_CONFIG.version ){
       self.db.changeVersion(self.db.version, DB_CONFIG.version, function (t) {
         changeDBFlag = true;
         self.createTable( changeDBFlag );
@@ -420,7 +410,7 @@ angular.module('starter.dao', [])
       var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
       self.query(query);
 
-      if( table.table_index != undefined ){      
+      if( table.table_index != undefined ){
         for( var key in table.table_index ){
           var tableInx = table.table_index[key];
           var query = 'CREATE '+ tableInx.type +' INDEX IF NOT EXISTS ' + tableInx.name +' ON ' +table.name + ' (' + tableInx.columns.join(',') + ')';

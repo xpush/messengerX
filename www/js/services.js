@@ -27,6 +27,12 @@ angular.module('starter.services', [])
   var scope;
 
   return {
+    add: function(userIds, callback) {
+      loginUserId = Sign.getUser().userId;
+      $rootScope.xpush.addUserToGroup( loginUserId, userIds, function( err, data ){
+        callback( data );
+      });
+    },
     getRefreshHistory : function(callback){
       UserDao.getRefreshHistory().then( function ( result ){
         callback( result );
