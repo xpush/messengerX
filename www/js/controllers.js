@@ -388,7 +388,7 @@ angular.module('starter.controllers', [])
 
   $scope.signIn = function(user) {
 		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
-    $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, function(err, result){
+    $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, 'ADD_DEVICE', function(err, result){
 
       if(err){
         var alertMessage = {title: 'Login Failed'};
@@ -442,7 +442,7 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('ChatCtrl', function($state, $scope, $rootScope, $ionicFrostedDelegate, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, UTIL, Emoticons) {
-  
+
   var loginUser = Sign.getUser();
 
   var channelId;
@@ -795,7 +795,7 @@ angular.module('starter.controllers', [])
       inputObj.value = "";
       console.log("progress  ["+idx+"]: "+data);
 
-      progressbar.value = data;   
+      progressbar.value = data;
     }, function(data,idx){
       var msg;
       var msgType;
@@ -816,6 +816,6 @@ angular.module('starter.controllers', [])
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
 
       Chat.send( msg, msgType );
-    });    
+    });
   }
 });

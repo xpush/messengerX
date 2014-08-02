@@ -32,7 +32,7 @@
     self.receiveMessageStack = [];
     self.isExistUnread = true;
     self.autoInitFlag = true;
- 
+
     if( autoInitFlag !=undefined ){
       self.autoInitFlag = autoInitFlag;
     }
@@ -60,6 +60,7 @@
 
   XPush.prototype.signup = function(userId, password, deviceId, cb){
     var self = this;
+
     if(typeof(deviceId) == 'function' && !cb){
       cb = deviceId;
       deviceId = 'WEB';
@@ -69,17 +70,23 @@
     self.ajax( XPush.Context.SIGNUP , 'POST', sendData, cb);
   };
 
-  XPush.prototype.login = function(userId, password, deviceId, cbLogin){
+  XPush.prototype.login = function(userId, password, deviceId, mode,cbLogin){
     var self = this;
 
-    if(typeof(deviceId) == 'function' && !cbLogin){
+    if(typeof(deviceId) == 'function' && !mode && !cbLogin){
       cbLogin = deviceId;
       deviceId = 'WEB';
+    }
+
+    if(typeof(mode) == 'function' && !cb){
+      cbLogin = mode;
     }
 
     self.userId = userId;
     self.deviceId = deviceId;
     var sendData = {A: self.appId, U: userId, PW: password, D: deviceId};
+    if(mode) sendData.MD = mode;
+
     self.ajax( XPush.Context.LOGIN , 'POST', sendData, function(err, result){
 
       if(err){
@@ -112,7 +119,7 @@
       deviceId = 'WEB';
     }
 
-    
+
 
     self.userId = userId;
     self.deviceId = deviceId;
@@ -939,7 +946,7 @@
         cb( data );
       });
     }
-  }; 
+  };
 
   Connection.prototype.upload = function(stream, data, cb){
     var self = this;
