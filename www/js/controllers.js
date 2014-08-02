@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('ChannelCtrl', function($scope, $rootScope, $state, $stateParams, ChannelDao, Friends, Sign ) {
+.controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign ) {
   $rootScope.currentChannel = '';
   var loginUserId = Sign.getUser().userId;
 
@@ -22,8 +22,32 @@ angular.module('starter.controllers', [])
       $stateParams.channelName = data.channel_name;
       $rootScope.$stateParams = $stateParams;
       $state.go( 'chat' );
+
+      /**
+      $window.$scope = $scope;
+      $rootScope.currentChannel = channelId;
+
+      // center the popup window
+      var left = screen.width/2 - 200
+          , top = screen.height/2 - 250
+          , popup = $window.open('popup-chat.html', '', "top=" + top + ",left=" + left + ",width=400,height=500")
+          , interval = 1000;
+
+      setTimeout( function(){
+        var popObj = popup.document.getElementById( "popupchat" );
+        var newWindowRootScope = popup.angular.element( popObj ).scope();
+
+        var args = {};
+        args.loginUser = Sign.getUser();
+        args.stateParams = $stateParams;
+        args.cache = Cache.all();
+        args.xpush = $rootScope.xpush;
+
+        newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
+      }, interval);
+      */
     });
-  };
+  }
 })
 .controller('FriendsCtrl', function($scope, $ionicLoading, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, UTIL, Manager) {
   $rootScope.currentChannel = '';
@@ -417,10 +441,30 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicFrostedDelegate, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, ChannelDao, UTIL, Emoticons) {
-  $rootScope.currentScope = $scope;
-
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicFrostedDelegate, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, UTIL, Emoticons) {
+  
   var loginUser = Sign.getUser();
+
+  var channelId;
+  var channelName;
+  var channelUsers = [];
+
+  $rootScope.$on("INTER_WINDOW_DATA_TRANSFER", function (data, args) {
+
+    $rootScope.xpush = args.xpush;
+
+    Sign.setUser( args.loginUser );
+    Cache.set( args.cache );
+
+    loginUser = Sign.getUser();
+    channelId = args.stateParams.channelId;
+
+    $rootScope.xpush.isExistUnread = false;
+    init( args.stateParams );
+    Manager.init();
+  });
+
+  $rootScope.currentScope = $scope;
 
   initChat = function( inviteMsg ){
 
@@ -429,6 +473,8 @@ angular.module('starter.controllers', [])
     param.channel = channelId;
     param.userId = loginUser.userId;
     param.deviceId = loginUser.deviceId;
+
+    console.log( channelId );
 
     // Channel Init
     Chat.init( param, loginUser, inviteMsg, $scope, function( messages ){
@@ -445,55 +491,68 @@ angular.module('starter.controllers', [])
   $scope.messages = [];
 
   var stateParams = $rootScope.$stateParams;
+  var rootImgPath = $rootScope.rootImgPath;
 
-  var channelId;
-  var channelName;
-  var channelUsers = [];
+  init = function( stateParams ){
+    if( stateParams.channelId != undefined ) {
+      channelId = stateParams.channelId;
 
-  if( stateParams.channelId != undefined ) {
-    channelId = stateParams.channelId;
+      channelUsers = stateParams.channelUsers.split(",");
+      channelUsers.sort();
+      channelName = stateParams.channelName;
 
-    channelUsers = stateParams.channelUsers.split(",");
-    channelUsers.sort();
-    channelName = stateParams.channelName;
+      initChat( '' );
+    } else {
+      var friendIds = stateParams.friendIds.split("$");
 
-    initChat( '' );
-  } else {
-    var friendIds = stateParams.friendIds.split("$");
+      channelUsers = channelUsers.concat( friendIds );
 
-    channelUsers = channelUsers.concat( friendIds );
-
-    if( channelUsers.indexOf( loginUser.userId ) < 0 ){
-      channelUsers.push( loginUser.userId );
-    }
-
-    channelName = UTIL.getNames( channelUsers );
-
-    var createObject = {};
-    createObject.U = channelUsers;
-    createObject.NM = channelName;
-    createObject.DT = { 'NM' : channelName, 'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length };
-
-    var channelId = ChannelDao.generateId(createObject);
-    createObject.C = channelId;
-
-    $rootScope.xpush.createChannel(channelUsers, channelId, createObject.DT, function(data){
-      createObject.unreadCount = 0;
-      ChannelDao.insert( createObject );
-
-      var inviteMsg = "";
-      if( channelUsers.length > 2 ){
-        inviteMsg = UTIL.getInviteMessage( channelUsers );
+      if( channelUsers.indexOf( loginUser.userId ) < 0 ){
+        channelUsers.push( loginUser.userId );
       }
 
-      initChat( inviteMsg );
-    });
-  }
+      channelName = UTIL.getNames( channelUsers );
 
-  $rootScope.$stateParams = {};
-  $scope.channelName = channelName;
-  $scope.channelId = channelId;
-  $scope.channelUsers = channelUsers;
+      var createObject = {};
+      createObject.U = channelUsers;
+      createObject.NM = channelName;
+      createObject.DT = { 'NM' : channelName, 'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length };
+
+      channelId = ChannelDao.generateId(createObject);
+      createObject.C = channelId;
+
+      $rootScope.xpush.createChannel(channelUsers, channelId, createObject.DT, function(data){
+        createObject.unreadCount = 0;
+        ChannelDao.insert( createObject );
+
+        var inviteMsg = "";
+        if( channelUsers.length > 2 ){
+          inviteMsg = UTIL.getInviteMessage( channelUsers );
+        }
+
+        initChat( inviteMsg );
+      });
+    };
+
+    $rootScope.$stateParams = {};
+    $scope.channelName = channelName;
+    $scope.channelId = channelId;
+    $scope.channelUsers = channelUsers;
+
+    Emoticons.list( {}, function(emoticons){
+      $scope.emoticons.push( { group : 's2', tag : 'ion-happy', 'CN' : 'tab-item tab-item-active', items : {
+          "01" : [rootImgPath+'/emo/s2/anger.PNG', rootImgPath+'/emo/s2/burn.PNG', rootImgPath+'/emo/s2/cool.PNG', rootImgPath+'/emo/s2/love.PNG'],
+          "02" : [rootImgPath+'/emo/s2/shout.PNG', rootImgPath+'/emo/s2/smile.PNG']}}
+      );
+      $scope.emoticons = $scope.emoticons.concat( emoticons );
+      //$scope.emoticons['b2'] = [rootImgPath+'/emo/b2/anger.png', rootImgPath+'/emo/b2/cry.png',  rootImgPath+'/emo/b2/haha.png', rootImgPath+'/emo/b2/money.png'];
+    });
+  };
+
+  if( stateParams != undefined ){
+    channelId = stateParams.channelId;
+    init( stateParams );
+  }
 
   $scope.add = function( nextMessage ) {
     $scope.messages.push(angular.extend({}, nextMessage));
@@ -606,17 +665,6 @@ angular.module('starter.controllers', [])
   };
 
   $scope.emoticons = [];
-  var rootImgPath = $rootScope.rootImgPath;
-
-  Emoticons.list( {}, function(emoticons){
-    $scope.emoticons.push( { group : 's2', tag : 'ion-happy', 'CN' : 'tab-item tab-item-active', items : {
-        "01" : [rootImgPath+'/emo/s2/anger.PNG', rootImgPath+'/emo/s2/burn.PNG', rootImgPath+'/emo/s2/cool.PNG', rootImgPath+'/emo/s2/love.PNG'],
-        "02" : [rootImgPath+'/emo/s2/shout.PNG', rootImgPath+'/emo/s2/smile.PNG']}}
-    );
-    $scope.emoticons = $scope.emoticons.concat( emoticons );
-    //$scope.emoticons['b2'] = [rootImgPath+'/emo/b2/anger.png', rootImgPath+'/emo/b2/cry.png',  rootImgPath+'/emo/b2/haha.png', rootImgPath+'/emo/b2/money.png'];
-  });
-
 
     //, '05' : rootImgPath+'/emo/b2/shocked.png', '06' : rootImgPath+'/emo/b2/victory.png' } );
 

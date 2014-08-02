@@ -104,6 +104,22 @@
     });
   };
 
+  XPush.prototype.setSessionInfo = function(userId, deviceId, cbLogin){
+    var self = this;
+
+    if(typeof(deviceId) == 'function' && !cbLogin){
+      cbLogin = deviceId;
+      deviceId = 'WEB';
+    }
+
+    
+
+    self.userId = userId;
+    self.deviceId = deviceId;
+
+    cbLogin();
+  };
+
   XPush.prototype.logout = function(userId, deviceId){
     var self = this;
     self._sessionConnection.disconnect();

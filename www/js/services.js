@@ -15,6 +15,9 @@ angular.module('starter.services', [])
     },
     get : function(key){
       return cache[key];
+    },
+    set : function( map ){
+      cache = map;
     }
   }
 })
@@ -100,6 +103,9 @@ angular.module('starter.services', [])
               $rootScope.xpush.on('message', function (ch,name,data) {
                 data.MG = decodeURIComponent(data.MG);
 
+                console.log( data );
+                console.log( $rootScope.currentChannel );
+
                 var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
                 if( data.T == 'J' ){
                   data.type = data.T;
@@ -115,7 +121,9 @@ angular.module('starter.services', [])
 
                   if( latestDate != dateStrs[3] ){
                     var dateMessage = dateStrs[1]+" "+dateStrs[2];
-                    $rootScope.currentScope.add( { type : 'T', date : dateStrs[1], message : dateMessage } );
+                    if( $rootScope.currentScope ){
+                      $rootScope.currentScope.add( { type : 'T', date : dateStrs[1], message : dateMessage } );
+                    }
                     latestDate = dateStrs[3];
                     $rootScope.currentChannelLatestDate = latestDate;
                   }
@@ -145,7 +153,9 @@ angular.module('starter.services', [])
                     ChannelDao.update( param );
                   }
 
-                  $rootScope.currentScope.add( nextMessage );
+                  if( $rootScope.currentScope ){
+                    $rootScope.currentScope.add( nextMessage );
+                  }
 
                 } else {
 
