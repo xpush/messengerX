@@ -1,6 +1,6 @@
 <ion-view title="{{channelName}}">
   <ion-nav-buttons side="right">
-    <button class="button icon ion-navicon" ng-click="showPopup();"></button>
+    <button class="button icon ion-navicon" ng-click="openFriendModal();"></button>
   </ion-nav-buttons>
   <ion-content padding="true" class="has-header" start-y="120">
     <ol class="messages">
@@ -100,15 +100,17 @@
     <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 10px 0 10px;"/>
     <button class="button button-positive" style="min-width:50px;" ng-click="send()" >Send </button>
   </ion-footer-bar>
-  <div class="chat-extends row hide" id="chat-extends">
-    <div class="col">
-      <img ng-src="{{rootImgPath}}/image.png" ng-click="openFileDialog('2')"/>
-    </div>
-    <div class="col" ng-if=" cameraFlag ">
-      <img ng-src="{{rootImgPath}}/camera.png" ng-click="openFileDialog('1')"/>
-    </div>
-    <div class="col" ng-if=" channelId.indexOf( '$' ) > -1 ">
-      <img ng-src="{{rootImgPath}}/webcam.png" ng-click="openWebRTC()"/>
+  <div class="chat-extends" id="chat-extends" style="display:none">
+    <div class="row">
+      <div class="col">
+        <img ng-src="{{rootImgPath}}/image.png" ng-click="openFileDialog('2')"/>
+      </div>
+      <div class="col" ng-if=" cameraFlag ">
+        <img ng-src="{{rootImgPath}}/camera.png" ng-click="openFileDialog('1')"/>
+      </div>
+      <div class="col" ng-if=" channelId.indexOf( '$' ) > -1 ">
+        <img ng-src="{{rootImgPath}}/webcam.png" ng-click="openWebRTC()"/>
+      </div>
     </div>
   </div>
  
