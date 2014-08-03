@@ -539,8 +539,8 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc eventHandler
    * @name inputObj
-   * @module eventHandler
-   * @kind function
+   * @module starter.controllers
+   * @kind eventHandler
    *
    * @description make self channel for emoticon file upload
    */
@@ -563,13 +563,22 @@ angular.module('starter.controllers', [])
 
       var param = {group:'custom', tag :'', image : imageUrl};
 
-      // save emoticon to local db
+      // Save emoticon to local db
       Emoticons.add( param, $scope.emoticon );
     });
   });
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $ionicPopup, Friends, Sign, Cache) {
 
+  /**
+   * @ngdoc function
+   * @name signIn
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Authorization 
+   * @param {jsonObject} Json object that is mapped to the screen
+   */
   $scope.signIn = function(user) {
 		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
     $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, 'ADD_DEVICE', function(err, result){
@@ -584,10 +593,11 @@ angular.module('starter.controllers', [])
           alertMessage.subTitle = 'Invalid log in or server error. Please try again.';
         }
 
-        $ionicPopup.alert(alertMessage)/*.then(function(res) {
-        })*/;
+        $ionicPopup.alert(alertMessage);
 
       }else{
+
+        // Create current session Info
         var loginUser = {};
         loginUser.app = params.A;
         loginUser.userId = user.userId;
@@ -599,11 +609,17 @@ angular.module('starter.controllers', [])
         loginUser.message = result.user.DT.MG;
 
         $rootScope.loginUser = loginUser;
+
+        // Save session Info
         Sign.setUser( loginUser );
 
+        // Push userImage and userName into local cache oject
         Cache.add(user.userId, {'NM':loginUser.userName, 'I':loginUser.image});
 
+        // Retrieve refresh history for sync friends
         Friends.getRefreshHistory(function(history){
+
+          // Do not update within an hour( 3600s )
           if( history != undefined && ( history.time - Date.now() ) < 3600 ){
             $rootScope.syncFlag = false;
           } else {
@@ -617,6 +633,15 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('SignUpCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
+  /**
+   * @ngdoc function
+   * @name signUp
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Create user into server
+   * @param {jsonObject} Json object that is mapped to the screen
+   */
   $scope.signUp = function(user) {
     var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
      'DT' : {'NM' : user.userName, 'I':'img/default_image.jpg', 'MG':'' } };
@@ -633,10 +658,22 @@ angular.module('starter.controllers', [])
   var channelName;
   var channelUsers = [];
 
+  /**
+   * @ngdoc eventHandler
+   * @name INTER_WINDOW_DATA_TRANSFER
+   * @module starter.controllers
+   * @kind eventHandler
+   *
+   * @description Generate a pop-up screen from th parent screen
+   * @param {jsonObject} 
+   * @param {jsonObject} Json object from the parent screen
+   */
   $rootScope.$on("INTER_WINDOW_DATA_TRANSFER", function (data, args) {
 
+    // Copy xpush object of parent screen
     $rootScope.xpush = args.xpush;
 
+    // Copy session object and cache object
     Sign.setUser( args.loginUser );
     Cache.set( args.cache );
 
@@ -644,12 +681,24 @@ angular.module('starter.controllers', [])
     channelId = args.stateParams.channelId;
 
     $rootScope.xpush.isExistUnread = false;
+
+    // Initialize chat controller
     init( args.stateParams );
     Manager.init();
   });
 
   $rootScope.currentScope = $scope;
 
+  /**
+   * @ngdoc function
+   * @name initChat
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Initialize Chat service
+   * @param {jsonObject} 
+   * @param {String} Invite Message
+   */
   initChat = function( inviteMsg ){
 
     var param = {};
@@ -658,12 +707,13 @@ angular.module('starter.controllers', [])
     param.userId = loginUser.userId;
     param.deviceId = loginUser.deviceId;
 
-    console.log( channelId );
-
     // Channel Init
     Chat.init( param, loginUser, inviteMsg, $scope, function( messages ){
       if( messages != undefined ){
+
+        // Message in local database
         $scope.messages = $scope.messages.concat(messages);
+
         setTimeout( function(){
           $ionicFrostedDelegate.update();
           $ionicScrollDelegate.scrollBottom(true);
@@ -673,11 +723,21 @@ angular.module('starter.controllers', [])
   };
 
   $scope.messages = [];
-
   var stateParams = $rootScope.$stateParams;
   var rootImgPath = $rootScope.rootImgPath;
 
+  /**
+   * @ngdoc function
+   * @name init
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Initialize current controller
+   * @param {jsonObject} channelId, channelName, channelUsers
+   */
   init = function( stateParams ){
+
+    // If channelId is exist, use the channel
     if( stateParams.channelId != undefined ) {
       channelId = stateParams.channelId;
 
@@ -687,8 +747,8 @@ angular.module('starter.controllers', [])
 
       initChat( '' );
     } else {
+      // make friend string to array 
       var friendIds = stateParams.friendIds.split("$");
-
       channelUsers = channelUsers.concat( friendIds );
 
       if( channelUsers.indexOf( loginUser.userId ) < 0 ){
@@ -702,9 +762,11 @@ angular.module('starter.controllers', [])
       createObject.NM = channelName;
       createObject.DT = { 'NM' : channelName, 'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length };
 
+      // Generate channel id
       channelId = ChannelDao.generateId(createObject);
       createObject.C = channelId;
 
+      // Create channel with channel info and save into local db
       $rootScope.xpush.createChannel(channelUsers, channelId, createObject.DT, function(data){
         createObject.unreadCount = 0;
         ChannelDao.insert( createObject );
@@ -718,11 +780,13 @@ angular.module('starter.controllers', [])
       });
     };
 
+    // Reset $stateParams
     $rootScope.$stateParams = {};
     $scope.channelName = channelName;
     $scope.channelId = channelId;
     $scope.channelUsers = channelUsers;
 
+    // Retrieve emoticon list from local db.
     Emoticons.list( {}, function(emoticons){
       $scope.emoticons.push( { group : 's2', tag : 'ion-happy', 'CN' : 'tab-item tab-item-active', items : {
           "01" : [rootImgPath+'/emo/s2/anger.PNG', rootImgPath+'/emo/s2/burn.PNG', rootImgPath+'/emo/s2/cool.PNG', rootImgPath+'/emo/s2/love.PNG'],
@@ -733,11 +797,21 @@ angular.module('starter.controllers', [])
     });
   };
 
+  // Not
   if( stateParams != undefined ){
     channelId = stateParams.channelId;
     init( stateParams );
   }
 
+  /**
+   * @ngdoc function
+   * @name add
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Add message to screen and Update scroll
+   * @param {jsonObject} channelId, channelName, channelUsers
+   */
   $scope.add = function( nextMessage ) {
     $scope.messages.push(angular.extend({}, nextMessage));
 
@@ -750,6 +824,15 @@ angular.module('starter.controllers', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name send
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Send Message and reset input text
+   * @param {jsonObject} channelId, channelName, channelUsers
+   */
   $scope.send = function() {
     if( $scope.inputMessage != '' ){
       var msg = $scope.inputMessage;
@@ -760,16 +843,15 @@ angular.module('starter.controllers', [])
 
   $scope.selection = [];
 
-  $scope.toggleSelection = function( friendId ){
-    var inx = $scope.selection.indexOf( friendId );
-    if( inx > -1 ){
-      $scope.selection.splice(inx, 1);
-    } else {
-      $scope.selection.push( friendId );
-    }
-  };
-
-  $scope.showPopup = function() {
+  /**
+   * @ngdoc function
+   * @name openFriendModal
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Open User modal to friend management
+   */
+  $scope.openFriendModal = function() {
     $scope.modal.datas = [];
     $scope.modal.selection = [];
     $scope.modal.num = 1;
@@ -789,6 +871,7 @@ angular.module('starter.controllers', [])
     animation: 'slide-in-up',
     focusFirstInput: true
   });
+
   $scope.$on('modal.hidden', function() {
     $scope.modal.visible = false;
 
@@ -798,15 +881,28 @@ angular.module('starter.controllers', [])
       $scope.channelUsers = $scope.modal.channelUsers;
     }
   });
+
   $scope.$on('modal.shown', function() {
-    // do nothing...
   });
 
   $scope.$on('$destroy', function() {
      window.onbeforeunload = undefined;
   });
 
+  /**
+   * @ngdoc eventHandler
+   * @name openFriendModal
+   * @module starter.controllers
+   * @kind eventHandler
+   *
+   * @description Open User modal to friend management
+   * @param {object} event
+   * @param {object} next state
+   * @param {object} currnet state
+   */
   $scope.$on('$locationChangeStart', function(event, next, current) {
+
+    // called when chat screen out
     if( current.indexOf('/chat') > -1 ){
       if(!confirm("Are you sure you want to leave this page?")) {
         event.preventDefault();
@@ -816,6 +912,15 @@ angular.module('starter.controllers', [])
     }
   });
 
+  /**
+   * @ngdoc function
+   * @name openWebRTC
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Open webRTC for video chatting
+   * @param {string} webRTC key
+   */
   $scope.openWebRTC = function( key ){
     $scope.toggleExt( "false" );
 
@@ -843,6 +948,7 @@ angular.module('starter.controllers', [])
       Chat.send( chKey, 'VO' );
     };
 
+    // Send video call
     if( newFlag ){
       Chat.send( chKey, 'VI' );
     }
@@ -850,41 +956,75 @@ angular.module('starter.controllers', [])
 
   $scope.emoticons = [];
 
-    //, '05' : rootImgPath+'/emo/b2/shocked.png', '06' : rootImgPath+'/emo/b2/victory.png' } );
-
   $scope.curEmoTabId = "0";
   $scope.showEmo = "false";
   $scope.showExt = "false";
 
+  /**
+   * @ngdoc function
+   * @name toggleEmoticons
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description show or hide emoticon div
+   * @param {string} 
+   */
   $scope.toggleEmoticons = function( flag ){
     $scope.showEmo = flag;
     if( $scope.showEmo == "true" ){
       document.getElementById( 'tabbody'+$scope.curEmoTabId ).style.display = "block";
       document.getElementById( 'chat-emoticons' ).style.display = "block";
-      document.getElementById( "chat-extends" ).className = "chat-extends row hide";
+      document.getElementById( "chat-extends" ).style.display = "none";
       $scope.showExt = "false";
     } else {
       document.getElementById( 'chat-emoticons' ).style.display = "none";
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name toggleExt
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description show or hide extension div
+   * @param {string}
+   */
   $scope.toggleExt = function( flag ) {
     $scope.showExt = flag;
     if( $scope.showExt == "true" ){
-      document.getElementById( "chat-extends" ).className= "chat-extends row flex";
+      document.getElementById( "chat-extends" ).style.display = "block";
       document.getElementById( 'chat-emoticons' ).style.display = "none";
       $scope.showEmo = "false";
     } else {
-      document.getElementById( "chat-extends" ).className = "chat-extends row hide";
+      document.getElementById( "chat-extends" ).style.display = "none";
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name sendEmoticon
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Send selected emoticon url
+   * @param {string} url
+   */
   $scope.sendEmoticon = function(url){
     $scope.toggleEmoticons( "false" );
     document.getElementById( 'chat-emoticons' ).style.display = "none";
     Chat.send( url, 'E' );
   };
 
+  /**
+   * @ngdoc function
+   * @name tabActive
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Active selected tab and deactive another tab
+   * @param {string} selected tabId
+   */
   $scope.tabActive = function( tabId ){
     $scope.curEmoTabId = tabId;
     var tabs = document.getElementById( 'emoticon-tabs' ).getElementsByTagName( "a" );
@@ -900,8 +1040,19 @@ angular.module('starter.controllers', [])
     }
   };
 
+
+  /**
+   * @ngdoc eventHandler
+   * @name openFileDialog
+   * @module starter.controllers
+   * @kind eventHandler
+   *
+   * @description make self channel for emoticon file upload
+   */
   var inputObj = document.getElementById('file');
   $scope.openFileDialog = function( sourceType ) {
+
+    // If android or IOS, use native plugin
     if( navigator.camera ){
 
       var opts = {
@@ -929,6 +1080,8 @@ angular.module('starter.controllers', [])
         console.log(message);
       }
     } else {
+
+      // If using browser, use file dialog
       $scope.toggleExt( "false" );
       ionic.trigger('click', { target: document.getElementById('file') });
     }
@@ -948,6 +1101,8 @@ angular.module('starter.controllers', [])
     }
 
     var tp = "";
+
+    // if video, add vido progress bar. Otherwise show progress bar.
     if( type == 'video' ){
       tp = "SVP";
     } else {
@@ -961,9 +1116,6 @@ angular.module('starter.controllers', [])
     $scope.$apply();
     itemInx++;
 
-    $ionicFrostedDelegate.update();
-    $ionicScrollDelegate.scrollBottom(true);
-
     setTimeout( function(){
       $ionicFrostedDelegate.update();
       $ionicScrollDelegate.scrollBottom(true);
@@ -971,14 +1123,22 @@ angular.module('starter.controllers', [])
     }, 100 );
   });
 
+  /**
+   * @ngdoc function
+   * @name uploadStream
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description upload file using socket stream.
+   */
   uploadStream = function( options, type, itemJnx ){
     var progressbar = document.getElementById( "progress_bar"+itemJnx );
     var tempDiv = document.getElementById( "progress_div"+itemJnx );
 
     $rootScope.xpush.uploadStream( channelId, options, function(data, idx){
       inputObj.value = "";
-      console.log("progress  ["+idx+"]: "+data);
 
+      // Update progress bar
       progressbar.value = data;
     }, function(data,idx){
       var msg;
@@ -995,6 +1155,7 @@ angular.module('starter.controllers', [])
         msgType = 'I';
       }
 
+      // remove progress bar
       angular.element( tempDiv ).remove();
       inputObj.value = "";
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
