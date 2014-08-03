@@ -223,7 +223,7 @@ angular.module('starter.controllers', [])
   });
 })
 
-.controller('UsersModalCtrl', function($scope, Users, Friends) {
+.controller('UsersModalCtrl', function($scope, Users, Sign, Friends) {
 
   /**
    * @ngdoc function
@@ -277,21 +277,25 @@ angular.module('starter.controllers', [])
     $scope.retrieveUsers();
   };
 
-/**
- * @ngdoc function
- * @name retrieveUsers
- * @module starter.controllers
- * @kind function
- *
- * @description Search user from server
- */
+  /**
+   * @ngdoc function
+   * @name retrieveUsers
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Search user from server
+   */
   $scope.retrieveUsers = function() {
 
     console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
-
     if($scope.modal.visible){
 
-      var query = {};
+      var loginUserId = Sign.getUser().userId;
+
+      var query = {
+        GR: {'$ne': loginUserId}
+      };
+
       if($scope.modal.search) query['DT.NM'] = new RegExp($scope.modal.search, 'i');
 
       Users.search(query, $scope.modal.num, function(users){
