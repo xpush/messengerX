@@ -77,7 +77,7 @@ angular.module('starter.dao', [])
         return result;
       });
     },
-    list : function( jsonObj ){
+    list : function(){
       var loginUserId = Sign.getUser().userId;
       return DB.query(
         'SELECT user_id, user_name, message, image, chosung, owner_id FROM TB_USER where owner_id = ? ORDER BY user_name', [loginUserId]

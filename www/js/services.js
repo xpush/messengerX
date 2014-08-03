@@ -1,48 +1,140 @@
 angular.module('starter.services', [])
 
+/**
+ * @ngdoc factory
+ * @name Cache
+ * @module starter.services
+ * @kind factory
+ *
+ * @description Manage cache for image and userName
+ */
 .factory('Cache', function(){
   var cache = {};
 
   return {
+    /**
+     * @ngdoc function
+     * @name all
+     * @module starter.services
+     * @kind function
+     *
+     * @description return cache object
+     * @returns {Object} cache object
+     */
     all : function(){
       return cache;
     },
+
+    /**
+     * @ngdoc function
+     * @name add
+     * @module starter.services
+     * @kind function
+     *
+     * @description add cache object
+     * @param {string} HashKey userId
+     * @param {Object} JSON Object. image and user name {'I' : image, 'NM' : userName }
+     */
     add : function(key, value){
       cache[key] = value;
     },
+
+    /**
+     * @ngdoc function
+     * @name remove
+     * @module starter.services
+     * @kind function
+     *
+     * @description remove cache object
+     * @param {string} HashKey userId
+     */
     remove : function(key){
       delete cache[key];
     },
+
+    /**
+     * @ngdoc function
+     * @name remove
+     * @module starter.services
+     * @kind function
+     *
+     * @description get cache object by userId
+     * @param {string} HashKey userId
+     * @return {Object} JSON Object. image and user name {'I' : image, 'NM' : userName }
+     */
     get : function(key){
       return cache[key];
     },
+
+    /**
+     * @ngdoc function
+     * @name set
+     * @module starter.services
+     * @kind function
+     *
+     * @description set entire cache object
+     * @param {Object} cache object
+     */
     set : function( map ){
       cache = map;
     }
   }
 })
 .factory('Friends', function($rootScope, Sign, UTIL, UserDao, Cache) {
-  // Might use a resource here that returns a JSON array
   var loginUserId;
   var scope;
 
   return {
+    /**
+     * @ngdoc function
+     * @name add
+     * @module starter.services
+     * @kind function
+     *
+     * @description Save friends into server
+     * @param {array} JSONArray that is consist of a number of userId
+     * @param {function} callback function that called after save success
+     */
     add: function(userIds, callback) {
       loginUserId = Sign.getUser().userId;
       $rootScope.xpush.addUserToGroup( loginUserId, userIds, function( err, data ){
         callback( data );
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name getRefreshHistory
+     * @module starter.services
+     * @kind function
+     *
+     * @description Retrieve refresh history from local DB
+     * @param {function} callback function that called after retrieve
+     */
     getRefreshHistory : function(callback){
       UserDao.getRefreshHistory().then( function ( result ){
         callback( result );
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name list
+     * @module starter.services
+     * @kind function
+     *
+     * @description Retrieve friend list from local DB and save info Cache
+     * @param {function} callback function that called after success
+     */
     list : function(callback){
-      UserDao.list( { 'friendFlag' : 'Y'} ).then( function ( result ){
+      UserDao.list().then( function ( result ){
         friends = {};
+
+        // foreach
         for( var key in result ){
           if( result[key].user_id != undefined ){
+
+            // Save info cache
             Cache.add( result[key].user_id, { 'NM' : result[key].user_name, 'I': result[key].image });
           }
         }
@@ -50,10 +142,21 @@ angular.module('starter.services', [])
         callback( result );
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name refresh
+     * @module starter.services
+     * @kind function
+     *
+     * @description Retrieve friends from server and save into local DB
+     * @param {function} callback function that called after success
+     */
     refresh : function(callback){
       var loginUserId = Sign.getUser().userId;
       $rootScope.xpush.getGroupUsers( loginUserId, function( err, users ){
-        console.log( users );
+
+        // Users : JSONArray from server
         UserDao.addAll( users, function( result ){
           UserDao.updateRefreshHistory();
           callback( {'status':'ok'} );
@@ -66,11 +169,33 @@ angular.module('starter.services', [])
   var loginUserId;
 
   return {
+
+    /**
+     * @ngdoc function
+     * @name lish
+     * @module starter.services
+     * @kind function
+     *
+     * @description Retrieve users from server
+     * @param {function} callback function that called after retrieve
+     */
     list : function(callback){
-      UserDao.list( { 'friendFlag' : 'N'} ).then( function ( result ){
+      UserDao.list().then( function ( result ){
         callback( result );
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name search
+     * @module starter.services
+     * @kind function
+     *
+     * @description Retrieve friend list from server
+     * @param {string} 
+     * @param {integer}
+     * @param {function} callback function that called after success
+     */
     search : function(_q, pageNumber, callback){
 
       var params = {
@@ -98,25 +223,48 @@ angular.module('starter.services', [])
 .factory('Manager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, UTIL ) {
   var initFlag = false;
   return {
+
+    /**
+     * @ngdoc function
+     * @name init
+     * @module starter.services
+     * @kind function
+     *
+     * @description Initialize this application's singleton object
+     * @param {function} callback function that called after success
+     */
     init : function(callback){
       self = this;
 
       if( !initFlag ){
+
+        // Get channel list from server
         self.channelList(function( channels ){
+
+          // Get unread message list from server
           self.unreadMessage( channels, function(result){
 
+            // get unread message count form local DB
             ChannelDao.getAllCount().then( function ( result ){
               var loginUser = Sign.getUser();
 
+              // Set unread message count into rootScope
               $rootScope.totalUnreadCount = result.total_count;
+
+              /**
+              * Add eventHandler when message received
+              * @param 
+              * @param 
+              * @param 
+              */
 
               $rootScope.xpush.on('message', function (ch,name,data) {
                 data.MG = decodeURIComponent(data.MG);
 
-                console.log( data );
-                console.log( $rootScope.currentChannel );
-
+                // compare sender's userId to logined UserId. send or receive
                 var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
+
+                // Join message not need to compare send or receive
                 if( data.T == 'J' ){
                   data.type = data.T;
                 } else if( data.T != undefined){
@@ -125,25 +273,34 @@ angular.module('starter.services', [])
                   data.type = sr;
                 }
 
+                // compare current channel id to received message's channel id
                 if( ch == $rootScope.currentChannel ){
                   var latestDate = $rootScope.currentChannelLatestDate;
+
+                  /**
+                  * time stamp to date array
+                  * dateStrs[0] : message's time( yyyy.mm.dd )
+                  * dateStrs[1] : message's time( hh:min )
+                  * dateStrs[2] : message's time( yyyy.mm.dd hh:min )
+                  * dateStrs[3] : message's time( yyyymmddhhm )
+                  */
+
                   var dateStrs = UTIL.timeToString( data.TS );
 
-                  if( latestDate != dateStrs[3] ){
+                  // if lastest date differ 10 minute and current channel's chatting is activated, show time message
+                  if( latestDate != dateStrs[3] && $rootScope.currentScope ){
                     var dateMessage = dateStrs[1]+" "+dateStrs[2];
-                    if( $rootScope.currentScope ){
-                      $rootScope.currentScope.add( { type : 'T', date : dateStrs[1], message : dateMessage } );
-                    }
+                    $rootScope.currentScope.add( { type : 'T', date : dateStrs[1], message : dateMessage } );
                     latestDate = dateStrs[3];
                     $rootScope.currentChannelLatestDate = latestDate;
                   }
 
                   var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, active : "true" };
 
-                  // Add to DB
+                  // Add to local DB
                   MessageDao.add( data );
 
-                  // 2 people Channel
+                  //  Update channel info
                   var param = { 'channel':data.C, 'reset' : true };
                   if( data.T == 'I' ){
                     param.message = "@image@";
@@ -155,23 +312,28 @@ angular.module('starter.services', [])
                     param.message = data.MG;
                   }
 
+                  // 1:1 Channel, update image
                   if( data.type == 'R' && data.C.indexOf( "$" ) > -1 ){
                     param.image = data.UO.I;
                   }
 
+                  // Join message is not need to update channel info
                   if( data.type != 'J' ){
                     ChannelDao.update( param );
                   }
 
+                  // If current channel's chatting is activated, show received message
                   if( $rootScope.currentScope ){
                     $rootScope.currentScope.add( nextMessage );
                   }
 
                 } else {
 
+                  // differ from current channel, get channel data
                   $rootScope.xpush.getChannelData( data.C, function( err, channelJson ){
                     var channel = {'channel': data.C, 'users' : channelJson.DT.US};
 
+                    //  Update channel info
                     if( data.T == 'I' ){
                       channel.message = "@image@";
                     } else if( data.T == 'E' ){
@@ -182,23 +344,28 @@ angular.module('starter.services', [])
                       channel.message = data.MG;
                     }
 
+                    // multi user channel : not need to update channel info
                     if( channelJson.DT.UC > 2 ){
                       channel.name = channelJson.DT.NM;
                       channel.image = '';
+
+                    // 1:1 channel : update channel image and channel name
                     } else if( channelJson.DT.UC == 2 ){
                       channel.name = data.UO.NM;
                       channel.image = data.UO.I;
                     }
 
-                    // Add to DB
+                    // Add to local DB
                     MessageDao.add( data );
 
+                    // Increase rootScope's unread count
                     $rootScope.totalUnreadCount++;
 
                     if( data.T != 'J' && channelJson.DT.UC >= 2 ){
                       ChannelDao.add( channel );
                     }
 
+                    // Local notification
                     $rootScope.localNoti( { id : data.TS, message : data.MG, title : channel.name}, function(){
                       console.log( '========= local noti callback =========');
                     });
@@ -212,9 +379,21 @@ angular.module('starter.services', [])
         });
       }
     },
+
+    /**
+     * @ngdoc function
+     * @name channelList
+     * @module starter.services
+     * @kind function
+     *
+     * @description Retrieve channel list from server
+     * @param {function} callback function that called after success
+     */
     channelList : function(callback){
       $rootScope.xpush.getChannels( function(err, channelArray){
         var channels = {};
+
+        // foreach channelArray channelInfo
         for( var inx = 0 ; inx < channelArray.length ; inx++ ){
           var data = channelArray[inx];
           var channel = {'channel': data.channel };
@@ -232,6 +411,7 @@ angular.module('starter.services', [])
             channel.name = "";
           }
 
+          // Pass self channel
           if( data.DT != undefined && data.DT.UC > 1 ){
             channels[ data.channel ] =  channel;
           }
@@ -240,6 +420,17 @@ angular.module('starter.services', [])
         callback(channels);
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name unreadMessage
+     * @module starter.services
+     * @kind function
+     *
+     * @description Retrieve unread message list from server
+     * @param {Array} JSONArray of channel info JSONObject
+     * @param {function} callback function that called after success
+     */
     unreadMessage : function(channels, callback){
       var loginUser = Sign.getUser();
 
@@ -252,11 +443,10 @@ angular.module('starter.services', [])
           data.MG = decodeURIComponent( data.MG );
           var sr = data.UO.U == loginUser.userId ? 'S':'R';
 
-          if( data.T != undefined ){
+          if( data.T == 'J' ){
             data.type = data.T;
-            if( data.T == "I" ){
-              data.type = sr + data.T;
-            }
+          } else if( data.T != undefined){
+            data.type = sr + data.T;
           } else {
             data.type = sr;
           }
@@ -278,6 +468,7 @@ angular.module('starter.services', [])
           MessageDao.add( data );
         }
 
+        // Update isExistUnread flag
         $rootScope.xpush.isExistUnread = false;
         callback({'status':'ok'});
       });
@@ -287,17 +478,16 @@ angular.module('starter.services', [])
 .factory('Sign', function($http, $state, $rootScope, BASE_URL) {
   var loginUser;
   return {
-    login : function( params, callback ){
-      $http.post("http://"+BASE_URL+":8000/auth", params)
-      .success(function(data) {
-        callback( data );
-      })
-      .error(function(data, status, headers, config) {
-      });
-    },
+    /**
+     * @ngdoc function
+     * @name logout
+     * @module starter.services
+     * @kind function
+     *
+     * @description Clear login info and go to login page
+     */
     logout : function(){
 
-      // Clear login
       loginUser = {};
       $rootScope.loginUser = {};
       $rootScope.currentChannel = '';
@@ -306,6 +496,16 @@ angular.module('starter.services', [])
 
       $state.transitionTo('signin', {}, { reload: true, notify: true });
     },
+    /**
+     * @ngdoc function
+     * @name register
+     * @module starter.services
+     * @kind function
+     *
+     * @description Call REST API for register user 
+     * @param {Object} userInfo for register
+     * @param {function} callback function that called after success
+     */
     register : function( params, callback ){
       $http.post("http://"+BASE_URL+":8000/user/register", params)
       .success(function(data) {
@@ -314,6 +514,16 @@ angular.module('starter.services', [])
       .error(function(data, status, headers, config) {
       });
     },
+    /**
+     * @ngdoc function
+     * @name update
+     * @module starter.services
+     * @kind function
+     *
+     * @description Call REST API for update user 
+     * @param {Object} userInfo for update
+     * @param {function} callback function that called after success
+     */
     update : function( params, callback ){
       $http.post("http://"+BASE_URL+":8000/user/update", params)
       .success(function(data) {
@@ -322,10 +532,27 @@ angular.module('starter.services', [])
       .error(function(data, status, headers, config) {
       });
     },
-
+    /**
+     * @ngdoc function
+     * @name setUser
+     * @module starter.services
+     * @kind function
+     *
+     * @description ser userInfo into session
+     * @param {Object} userInfo
+     */
     setUser : function( user ){
       loginUser = user;
     },
+    /**
+     * @ngdoc function
+     * @name getUser
+     * @module starter.services
+     * @kind function
+     *
+     * @description return logined user
+     * @return {Object} userInfo
+     */
     getUser : function(){
       return loginUser;
     }
