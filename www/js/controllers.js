@@ -2,7 +2,6 @@ angular.module('starter.controllers', [])
 
 .controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign ) {
   $rootScope.currentChannel = '';
-  var loginUserId = Sign.getUser().userId;
 
   ChannelDao.getAllCount().then( function ( result ){
     $rootScope.totalUnreadCount = result.total_count;
@@ -47,7 +46,7 @@ angular.module('starter.controllers', [])
       }, interval);
       */
     });
-  }
+  };
 })
 .controller('FriendsCtrl', function($scope, $ionicLoading, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, UTIL, Manager) {
   $rootScope.currentChannel = '';
@@ -296,7 +295,7 @@ angular.module('starter.controllers', [])
         GR: {'$ne': loginUserId}
       };
 
-      if($scope.modal.search) query['DT.NM'] = new RegExp($scope.modal.search, 'i');
+      if($scope.modal.search) query['DT.NM'] = '%'+$scope.modal.search+'%';
 
       Users.search(query, $scope.modal.num, function(users){
 
@@ -499,6 +498,7 @@ angular.module('starter.controllers', [])
 .controller('EmoticonCtrl', function($scope, $rootScope, Sign, ChannelDao, Chat, Emoticons) {
   $rootScope.currentChannel = '';
   var loginUser = Sign.getUser();
+  var channelId = '';
 
   $scope.emoticon = {};
   Emoticons.list( { group : 'custom' }, function(emoticons){
@@ -527,11 +527,11 @@ angular.module('starter.controllers', [])
    *
    * @description make self channel for emoticon file upload
    */
-  initSelfChannel = function(){
+  var initSelfChannel = function(){
 
     // channel for loginUser
     var channelUsers = [loginUser.userId];
-    var channelId = ChannelDao.generateId(createObject);
+    channelId = ChannelDao.generateId(createObject);
 
     var createObject = {};
     createObject.U = channelUsers;
@@ -550,7 +550,7 @@ angular.module('starter.controllers', [])
       Chat.init( param, '', $scope, function( messages ){
       });
     });
-  }
+  };
 
   // Initialize this controller
   initSelfChannel();
@@ -718,7 +718,7 @@ angular.module('starter.controllers', [])
    * @param {jsonObject}
    * @param {String} Invite Message
    */
-  initChat = function( inviteMsg ){
+  var initChat = function( inviteMsg ){
 
     var param = {};
     param.app = loginUser.app;
@@ -754,7 +754,7 @@ angular.module('starter.controllers', [])
    * @description Initialize current controller
    * @param {jsonObject} channelId, channelName, channelUsers
    */
-  init = function( stateParams ){
+  var init = function( stateParams ){
 
     // If channelId is exist, use the channel
     if( stateParams.channelId != undefined ) {
@@ -797,7 +797,7 @@ angular.module('starter.controllers', [])
 
         initChat( inviteMsg );
       });
-    };
+    }
 
     // Reset $stateParams
     $rootScope.$stateParams = {};
@@ -1079,7 +1079,7 @@ angular.module('starter.controllers', [])
         destinationType: Camera.DestinationType.FILE_URI,
         sourceType: sourceType,
         encodingType: 0
-      }
+      };
 
       navigator.camera.getPicture(onSuccess, onFail, opts);
 
@@ -1150,7 +1150,7 @@ angular.module('starter.controllers', [])
    *
    * @description upload file using socket stream.
    */
-  uploadStream = function( options, type, itemJnx ){
+  var uploadStream = function( options, type, itemJnx ){
     var progressbar = document.getElementById( "progress_bar"+itemJnx );
     var tempDiv = document.getElementById( "progress_div"+itemJnx );
 
@@ -1181,5 +1181,5 @@ angular.module('starter.controllers', [])
 
       Chat.send( msg, msgType );
     });
-  }
+  };
 });

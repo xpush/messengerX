@@ -75,7 +75,7 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
       url: '/chat',
       templateUrl: "templates/chat.html",
       controller: 'ChatCtrl'
-    })
+    });
 
   $urlRouterProvider.otherwise('/chat');
 });
@@ -87,5 +87,5 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     update: function() {
       $rootScope.$emit('ionicFrosted.update');
     }
-  }
+  };
 }]);

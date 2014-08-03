@@ -78,11 +78,10 @@ angular.module('starter.services', [])
     set : function( map ){
       cache = map;
     }
-  }
+  };
 })
 .factory('Friends', function($rootScope, Sign, UTIL, UserDao, Cache) {
   var loginUserId;
-  var scope;
 
   return {
     /**
@@ -128,7 +127,6 @@ angular.module('starter.services', [])
      */
     list : function(callback){
       UserDao.list().then( function ( result ){
-        friends = {};
 
         // foreach
         for( var key in result ){
@@ -163,10 +161,9 @@ angular.module('starter.services', [])
         });
       });
     }
-  }
+  };
 })
 .factory('Users', function($rootScope, Sign, UserDao, UTIL, Cache) {
-  var loginUserId;
 
   return {
 
@@ -192,7 +189,7 @@ angular.module('starter.services', [])
      * @kind function
      *
      * @description Retrieve friend list from server
-     * @param {string} 
+     * @param {string}
      * @param {integer}
      * @param {function} callback function that called after success
      */
@@ -218,7 +215,7 @@ angular.module('starter.services', [])
       });
 
     }
-  }
+  };
 })
 .factory('Manager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, UTIL ) {
   var initFlag = false;
@@ -234,7 +231,7 @@ angular.module('starter.services', [])
      * @param {function} callback function that called after success
      */
     init : function(callback){
-      self = this;
+      var self = this;
 
       if( !initFlag ){
 
@@ -253,9 +250,9 @@ angular.module('starter.services', [])
 
               /**
               * Add eventHandler when message received
-              * @param 
-              * @param 
-              * @param 
+              * @param
+              * @param
+              * @param
               */
 
               $rootScope.xpush.on('message', function (ch,name,data) {
@@ -473,7 +470,7 @@ angular.module('starter.services', [])
         callback({'status':'ok'});
       });
     }
-  }
+  };
 })
 .factory('Sign', function($http, $state, $rootScope, BASE_URL) {
   var loginUser;
@@ -502,7 +499,7 @@ angular.module('starter.services', [])
      * @module starter.services
      * @kind function
      *
-     * @description Call REST API for register user 
+     * @description Call REST API for register user
      * @param {Object} userInfo for register
      * @param {function} callback function that called after success
      */
@@ -520,7 +517,7 @@ angular.module('starter.services', [])
      * @module starter.services
      * @kind function
      *
-     * @description Call REST API for update user 
+     * @description Call REST API for update user
      * @param {Object} userInfo for update
      * @param {function} callback function that called after success
      */
@@ -556,10 +553,10 @@ angular.module('starter.services', [])
     getUser : function(){
       return loginUser;
     }
-  }
+  };
 })
 .factory('Chat', function($http, $compile, $rootScope, BASE_URL, ChannelDao, MessageDao, UTIL, Cache, Sign ) {
-  var channelSocket;
+
   var CONF = {};
   var self;
 
@@ -664,11 +661,10 @@ angular.module('starter.services', [])
         callback( data );
       });
     }
-  }
+  };
 })
 .factory('Emoticons', function(EmoticonDao){
   var emoticons = {};
-  var metas = [];
 
   return {
     /**
@@ -683,7 +679,6 @@ angular.module('starter.services', [])
      */
     list : function( param, callback){
       EmoticonDao.list(param).then(function(emoticonArray) {
-        var before = "";
         var result = {};
 
         for( var inx = 0 ; inx < emoticonArray.length ; inx++ ){
@@ -704,11 +699,12 @@ angular.module('starter.services', [])
           var group = groups.group;
           var tag = groups.tag;
 
+          // @TODO duplicate key : tgf
           var rr = { group : group, tag : tag, items : {}, metas : 0, tag : 'ion-android-hand', 'CN' : 'tab-item' };
 
           var jnx = 0;
 
-          // Divide result by 4 
+          // Divide result by 4
           if( groups.items.length > 4 ){
             var newKey;
             while( groups.items.length > 4 ){
@@ -781,7 +777,7 @@ angular.module('starter.services', [])
     all : function () {
       return emoticons;
     }
-  }
+  };
 })
 .factory('UTIL', function(Cache, Sign){
   var cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
@@ -861,9 +857,9 @@ angular.module('starter.services', [])
      * @return {string} chosung
      */
     getChosung : function(str) {
-      result = "";
-      for(i=0;i<str.length;i++) {
-        code = str.charCodeAt(i)-44032;
+      var result = "";
+      for(var i=0;i<str.length;i++) {
+        var code = str.charCodeAt(i)-44032;
         if(code>-1 && code<11172) result += cho[Math.floor(code/588)];
       }
       return result;
@@ -968,7 +964,6 @@ angular.module('starter.services', [])
     getNames : function( userIds ){
       var loginUserId = Sign.getUser().userId;
       var loginUserName = Sign.getUser().userName;
-      var result;
       var userNames = [];
 
       var userArray = angular.copy( userIds );
@@ -976,7 +971,7 @@ angular.module('starter.services', [])
       // Get friends cache
       var friends = Cache.all();
 
-      // Room with 2 people 
+      // Room with 2 people
       if( userArray.length == 2 && userArray.indexOf( loginUserId ) > -1 ){
 
         // Remove loginUserId from userArray
@@ -1030,5 +1025,5 @@ angular.module('starter.services', [])
 
       return result;
     }
-  }
+  };
 });
