@@ -547,7 +547,7 @@ angular.module('starter.controllers', [])
       param.deviceId = loginUser.deviceId;
 
       // Channel Init
-      Chat.init( param, loginUser, '', $scope, function( messages ){
+      Chat.init( param, '', $scope, function( messages ){
       });
     });
   }
@@ -727,7 +727,7 @@ angular.module('starter.controllers', [])
     param.deviceId = loginUser.deviceId;
 
     // Channel Init
-    Chat.init( param, loginUser, inviteMsg, $scope, function( messages ){
+    Chat.init( param, inviteMsg, $scope, function( messages ){
       if( messages != undefined ){
 
         // Message in local database

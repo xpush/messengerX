@@ -6,7 +6,7 @@
   </ion-nav-buttons>
   <ion-content class="has-header">
     <ion-list>
-      <ion-item ng-repeat="channel in channelArray" ng-click="goChat('{{channel.channel_id}}')" class="item item-channel">
+      <ion-item ng-repeat="channel in channelArray" ng-click='goChat("{{channel.channel_id}}")' class="item item-channel">
         <img channel-image users="channel.channel_users" channel-name="channel.channel_name" image="channel.channel_image" ></img>
         <div>
           <h2 class="name">{{channel.channel_name}}</h2>

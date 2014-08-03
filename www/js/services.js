@@ -558,15 +558,29 @@ angular.module('starter.services', [])
     }
   }
 })
-.factory('Chat', function($http, $compile, $rootScope, BASE_URL, ChannelDao, MessageDao, UTIL, Cache ) {
+.factory('Chat', function($http, $compile, $rootScope, BASE_URL, ChannelDao, MessageDao, UTIL, Cache, Sign ) {
   var channelSocket;
   var CONF = {};
   var self;
 
   return {
-   init : function( params, loginUser, inviteMessage, $scope, callback ){
+
+    /**
+     * @ngdoc function
+     * @name init
+     * @module starter.services
+     * @kind function
+     *
+     * @description return logined user
+     * @param {Object} userInfo
+     * @param {string} invite message
+     * @param {Object} current scope
+     * @param {function} callback function that called after success
+     */
+    init : function( params, inviteMessage, $scope, callback ){
       self = this;
 
+      var loginUser = Sign.getUser();
       var latestDate;
 
       CONF._app = params.app;
@@ -578,26 +592,25 @@ angular.module('starter.services', [])
       if( inviteMessage == '' ){
         var latestMessage = '';
 
-        /*
-        *Reset Count Start
-        */
+        // Reset channel's  unread count to zero and lastest message.
         var param = { 'channel' :  params.channel, 'reset' : true, 'message': latestMessage };
         ChannelDao.update( param );
 
-        /*
-        *Reset Count End
-        */
         var messages = [];
+
+        // Get message list from local DB
         MessageDao.list( params.channel ).then(function(messageArray) {
 
           for( var inx = 0 ; inx < messageArray.length ; inx++ ){
             var data = messageArray[inx];
             var dateStrs = UTIL.timeToString( data.time );
 
+            // Get previous message's time yyyyMMddhhm
             if( inx > 0 ){
               latestDate =  UTIL.timeToString( messageArray[inx-1].time )[3];
             }
 
+            // 10 minute
             if( latestDate != dateStrs[3] ){
               var dateMessage = dateStrs[1]+" "+dateStrs[2];
               messages.push( { type : 'T', date : dateStrs[1], message : dateMessage } );
@@ -614,6 +627,17 @@ angular.module('starter.services', [])
         self.send( inviteMessage, 'J' );
       }
     },
+
+    /**
+     * @ngdoc function
+     * @name send
+     * @module starter.services
+     * @kind function
+     *
+     * @description Send message
+     * @param {string} message
+     * @param {string} messageType
+     */
     send : function(msg, type){
       var DT = { UO : CONF._user, MG : encodeURIComponent(msg), S : CONF._user.U };
 
@@ -623,13 +647,22 @@ angular.module('starter.services', [])
 
       $rootScope.xpush.send(CONF._channel, 'message', DT );
     },
+
+    /**
+     * @ngdoc function
+     * @name join
+     * @module starter.services
+     * @kind function
+     *
+     * @description Join channel
+     * @param {string} channel id
+     * @param {Object} channel info, US : channel users
+     * @param {function} callback function that called after success
+     */
     join : function(channelId, param, callback){
       $rootScope.xpush.joinChannel( channelId, param, function (data) {
         callback( data );
       });
-    },
-    exit : function(){
-      channelSocket.disconnect();
     }
   }
 })
@@ -638,6 +671,16 @@ angular.module('starter.services', [])
   var metas = [];
 
   return {
+    /**
+     * @ngdoc function
+     * @name list
+     * @module starter.services
+     * @kind function
+     *
+     * @description Retreive emoticon from local DB
+     * @param {Object} Search param
+     * @param {function} callback function that called after success
+     */
     list : function( param, callback){
       EmoticonDao.list(param).then(function(emoticonArray) {
         var before = "";
@@ -661,10 +704,11 @@ angular.module('starter.services', [])
           var group = groups.group;
           var tag = groups.tag;
 
-
           var rr = { group : group, tag : tag, items : {}, metas : 0, tag : 'ion-android-hand', 'CN' : 'tab-item' };
 
           var jnx = 0;
+
+          // Divide result by 4 
           if( groups.items.length > 4 ){
             var newKey;
             while( groups.items.length > 4 ){
@@ -691,7 +735,20 @@ angular.module('starter.services', [])
         callback( superResult );
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name add
+     * @module starter.services
+     * @kind function
+     *
+     * @description Add emoticon into local DB and current Emoticon object
+     * @param {Object} param
+     * @param {Object} Search param
+     */
     add : function (param,jsonObject) {
+
+      // Add emoticon into local DB
       EmoticonDao.add( param );
 
       var k;
@@ -712,6 +769,8 @@ angular.module('starter.services', [])
       if( jsonObject.items[groupKey].length < 4 ){
         k = groupKey;
       } else {
+
+        // Item count larger than 4. make new group key
         k = group + (++groupInx);
         jsonObject.items[k] = [];
         jsonObject.metas = groupInx;
@@ -727,6 +786,16 @@ angular.module('starter.services', [])
 .factory('UTIL', function(Cache, Sign){
   var cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
   return {
+
+    /**
+     * @ngdoc function
+     * @name getUniqueKey
+     * @module starter.services
+     * @kind function
+     *
+     * @description Generate uuid
+     * @return {string} uuid that generated
+     */
     getUniqueKey : function () {
       var s = [], itoh = '0123456789ABCDEF';
       for (var i = 0; i < 36; i++) s[i] = Math.floor(Math.random()*0x10);
@@ -738,6 +807,17 @@ angular.module('starter.services', [])
 
       return s.join('');
     },
+
+    /**
+     * @ngdoc function
+     * @name timeToString
+     * @module starter.services
+     * @kind function
+     *
+     * @description Generate uuid
+     * @return {long} timestamp
+     * @return {Array} [ yyyy.mm.dd | hh:min, yyyy.mm.dd, hh:min, yyyymmddhhm]
+     */
     timeToString : function( timestamp ){
       var cDate = new Date();
 
@@ -769,6 +849,17 @@ angular.module('starter.services', [])
 
       return result;
     },
+
+    /**
+     * @ngdoc function
+     * @name getChosung
+     * @module starter.services
+     * @kind function
+     *
+     * @description Get chosung for Korean character
+     * @param {string} userName
+     * @return {string} chosung
+     */
     getChosung : function(str) {
       result = "";
       for(i=0;i<str.length;i++) {
@@ -777,6 +868,17 @@ angular.module('starter.services', [])
       }
       return result;
     },
+
+    /**
+     * @ngdoc function
+     * @name getChosung
+     * @module starter.services
+     * @kind function
+     *
+     * @description Get morphemes for Korean character
+     * @param {string} userName
+     * @return {string} chosung
+     */
     getMorphemes : function(str){
 
       var choArray = Array(
@@ -799,6 +901,7 @@ angular.module('starter.services', [])
       for( var inx =0 ; inx < str.length ; inx++ ){
         var ch = str.charAt(inx);
 
+        // if Alphabet, set the character
         if (ch.search(/[^a-zA-Z]+/) === -1) {
           result += ch;
           continue;
@@ -819,6 +922,17 @@ angular.module('starter.services', [])
 
       return result;
     },
+
+    /**
+     * @ngdoc function
+     * @name getChosung
+     * @module starter.services
+     * @kind function
+     *
+     * @description Get morphemes for Korean character
+     * @param {string} userName
+     * @return {string} chosung
+     */
     getInviteMessage: function(userArray){
       var loginUser = Sign.getUser();
       var result = '';
@@ -840,6 +954,17 @@ angular.module('starter.services', [])
 
       return result;
     },
+
+    /**
+     * @ngdoc function
+     * @name getNames
+     * @module starter.services
+     * @kind function
+     *
+     * @description Get channelName by channelUser
+     * @param {string} userName
+     * @return {string} chosung
+     */
     getNames : function( userIds ){
       var loginUserId = Sign.getUser().userId;
       var loginUserName = Sign.getUser().userName;
@@ -848,10 +973,13 @@ angular.module('starter.services', [])
 
       var userArray = angular.copy( userIds );
 
+      // Get friends cache
       var friends = Cache.all();
 
-      // Room with 2 people
+      // Room with 2 people 
       if( userArray.length == 2 && userArray.indexOf( loginUserId ) > -1 ){
+
+        // Remove loginUserId from userArray
         userArray.splice( userArray.indexOf( loginUserId ), 1 );
 
         var name = userArray[0];
@@ -876,6 +1004,17 @@ angular.module('starter.services', [])
 
       return userNames.join(",");
     },
+
+    /**
+     * @ngdoc function
+     * @name getType
+     * @module starter.services
+     * @kind function
+     *
+     * @description Get file type from DOM object
+     * @param {Object} file DOM object
+     * @return {string} file type
+     */
     getType : function( inputObj ){
       var images = ['bmp','jpeg','jpg','png'];
       var movies = ['mp4','avi','asf','mov'];
