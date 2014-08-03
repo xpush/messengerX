@@ -466,6 +466,33 @@
     });
   };
 
+  //params.key, value
+  XPush.prototype.queryUser = function(_params,  cb){
+
+    var self = this;
+
+    if(!_params.query) {
+      console.error('Query User', 'query is not existed.');
+    };
+    if(!_params.column) {
+      console.error('Query User', 'column is not existed.');
+    };
+
+    var params = {
+      query : _params.query,
+      column: _params.column
+    };
+
+    if(_params.options) params['options'] = _params.options;
+
+    console.log("xpush : queryUser ",params);
+
+    self.sEmit('user-query' , params, function(err, result){
+        if(cb) cb(err, result.users, result.count);
+    });
+
+  };
+
   XPush.prototype.send = function(channel, name, data){
     var self = this;
 

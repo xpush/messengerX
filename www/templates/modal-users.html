@@ -2,16 +2,16 @@
 
   <ion-header-bar class="bar bar-header bar-positive">
     <button class="button button-icon ion-close" ng-click="modal.hide()"></button>
-    <h1 class="title">Select your friends ({{modal.datas.length}})</h1>
+    <h1 class="title">Select your friends</h1>
     <button class="button button-icon icon-right ion-checkmark" ng-click="addFriends()" ng-disabled='modal.selection.length == 0'>OK&nbsp;</button>
   </ion-header-bar>
 
   <ion-header-bar class="bar bar-subheader item-input-inset">
     <label class="item-input-wrapper input-search">
           <i class="icon ion-ios7-search placeholder-icon"></i>
-          <input id="searchKey" type="search" placeholder="Search" ng-model="searchKey" autocorrect="off">
+          <input id="searchKey" type="search" placeholder="Search" ng-model="modal.search" autocorrect="off">
     </label>
-    <button class="button button-positive button-search" ng-click="retrieveUsers()">
+    <button class="button button-positive button-search" ng-click='searchUsers()'>
           <i class="icon ion-search"></i>
     </button>
   </ion-header-bar>

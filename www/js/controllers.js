@@ -150,6 +150,7 @@ angular.module('starter.controllers', [])
     $scope.modal.num = 1;
     $scope.modal.changed = false;
     $scope.modal.visible = true;
+    $scope.modal.search = '';
     $scope.modal.show();
   };
 
@@ -206,12 +207,24 @@ angular.module('starter.controllers', [])
     }
   };
 
+  $scope.searchUsers = function() {
+
+    $scope.modal.visible = true;
+    $scope.modal.num = 1;
+    
+    $scope.retrieveUsers();
+  };
+
   $scope.retrieveUsers = function() {
 
     console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
+
     if($scope.modal.visible){
 
-      Users.search([], [], $scope.modal.num, function(users){
+      var query = {};
+      if($scope.modal.search) query['DT.NM'] = new RegExp($scope.modal.search, 'i');
+
+      Users.search(query, $scope.modal.num, function(users){
 
         if( users != undefined ){
           if($scope.modal.num > 1) {

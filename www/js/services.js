@@ -71,20 +71,24 @@ angular.module('starter.services', [])
         callback( result );
       });
     },
-    search : function(_k, _v, pageNumber, callback){
-      if(!pageNumber) pageNumber = 1;
-      resultsPerPage = 50;
+    search : function(_q, pageNumber, callback){
 
       var params = {
-        keys : _k,
-        values : _v,
-        page: {
-          num: pageNumber,
-          size: resultsPerPage
+        query : _q,
+        column: { U: 1, DT: 1, _id: 0 },
+        options: {
+          skipCount : true,
+          sortBy : { 'DT.NM': 1},
+          pageNum : 1,
+          pageSize: 50
         }
       };
 
-      $rootScope.xpush.getUserList(params, function( err, userArray){
+      if(pageNumber > 0) {
+        params.options['pageNum'] = pageNumber;
+      }
+
+      $rootScope.xpush.queryUser(params, function( err, userArray, count){
         callback( userArray );
       });
 
