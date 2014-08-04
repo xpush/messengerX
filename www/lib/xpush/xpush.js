@@ -547,7 +547,7 @@
   if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userId = groupId; groupId = undefined;}
     groupId = groupId ? groupId : self.userId;
 
-    self.sEmit('group-remove',{'GR': groupId, userId: userId}, function(err, result){
+    self.sEmit('group-remove',{'GR': groupId, 'U': userId}, function(err, result){
         cb(err,result);
     });
   };

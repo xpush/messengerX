@@ -103,6 +103,23 @@ angular.module('starter.services', [])
 
     /**
      * @ngdoc function
+     * @name remove
+     * @module starter.services
+     * @kind function
+     *
+     * @description Remove a friend from buddy list
+     * @param {string} userId
+     * @param {function} callback function that called after save success
+     */
+    remove: function(userId, callback) {
+      loginUserId = Sign.getUser().userId;
+      $rootScope.xpush.removeUserFromGroup( loginUserId, userId, function( err, data ){
+        callback( data );
+      });
+    },
+
+    /**
+     * @ngdoc function
      * @name getRefreshHistory
      * @module starter.services
      * @kind function
@@ -1055,7 +1072,7 @@ angular.module('starter.services', [])
           args.sessionConnection = $rootScope.xpush._sessionConnection;
 
           newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
-        }, interval);        
+        }, interval);
       } else {
         $rootScope.$stateParams = stateParams;
         $state.go( 'chat' );

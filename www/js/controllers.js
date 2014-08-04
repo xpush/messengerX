@@ -138,6 +138,21 @@ angular.module('starter.controllers', [])
 
   /**
    * @ngdoc function
+   * @name removeFriend
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Remove friend from list
+   */
+  $scope.removeFriend = function(userId){
+    Friends.remove( userId, function( data ){
+      // Sync friends with Server
+      $scope.syncFriends();
+    });
+  };
+
+  /**
+   * @ngdoc function
    * @name openUserModal
    * @module starter.controllers
    * @kind function
@@ -678,7 +693,7 @@ angular.module('starter.controllers', [])
 
       // Initialize chat controller
       init( args.stateParams );
-      Manager.addEvent();        
+      Manager.addEvent();
     });
   });
 
