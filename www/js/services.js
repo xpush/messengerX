@@ -705,8 +705,7 @@ angular.module('starter.services', [])
           var group = groups.group;
           var tag = groups.tag;
 
-          // @TODO duplicate key : tgf
-          var rr = { group : group, tag : tag, items : {}, metas : 0, tag : 'ion-android-hand', 'CN' : 'tab-item' };
+          var rr = { group : group, items : {}, metas : 0, tag : 'ion-android-hand', 'CN' : 'tab-item' };
 
           var jnx = 0;
 
