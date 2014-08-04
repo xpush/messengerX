@@ -92,7 +92,7 @@ angular.module('starter.services', [])
      *
      * @description Save friends into server
      * @param {array} JSONArray that is consist of a number of userId
-     * @param {function} callback function that called after save success
+     * @param {function} callback function that be called after save success
      */
     add: function(userIds, callback) {
       loginUserId = Sign.getUser().userId;
@@ -109,7 +109,7 @@ angular.module('starter.services', [])
      *
      * @description Remove a friend from buddy list
      * @param {string} userId
-     * @param {function} callback function that called after save success
+     * @param {function} callback function that be called after save success
      */
     remove: function(userId, callback) {
       loginUserId = Sign.getUser().userId;
@@ -125,7 +125,7 @@ angular.module('starter.services', [])
      * @kind function
      *
      * @description Retrieve refresh history from local DB
-     * @param {function} callback function that called after retrieve
+     * @param {function} callback function that be called after retrieve
      */
     getRefreshHistory : function(callback){
       UserDao.getRefreshHistory().then( function ( result ){
@@ -140,7 +140,7 @@ angular.module('starter.services', [])
      * @kind function
      *
      * @description Retrieve friend list from local DB and save info Cache
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     list : function(callback){
       UserDao.list().then( function ( result ){
@@ -165,7 +165,7 @@ angular.module('starter.services', [])
      * @kind function
      *
      * @description Retrieve friends from server and save into local DB
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     refresh : function(callback){
       var loginUserId = Sign.getUser().userId;
@@ -191,7 +191,7 @@ angular.module('starter.services', [])
      * @kind function
      *
      * @description Retrieve users from server
-     * @param {function} callback function that called after retrieve
+     * @param {function} callback function that be called after retrieve
      */
     list : function(callback){
       UserDao.list().then( function ( result ){
@@ -208,7 +208,7 @@ angular.module('starter.services', [])
      * @description Retrieve friend list from server
      * @param {string}
      * @param {integer}
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     search : function(_q, pageNumber, callback){
 
@@ -245,7 +245,7 @@ angular.module('starter.services', [])
      * @kind function
      *
      * @description Initialize this application's singleton object
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     init : function(callback){
       var self = this;
@@ -398,7 +398,7 @@ angular.module('starter.services', [])
      * @kind function
      *
      * @description Retrieve channel list from server
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     channelList : function(callback){
       $rootScope.xpush.getChannels( function(err, channelArray){
@@ -440,7 +440,7 @@ angular.module('starter.services', [])
      *
      * @description Retrieve unread message list from server
      * @param {Array} JSONArray of channel info JSONObject
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     unreadMessage : function(channels, callback){
       var loginUser = Sign.getUser();
@@ -524,7 +524,7 @@ angular.module('starter.services', [])
      *
      * @description Call REST API for register user
      * @param {Object} userInfo for register
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     register : function( params, callback ){
       $http.post("http://"+BASE_URL+":8000/user/register", params)
@@ -542,7 +542,7 @@ angular.module('starter.services', [])
      *
      * @description Call REST API for update user
      * @param {Object} userInfo for update
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     update : function( params, callback ){
       $http.post("http://"+BASE_URL+":8000/user/update", params)
@@ -595,7 +595,7 @@ angular.module('starter.services', [])
      * @param {Object} userInfo
      * @param {string} invite message
      * @param {Object} current scope
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     init : function( params, inviteMessage, $scope, callback ){
       self = this;
@@ -677,7 +677,7 @@ angular.module('starter.services', [])
      * @description Join channel
      * @param {string} channel id
      * @param {Object} channel info, US : channel users
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     join : function(channelId, param, callback){
       $rootScope.xpush.joinChannel( channelId, param, function (data) {
@@ -698,7 +698,7 @@ angular.module('starter.services', [])
      *
      * @description Retreive emoticon from local DB
      * @param {Object} Search param
-     * @param {function} callback function that called after success
+     * @param {function} callback function that be called after success
      */
     list : function( param, callback){
       EmoticonDao.list(param).then(function(emoticonArray) {

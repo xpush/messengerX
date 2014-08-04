@@ -2,6 +2,15 @@ angular.module('starter.dao', [])
 
 .factory('UserDao', function(Sign, DB, UTIL) {
   return {
+    /**
+     * @ngdoc function
+     * @name getRefreshHistory
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Get refresh history from local DB
+     * @returns {Object} history object
+     */
     getRefreshHistory : function(){
       var loginUserId = Sign.getUser().userId;
       var query = 'SELECT time from TB_REFRESH_HISTORY where owner_id = ? ';
@@ -11,6 +20,15 @@ angular.module('starter.dao', [])
         return DB.fetch(result);
       });
     },
+    /**
+     * @ngdoc function
+     * @name updateRefreshHistory
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Insert or update refresh history at local DB
+     * @returns {Object} query result
+     */
     updateRefreshHistory : function(){
       var loginUserId = Sign.getUser().userId;
 
@@ -26,6 +44,16 @@ angular.module('starter.dao', [])
         return result;
       });
     },
+    /**
+     * @ngdoc function
+     * @name addAll
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Insert or update a lot of user data at local DB
+     * @param {Array} User Array
+     * @param {function} callback function that be called after save success
+     */
     addAll : function(jsonArray, callback){
       var loginUserId = Sign.getUser().userId;
 
@@ -57,26 +85,16 @@ angular.module('starter.dao', [])
         callback( result );
       });
     },
-    add : function(jsonObj){
-      var loginUserId = Sign.getUser().userId;
 
-      var query = "INSERT OR REPLACE INTO TB_USER (user_id, user_name, message, image, chosung, owner_id ) ";
-      query +=" VALUES ( ?, ?, ?, ?, ?, ? )";
-
-      var currentTimestamp = Date.now();
-      var cond = [
-        jsonObj.user_id,
-        jsonObj.user_name,
-        jsonObj.message,
-        jsonObj.image,
-        jsonObj.chosung,
-        loginUserId
-      ];
-
-      return DB.query(query, cond).then(function(result) {
-        return result;
-      });
-    },
+    /**
+     * @ngdoc function
+     * @name list
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Retrieve user list from local DB
+     * @return {Array} User Array
+     */
     list : function(){
       var loginUserId = Sign.getUser().userId;
       return DB.query(
@@ -92,6 +110,16 @@ angular.module('starter.dao', [])
   var loginUserId;
 
   return {
+
+    /**
+     * @ngdoc function
+     * @name get
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Retrieve single channel data from local DB
+     * @return {Object} Channel data
+     */
     get : function( channelId ){
       loginUserId = Sign.getUser().userId;
       return DB.query(
@@ -100,6 +128,16 @@ angular.module('starter.dao', [])
           return DB.fetch(result);
         });
     },
+
+    /**
+     * @ngdoc function
+     * @name list
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Retrieve channel list from local DB
+     * @return {Array} Channel data list
+     */
     list : function( $scope, socket ){
       scope = $scope;
       loginUserId = Sign.getUser().userId;
@@ -110,32 +148,16 @@ angular.module('starter.dao', [])
         return DB.fetchAll(result);
       });
     },
-    addCount : function(jsonObj){
-      loginUserId = Sign.getUser().userId;
 
-      var query =
-        "INSERT OR REPLACE INTO TB_CHANNEL "+
-        "(channel_id, unread_count, channel_updated, owner_id) "+
-        "SELECT new.channel_id, IFNULL( old.unread_count, new.unread_count) as unread_count, new.channel_updated, new.owner_id "+
-        "FROM ( "+
-        "  SELECT ? as channel_id, 0 as unread_count , ? as channel_updated, ? as owner_id " +
-        ") as new " +
-        " LEFT JOIN ( " +
-        "   SELECT channel_id, unread_count + 1 as unread_count, channel_updated, owner_id " +
-        "   FROM TB_CHANNEL " +
-        " ) AS old ON new.channel_id = old.channel_id AND new.owner_id = old.owner_id ; ";
-
-      var cond = [
-        jsonObj.channel,
-        Date.now(),
-        loginUserId
-      ];
-
-      return DB.query(query, cond).then(function(result) {
-        return result;
-      });
-
-    },
+    /**
+     * @ngdoc function
+     * @name getAllCount
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Retrieve total unread message count from local DB
+     * @return {integer} total nread message count 
+     */
     getAllCount : function(jsonObj){
       loginUserId = Sign.getUser().userId;
 
@@ -145,6 +167,16 @@ angular.module('starter.dao', [])
         return DB.fetch(result);
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name updateUsers
+     * @module starter.dao
+     * @kind function
+     *
+     * @description  Update channel name and channel users at local DB
+     * @return {Object} query result
+     */
     updateUsers : function(param){
       loginUserId = Sign.getUser().userId;
 
@@ -158,6 +190,16 @@ angular.module('starter.dao', [])
         return result;
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name update
+     * @module starter.dao
+     * @kind function
+     *
+     * @description  Update channel info at local DB
+     * @return {Object} query result
+     */
     update : function(param){
       loginUserId = Sign.getUser().userId;
 
@@ -187,6 +229,16 @@ angular.module('starter.dao', [])
         return result;
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name insert
+     * @module starter.dao
+     * @kind function
+     *
+     * @description  insert channel info into local DB
+     * @return {Object} query result
+     */
     insert : function(jsonObj){
       loginUserId = Sign.getUser().userId;
       var query =
@@ -207,6 +259,16 @@ angular.module('starter.dao', [])
       });
 
     },
+
+    /**
+     * @ngdoc function
+     * @name add
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Insert or replace channel info with channel image at local DB
+     * @return {Object} query result
+     */
     add : function(jsonObj){
       loginUserId = Sign.getUser().userId;
 
@@ -267,11 +329,24 @@ angular.module('starter.dao', [])
         return result;
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name generateId
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Generate channel Id
+     * @return {string} channelId
+     */
     generateId : function(jsonObj){
       var channelId;
+
+      // multi user channel = generate uuid
       if( jsonObj.U.length > 2 ){
         channelId = UTIL.getUniqueKey()+"^"+APP_INFO.appKey;;
       } else {
+        // 1:1 channel = userId concat friendId
         channelId = jsonObj.U.sort().join( "$" )+"^"+APP_INFO.appKey;
       }
       return channelId;
