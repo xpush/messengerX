@@ -41,6 +41,8 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
       $rootScope.supportWebRTC = false;
     }
 
+    $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function(){
+    }, false );
     DB.init();
 
     /**

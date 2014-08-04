@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign ) {
+.controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign, NAVI ) {
   $rootScope.currentChannel = '';
 
   ChannelDao.getAllCount().then( function ( result ){
@@ -14,41 +14,18 @@ angular.module('starter.controllers', [])
     $scope.channelArray = channels;
   });
 
-  $scope.goChat = function( channelId ) {
+  $scope.gotoChat = function( channelId ) {
+
     ChannelDao.get( channelId ).then(function(data) {
       $stateParams.channelId = channelId;
       $stateParams.channelUsers = data.channel_users;
       $stateParams.channelName = data.channel_name;
-      $rootScope.$stateParams = $stateParams;
-      $state.go( 'chat' );
 
-      /**
-      $window.$scope = $scope;
-      $rootScope.currentChannel = channelId;
-
-      // center the popup window
-      var left = screen.width/2 - 200
-          , top = screen.height/2 - 250
-          , popup = $window.open('popup-chat.html', '', "top=" + top + ",left=" + left + ",width=400,height=500")
-          , interval = 1000;
-
-      setTimeout( function(){
-        var popObj = popup.document.getElementById( "popupchat" );
-        var newWindowRootScope = popup.angular.element( popObj ).scope();
-
-        var args = {};
-        args.loginUser = Sign.getUser();
-        args.stateParams = $stateParams;
-        args.cache = Cache.all();
-        args.xpush = $rootScope.xpush;
-
-        newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
-      }, interval);
-      */
+      NAVI.gotoChat( $scope, $stateParams );
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $ionicLoading, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, UTIL, Manager) {
+.controller('FriendsCtrl', function($scope, $ionicLoading, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, UTIL, Manager, NAVI) {
   $rootScope.currentChannel = '';
 
   /**
@@ -156,8 +133,7 @@ angular.module('starter.controllers', [])
    */
   $scope.gotoChat = function( friendIds ) {
     $stateParams.friendIds = friendIds;
-    $rootScope.$stateParams = $stateParams;
-    $state.go( 'chat' );
+    NAVI.gotoChat( $scope, $stateParams );
   };
 
   /**
@@ -639,7 +615,7 @@ angular.module('starter.controllers', [])
         Friends.getRefreshHistory(function(history){
 
           // Do not update within an hour( 3600s )
-          if( history != undefined && ( history.time - Date.now() ) < 3600 ){
+          if( history != undefined && ( history.time - Date.now() ) < 60000 ){
             $rootScope.syncFlag = false;
           } else {
             $rootScope.syncFlag = true;
@@ -688,25 +664,23 @@ angular.module('starter.controllers', [])
    * @param {jsonObject} Json object from the parent screen
    */
   $rootScope.$on("INTER_WINDOW_DATA_TRANSFER", function (data, args) {
-
-    // Copy xpush object of parent screen
-    $rootScope.xpush = args.xpush;
-
     // Copy session object and cache object
     Sign.setUser( args.loginUser );
     Cache.set( args.cache );
-
     loginUser = Sign.getUser();
-    channelId = args.stateParams.channelId;
 
-    $rootScope.xpush.isExistUnread = false;
+    $rootScope.xpush.setSessionInfo( loginUser.userId, loginUser.deviceId, function(){
 
-    // Initialize chat controller
-    init( args.stateParams );
-    Manager.init();
+
+      $rootScope.xpush._sessionConnection = args.sessionConnection;
+      channelId = args.stateParams.channelId;
+      $rootScope.xpush.isExistUnread = false;
+
+      // Initialize chat controller
+      init( args.stateParams );
+      Manager.addEvent();        
+    });
   });
-
-  $rootScope.currentScope = $scope;
 
   /**
    * @ngdoc function
@@ -719,6 +693,9 @@ angular.module('starter.controllers', [])
    * @param {String} Invite Message
    */
   var initChat = function( inviteMsg ){
+
+    $rootScope.currentChannel = channelId;
+    $rootScope.currentScope = $scope;
 
     var param = {};
     param.app = loginUser.app;

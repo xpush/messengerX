@@ -243,138 +243,135 @@ angular.module('starter.services', [])
 
             // get unread message count form local DB
             ChannelDao.getAllCount().then( function ( result ){
-              var loginUser = Sign.getUser();
-
               // Set unread message count into rootScope
               $rootScope.totalUnreadCount = result.total_count;
 
-              /**
-              * Add eventHandler when message received
-              * @param
-              * @param
-              * @param
-              */
-
-              $rootScope.xpush.on('message', function (ch,name,data) {
-                data.MG = decodeURIComponent(data.MG);
-
-                // compare sender's userId to logined UserId. send or receive
-                var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
-
-                // Join message not need to compare send or receive
-                if( data.T == 'J' ){
-                  data.type = data.T;
-                } else if( data.T != undefined){
-                  data.type = sr + data.T;
-                } else {
-                  data.type = sr;
-                }
-
-                // compare current channel id to received message's channel id
-                if( ch == $rootScope.currentChannel ){
-                  var latestDate = $rootScope.currentChannelLatestDate;
-
-                  /**
-                  * time stamp to date array
-                  * dateStrs[0] : message's time( yyyy.mm.dd )
-                  * dateStrs[1] : message's time( hh:min )
-                  * dateStrs[2] : message's time( yyyy.mm.dd hh:min )
-                  * dateStrs[3] : message's time( yyyymmddhhm )
-                  */
-
-                  var dateStrs = UTIL.timeToString( data.TS );
-
-                  // if lastest date differ 10 minute and current channel's chatting is activated, show time message
-                  if( latestDate != dateStrs[3] && $rootScope.currentScope ){
-                    var dateMessage = dateStrs[1]+" "+dateStrs[2];
-                    $rootScope.currentScope.add( { type : 'T', date : dateStrs[1], message : dateMessage } );
-                    latestDate = dateStrs[3];
-                    $rootScope.currentChannelLatestDate = latestDate;
-                  }
-
-                  var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, active : "true" };
-
-                  // Add to local DB
-                  MessageDao.add( data );
-
-                  //  Update channel info
-                  var param = { 'channel':data.C, 'reset' : true };
-                  if( data.T == 'I' ){
-                    param.message = "@image@";
-                  } else if( data.T == 'E' ){
-                    param.message = "@emoticon@";
-                  } else if ( data.T == 'VI' || data.T == 'V' ) {
-                    param.message = "@video@";
-                  } else {
-                    param.message = data.MG;
-                  }
-
-                  // 1:1 Channel, update image
-                  if( data.type == 'R' && data.C.indexOf( "$" ) > -1 ){
-                    param.image = data.UO.I;
-                  }
-
-                  // Join message is not need to update channel info
-                  if( data.type != 'J' ){
-                    ChannelDao.update( param );
-                  }
-
-                  // If current channel's chatting is activated, show received message
-                  if( $rootScope.currentScope ){
-                    $rootScope.currentScope.add( nextMessage );
-                  }
-
-                } else {
-
-                  // differ from current channel, get channel data
-                  $rootScope.xpush.getChannelData( data.C, function( err, channelJson ){
-                    var channel = {'channel': data.C, 'users' : channelJson.DT.US};
-
-                    //  Update channel info
-                    if( data.T == 'I' ){
-                      channel.message = "@image@";
-                    } else if( data.T == 'E' ){
-                      channel.message = "@emoticon@";
-                    } else if ( data.T == 'VI' || data.T == 'V' ) {
-                      param.message = "@video@";
-                    } else {
-                      channel.message = data.MG;
-                    }
-
-                    // multi user channel : not need to update channel info
-                    if( channelJson.DT.UC > 2 ){
-                      channel.name = channelJson.DT.NM;
-                      channel.image = '';
-
-                    // 1:1 channel : update channel image and channel name
-                    } else if( channelJson.DT.UC == 2 ){
-                      channel.name = data.UO.NM;
-                      channel.image = data.UO.I;
-                    }
-
-                    // Add to local DB
-                    MessageDao.add( data );
-
-                    // Increase rootScope's unread count
-                    $rootScope.totalUnreadCount++;
-
-                    if( data.T != 'J' && channelJson.DT.UC >= 2 ){
-                      ChannelDao.add( channel );
-                    }
-
-                    // Local notification
-                    $rootScope.localNoti( { id : data.TS, message : data.MG, title : channel.name}, function(){
-                      console.log( '========= local noti callback =========');
-                    });
-                  });
-                }
-              });
-
+              //Add Event
+              self.addEvent();
               initFlag = true;
             });
           });
         });
       }
+    },
+    addEvent : function(){
+
+      var loginUser = Sign.getUser();
+      $rootScope.xpush.on('message', function (ch,name,data) {
+        data.MG = decodeURIComponent(data.MG);
+
+        // compare sender's userId to logined UserId. send or receive
+        var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
+
+        // Join message not need to compare send or receive
+        if( data.T == 'J' ){
+          data.type = data.T;
+        } else if( data.T != undefined){
+          data.type = sr + data.T;
+        } else {
+          data.type = sr;
+        }
+
+        // compare current channel id to received message's channel id
+        console.log(  ch + " : " + $rootScope.currentChannel );
+        if( ch == $rootScope.currentChannel ){
+          var latestDate = $rootScope.currentChannelLatestDate;
+
+          /**
+          * time stamp to date array
+          * dateStrs[0] : message's time( yyyy.mm.dd )
+          * dateStrs[1] : message's time( hh:min )
+          * dateStrs[2] : message's time( yyyy.mm.dd hh:min )
+          * dateStrs[3] : message's time( yyyymmddhhm )
+          */
+
+          var dateStrs = UTIL.timeToString( data.TS );
+
+          // if lastest date differ 10 minute and current channel's chatting is activated, show time message
+          if( latestDate != dateStrs[3] && $rootScope.currentScope ){
+            var dateMessage = dateStrs[1]+" "+dateStrs[2];
+            $rootScope.currentScope.add( { type : 'T', date : dateStrs[1], message : dateMessage } );
+            latestDate = dateStrs[3];
+            $rootScope.currentChannelLatestDate = latestDate;
+          }
+
+          var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, active : "true" };
+
+          // Add to local DB
+          MessageDao.add( data );
+
+          //  Update channel info
+          var param = { 'channel':data.C, 'reset' : true };
+          if( data.T == 'I' ){
+            param.message = "@image@";
+          } else if( data.T == 'E' ){
+            param.message = "@emoticon@";
+          } else if ( data.T == 'VI' || data.T == 'V' ) {
+            param.message = "@video@";
+          } else {
+            param.message = data.MG;
+          }
+
+          // 1:1 Channel, update image
+          if( data.type == 'R' && data.C.indexOf( "$" ) > -1 ){
+            param.image = data.UO.I;
+          }
+
+          // Join message is not need to update channel info
+          if( data.type != 'J' ){
+            ChannelDao.update( param );
+          }
+
+          // If current channel's chatting is activated, show received message
+          if( $rootScope.currentScope ){
+            $rootScope.currentScope.add( nextMessage );
+          }
+
+        } else {
+
+          // differ from current channel, get channel data
+          $rootScope.xpush.getChannelData( data.C, function( err, channelJson ){
+            var channel = {'channel': data.C, 'users' : channelJson.DT.US};
+
+            //  Update channel info
+            if( data.T == 'I' ){
+              channel.message = "@image@";
+            } else if( data.T == 'E' ){
+              channel.message = "@emoticon@";
+            } else if ( data.T == 'VI' || data.T == 'V' ) {
+              param.message = "@video@";
+            } else {
+              channel.message = data.MG;
+            }
+
+            // multi user channel : not need to update channel info
+            if( channelJson.DT.UC > 2 ){
+              channel.name = channelJson.DT.NM;
+              channel.image = '';
+
+            // 1:1 channel : update channel image and channel name
+            } else if( channelJson.DT.UC == 2 ){
+              channel.name = data.UO.NM;
+              channel.image = data.UO.I;
+            }
+
+            // Add to local DB
+            MessageDao.add( data );
+
+            // Increase rootScope's unread count
+            $rootScope.totalUnreadCount++;
+
+            if( data.T != 'J' && channelJson.DT.UC >= 2 ){
+              ChannelDao.add( channel );
+            }
+
+            // Local notification
+            $rootScope.localNoti( { id : data.TS, message : data.MG, title : channel.name}, function(){
+              console.log( '========= local noti callback =========');
+            });
+          });
+        }
+      });
     },
 
     /**
@@ -449,7 +446,16 @@ angular.module('starter.services', [])
           }
 
           var channel = channels[data.C];
-          channel.message = data.MG;
+
+          if( data.T == 'I' ){
+            channel.message = "@image@";
+          } else if( data.T == 'E' ){
+            channel.message = "@emoticon@";
+          } else if ( data.T == 'VI' || data.T == 'V' ) {
+            channel.message = "@video@";
+          } else {
+            channel.message = data.MG;
+          }
 
           if( channel.users.length > 2 ){
             channel.name = channel.name;
@@ -1024,6 +1030,37 @@ angular.module('starter.services', [])
       }
 
       return result;
+    }
+  };
+})
+.factory('NAVI', function($window, $rootScope, $state, Cache, Sign){
+  return {
+    gotoChat : function( scope, stateParams ){
+      if( $rootScope.usePopupFlag ){
+        $window.$scope = scope;
+
+        // center the popup window
+        var left = screen.width/2 - 200
+            , top = screen.height/2 - 250
+            , popup = $window.open( $rootScope.rootPath + 'popup-chat.html', '', "top=" + top + ",left=" + left + ",width=400,height=600")
+            , interval = 1000;
+
+        setTimeout( function(){
+          var popObj = popup.document.getElementById( "popupchat" );
+          var newWindowRootScope = popup.angular.element( popObj ).scope();
+
+          var args = {};
+          args.loginUser = Sign.getUser();
+          args.stateParams = stateParams;
+          args.cache = Cache.all();
+          args.sessionConnection = $rootScope.xpush._sessionConnection;
+
+          newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
+        }, interval);        
+      } else {
+        $rootScope.$stateParams = stateParams;
+        $state.go( 'chat' );
+      }
     }
   };
 });

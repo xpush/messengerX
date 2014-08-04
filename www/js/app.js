@@ -17,6 +17,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.rootPath = "";
 
       $rootScope.cameraFlag = true;
+      $rootScope.usePopupFlag = false;
 
       if( device.model.indexOf('x86') === 0){ // emulator or desktop pc
         console.log('emulator or desktop pc');
@@ -46,10 +47,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.rootImgPath = "img";
       $rootScope.rootPath = "../www/";
       $rootScope.deviceId = 'ionic';
+      $rootScope.usePopupFlag = true;
     } else {
       $rootScope.rootImgPath = "../img";
       $rootScope.rootPath = "/";
       $rootScope.deviceId = 'ionic';
+      $rootScope.usePopupFlag = true;
     }
 
     $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";
