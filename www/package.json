@@ -3,8 +3,8 @@
   "main": "index.html",
   "description": "messengerX",
   "window": {
-    "frame" : false,
-    "toolbar" : false,
+    "frame" : true,
+    "toolbar" : true,
    	"width": 600,
   	"height": 800,
   	"title" : "messengerX",

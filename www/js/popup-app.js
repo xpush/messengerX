@@ -39,7 +39,7 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
       });
 
       $rootScope.close = function(){
-        winmain.close(true);
+        winmain.close();
       };
     }
 

@@ -85,7 +85,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
       $rootScope.close = function(){
         winmain.minimize();
-        //winmain.setShowInTaskbar(false);
         winmain.hide();
       };
 
@@ -280,66 +279,79 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
 }])
 .factory('NAVI', function($rootScope, $state, Cache, Sign){
   var popupCount = 0;
+  var popupKeys = {};
+  var gui;
+
+  if( $rootScope.nodeWebkit ){
+    gui = require('nw.gui');
+  }
+
   return {    
-    gotoChat : function( scope, stateParams ){
+    gotoChat : function( scope, popupKey, stateParams ){
+
       if( $rootScope.usePopupFlag ){
-        var wkpopup;
-        var popup;
+        console.log( popupKeys[popupKey] );
+        if( popupKeys[popupKey] != undefined ){
+          popupKeys[popupKey].focus();
+        } else {
 
-        var left = screen.width - 520 + ( popupCount * 25 );
-        var top = 0 + ( popupCount * 25 ) ;
-        popupCount++;
+          var wkpopup;
+          var popup;
 
-        if( $rootScope.nodeWebkit ){
-          var gui = require('nw.gui');
-          wkpopup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
-            "frame" : false,
-            "toolbar" : false,
-            width: 400,
-            height: 600,
-            x:left,
-            y:top,
-            title:'Chat'
-          });
-        } else {        
-          popup = window.open( $rootScope.rootPath + 'popup-chat.html', '', 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
-        }
+          var left = screen.width - 520 + ( popupCount * 25 );
+          var top = 0 + ( popupCount * 25 ) ;
+          popupCount++;
 
-        var interval = 1000;
-
-        setTimeout( function(){
           if( $rootScope.nodeWebkit ){
-            popup = wkpopup.window;
-
-            wkpopup.on('close', function() {
-              
-              // Hide the window to give user the feeling of closing immediately
-              this.hide();
-              popupCount--;
-
-              // If the new window is still open then close it.
-              if (wkpopup != null){
-                wkpopup.close(true);
-              }
-
-              // After closing the new window, close the main window.
-              this.close(true);
+            wkpopup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
+              "frame" : false,
+              "toolbar" : false,
+              width: 400,
+              height: 600,
+              x:left,
+              y:top,
+              title:'Chat'
             });
+          } else {        
+            popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
 
-          var popObj = popup.document.getElementById( "popupchat" );
-          var newWindowRootScope = popup.angular.element( popObj ).scope();
+          var interval = 1000;
 
-          var args = {};
-          args.loginUser = Sign.getUser();
-          args.stateParams = stateParams;
-          args.cache = Cache.all();
-          args.sessionConnection = $rootScope.xpush._sessionConnection;
+          setTimeout( function(){
+            if( $rootScope.nodeWebkit ){
+              popup = wkpopup.window;
+              popupKeys[popupKey] = popup;
 
-          newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
+              wkpopup.on('close', function() {
+                
+                // Hide the window to give user the feeling of closing immediately
+                this.hide();
+                popupCount--;
+                // If the new window is still open then close it.
+                if (wkpopup != null){
+                  wkpopup.close(true);
+                  console.log( "popup close" );
+                  delete popupKeys[popupKey];
+                }
 
-        }, interval);
+                // After closing the new window, close the main window.
+                this.close(true);
+              });
+            }
 
+            var popObj = popup.document.getElementById( "popupchat" );
+            var newWindowRootScope = popup.angular.element( popObj ).scope();
+
+            var args = {};
+            args.loginUser = Sign.getUser();
+            args.stateParams = stateParams;
+            args.cache = Cache.all();
+            args.sessionConnection = $rootScope.xpush._sessionConnection;
+
+            newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
+          }, interval);
+        }
       } else {
         $rootScope.$stateParams = stateParams;
         $state.go( 'chat' );

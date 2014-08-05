@@ -21,11 +21,11 @@ angular.module('starter.controllers', [])
       $stateParams.channelUsers = data.channel_users;
       $stateParams.channelName = data.channel_name;
 
-      NAVI.gotoChat( $scope, $stateParams );
+      NAVI.gotoChat( $scope, channelId, $stateParams );
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $ionicLoading, $rootScope, $state, $stateParams, $ionicPopup, $ionicModal, $ionicScrollDelegate, Friends, UTIL, Manager, NAVI) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, Friends, Manager, NAVI, ChannelDao, Sign) {
   $rootScope.currentChannel = '';
 
   /**
@@ -129,11 +129,14 @@ angular.module('starter.controllers', [])
    * @kind function
    *
    * @description Navigate to Chat screen.
-   * @param {string} filtered friends by searchKey;
+   * @param {string} Selected friend
    */
   $scope.gotoChat = function( friendIds ) {
     $stateParams.friendIds = friendIds;
-    NAVI.gotoChat( $scope, $stateParams );
+    var jsonObject = {};
+    jsonObject.U = [friendIds,Sign.getUser().userId];
+    var channelId = ChannelDao.generateId( jsonObject );
+    NAVI.gotoChat( $scope, channelId, $stateParams );
   };
 
   /**
