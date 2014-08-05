@@ -290,7 +290,6 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     gotoChat : function( scope, popupKey, stateParams ){
 
       if( $rootScope.usePopupFlag ){
-        console.log( popupKeys[popupKey] );
         if( popupKeys[popupKey] != undefined ){
           popupKeys[popupKey].focus();
         } else {
@@ -331,13 +330,19 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
                 // If the new window is still open then close it.
                 if (wkpopup != null){
                   wkpopup.close(true);
-                  console.log( "popup close" );
                   delete popupKeys[popupKey];
                 }
 
                 // After closing the new window, close the main window.
                 this.close(true);
               });
+            } else {
+              popup = popup.window;
+              popupKeys[popupKey] = popup;
+              popup.onbeforeunload = function(){
+                popupCount--;
+                delete popupKeys[popupKey];
+              };
             }
 
             var popObj = popup.document.getElementById( "popupchat" );
