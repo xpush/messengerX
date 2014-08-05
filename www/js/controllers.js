@@ -566,16 +566,6 @@ angular.module('starter.controllers', [])
 
   if( window.root ){
     $scope.hideNavbar = "false";
-
-    var gui = require('nw.gui');
-    var winmain = gui.Window.get();
-    winmain.on('close', function(){
-       winmain.minimize();
-    });
-
-    $scope.close = function(){
-      winmain.minimize();
-    };
   } else {
     $scope.hideNavbar = "true";
   }

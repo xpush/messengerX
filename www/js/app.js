@@ -73,14 +73,23 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
       tray.menu = menu;
 
+      tray.click = function(){
+        winmain.show();
+      }
+
       var winmain = gui.Window.get();
       winmain.on('close', function(){
          winmain.minimize();
+         winmain.setShowInTaskbar(false);
       });
 
       $rootScope.close = function(){
         winmain.minimize();
-      };      
+        //winmain.setShowInTaskbar(false);
+        winmain.hide();
+      };
+
+      winmain.show();  
     }
 
     $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";
@@ -284,8 +293,8 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
         if( $rootScope.nodeWebkit ){
           var gui = require('nw.gui');
           wkpopup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
-            "frame" : true,
-            "toolbar" : true,
+            "frame" : false,
+            "toolbar" : false,
             width: 400,
             height: 600,
             x:left,
