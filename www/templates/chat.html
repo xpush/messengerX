@@ -2,9 +2,9 @@
   <ion-nav-buttons side="right">
     <div class="no-drag" >
       <button class="button icon ion-navicon" ng-click="openFriendModal();" ></button>
-      <div class="close-button">
-        <img id=" no-drag" src="{{rootImgPath}}/button_close.png" ng-click="close()" ng-if=" nodeWebkit ">
-      </div>
+      <button class="button button-dark  no-drag" ng-if=" nodeWebkit " ng-click="close()">
+        <img src="{{rootImgPath}}/button_close.png">
+      </button>
     </div>
   </ion-nav-buttons>
   <ion-content padding="true" class="has-header" start-y="120">

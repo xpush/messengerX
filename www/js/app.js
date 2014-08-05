@@ -284,8 +284,8 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
         if( $rootScope.nodeWebkit ){
           var gui = require('nw.gui');
           wkpopup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
-            "frame" : false,
-            "toolbar" : false,
+            "frame" : true,
+            "toolbar" : true,
             width: 400,
             height: 600,
             x:left,
