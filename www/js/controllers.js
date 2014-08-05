@@ -138,21 +138,6 @@ angular.module('starter.controllers', [])
 
   /**
    * @ngdoc function
-   * @name removeFriend
-   * @module starter.controllers
-   * @kind function
-   *
-   * @description Remove friend from list
-   */
-  $scope.removeFriend = function(userId){
-    Friends.remove( userId, function( data ){
-      // Sync friends with Server
-      $scope.syncFriends();
-    });
-  };
-
-  /**
-   * @ngdoc function
    * @name openUserModal
    * @module starter.controllers
    * @kind function
@@ -321,7 +306,6 @@ angular.module('starter.controllers', [])
    * @kind function
    *
    * @description Push selected userId into selection array
-   * @param {string} selected userId in friend modal
    */
   $scope.toggleSelection = function( friendId ){
     var inx = $scope.modal.selection.indexOf( friendId );
@@ -522,10 +506,10 @@ angular.module('starter.controllers', [])
 
     // channel for loginUser
     var channelUsers = [loginUser.userId];
-    channelId = ChannelDao.generateId(createObject);
 
     var createObject = {};
-    createObject.U = channelUsers;
+    createObject.U = channelUsers;    
+    channelId = ChannelDao.generateId(createObject);    
     createObject.DT = { 'US' : channelUsers, 'UC': channelUsers.length };
     createObject.C = channelId;
 
@@ -579,6 +563,12 @@ angular.module('starter.controllers', [])
   });
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $ionicPopup, Friends, Sign, Cache) {
+
+  if( window.root ){
+    $scope.hideNavbar = "false";
+  } else {
+    $scope.hideNavbar = "true";
+  }
 
   /**
    * @ngdoc function
@@ -693,7 +683,7 @@ angular.module('starter.controllers', [])
 
       // Initialize chat controller
       init( args.stateParams );
-      Manager.addEvent();
+      Manager.addEvent();        
     });
   });
 

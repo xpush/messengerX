@@ -1048,35 +1048,4 @@ angular.module('starter.services', [])
       return result;
     }
   };
-})
-.factory('NAVI', function($window, $rootScope, $state, Cache, Sign){
-  return {
-    gotoChat : function( scope, stateParams ){
-      if( $rootScope.usePopupFlag ){
-        $window.$scope = scope;
-
-        // center the popup window
-        var left = screen.width/2 - 200
-            , top = screen.height/2 - 250
-            , popup = $window.open( $rootScope.rootPath + 'popup-chat.html', '', "top=" + top + ",left=" + left + ",width=400,height=600")
-            , interval = 1000;
-
-        setTimeout( function(){
-          var popObj = popup.document.getElementById( "popupchat" );
-          var newWindowRootScope = popup.angular.element( popObj ).scope();
-
-          var args = {};
-          args.loginUser = Sign.getUser();
-          args.stateParams = stateParams;
-          args.cache = Cache.all();
-          args.sessionConnection = $rootScope.xpush._sessionConnection;
-
-          newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
-        }, interval);
-      } else {
-        $rootScope.$stateParams = stateParams;
-        $state.go( 'chat' );
-      }
-    }
-  };
 });

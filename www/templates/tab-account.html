@@ -1,4 +1,12 @@
 <ion-view title="Account">
+  <ion-nav-buttons side="right">
+    <button class="button" ng-click="logout()" ng-if=" !nodeWebkit ">
+      LogOut
+    </button>
+    <div class="top-titlebar-close-button" ng-if=" nodeWebkit ">
+      <img id="top-titlebar-close-button" src="{{rootImgPath}}/button_close.png" ng-click="close()">
+    </div>    
+  </ion-nav-buttons>
   <ion-content class="has-header padding">
 		<div class="list card">
 		  <div class="item item-divider">

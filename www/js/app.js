@@ -55,6 +55,34 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.usePopupFlag = true;
     }
 
+    // node wekit ==  true
+    if( window.root ){
+      var gui = require('nw.gui');
+      $rootScope.nodeWebkit = true;
+      $rootScope.rootPath = "file://"+window.root+"/";
+
+      var tray = new gui.Tray({ title: 'Tray', icon: 'icon.png' });
+      var menu = new gui.Menu();
+      menu.append(new gui.MenuItem({ label: 'close' }));
+
+      menu.items[0].click = function() { 
+        console.log('clicked');
+        tray.remove();
+        gui.App.quit();
+      };
+
+      tray.menu = menu;
+
+      var winmain = gui.Window.get();
+      winmain.on('close', function(){
+         winmain.minimize();
+      });
+
+      $rootScope.close = function(){
+        winmain.minimize();
+      };      
+    }
+
     $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";
     $rootScope.app  = 'messengerx';
 
@@ -240,4 +268,75 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       $rootScope.$emit('ionicFrosted.update');
     }
   }
-}]);
+}])
+.factory('NAVI', function($rootScope, $state, Cache, Sign){
+  var popupCount = 0;
+  return {    
+    gotoChat : function( scope, stateParams ){
+      if( $rootScope.usePopupFlag ){
+        var wkpopup;
+        var popup;
+
+        var left = screen.width - 520 + ( popupCount * 25 );
+        var top = 0 + ( popupCount * 25 ) ;
+        popupCount++;
+
+        console.log( left );
+        console.log( top );
+
+        if( $rootScope.nodeWebkit ){
+          var gui = require('nw.gui');
+          wkpopup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
+            width: 400,
+            height: 600,
+            x:left,
+            y:top,
+            title:'Chat'
+          });
+        } else {        
+          popup = window.open( $rootScope.rootPath + 'popup-chat.html', '', 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
+        }
+
+        var interval = 1000;
+
+        setTimeout( function(){
+          if( $rootScope.nodeWebkit ){
+            popup = wkpopup.window;
+
+            wkpopup.on('close', function() {
+              $rootScope.close();
+              
+              // Hide the window to give user the feeling of closing immediately
+              this.hide();
+              popupCount--;
+
+              // If the new window is still open then close it.
+              if (wkpopup != null){
+                wkpopup.close(true);
+              }
+
+              // After closing the new window, close the main window.
+              this.close(true);
+            });
+          }
+
+          var popObj = popup.document.getElementById( "popupchat" );
+          var newWindowRootScope = popup.angular.element( popObj ).scope();
+
+          var args = {};
+          args.loginUser = Sign.getUser();
+          args.stateParams = stateParams;
+          args.cache = Cache.all();
+          args.sessionConnection = $rootScope.xpush._sessionConnection;
+
+          newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
+
+        }, interval);
+
+      } else {
+        $rootScope.$stateParams = stateParams;
+        $state.go( 'chat' );
+      }
+    }
+  };
+});

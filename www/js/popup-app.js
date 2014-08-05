@@ -45,15 +45,6 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
     }, false );
     DB.init();
 
-    /**
-    $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
-
-      if(type == 'LOGOUT'){
-        window.location = $rootScope.rootPath + 'err.html?LOGOUT';
-      }
-    }, false );
-    */
-
     // tootScope function
     $rootScope.logout = function(){
       Sign.logout();
