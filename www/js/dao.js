@@ -520,10 +520,8 @@ angular.module('starter.dao', [])
       }
 
       transaction.executeSql(querys[until] , bindings[until], function(transaction, result) {
-        console.log( result );
         deferred.resolve(result);
       }, function(transaction, error) {
-        console.log( error );
         deferred.reject(error);
       });
     });

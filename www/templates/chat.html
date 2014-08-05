@@ -1,6 +1,11 @@
 <ion-view title="{{channelName}}">
   <ion-nav-buttons side="right">
-    <button class="button icon ion-navicon" ng-click="openFriendModal();"></button>
+    <div class="no-drag" >
+      <button class="button icon ion-navicon" ng-click="openFriendModal();" ></button>
+      <div class="close-button">
+        <img id=" no-drag" src="{{rootImgPath}}/button_close.png" ng-click="close()" ng-if=" nodeWebkit ">
+      </div>
+    </div>
   </ion-nav-buttons>
   <ion-content padding="true" class="has-header" start-y="120">
     <ol class="messages">

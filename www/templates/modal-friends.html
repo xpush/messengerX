@@ -1,7 +1,7 @@
 <div class="modal" ng-controller="FriendsModalCtrl">
 
   <ion-header-bar class="bar bar-header bar-positive">
-    <button class="button button-icon ion-close" ng-click="modal.hide()"></button>
+    <button class="button button-icon ion-close no-drag" ng-click="modal.hide()"></button>
     <h1 class="title">Select your friends({{modal.datas.length}})</h1>
     <button class="button button-icon icon-right ion-checkmark" ng-click="inviteFriends()" ng-disabled='modal.selection.length == 0'>OK&nbsp;</button>
   </ion-header-bar>

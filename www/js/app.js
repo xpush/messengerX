@@ -281,12 +281,11 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
         var top = 0 + ( popupCount * 25 ) ;
         popupCount++;
 
-        console.log( left );
-        console.log( top );
-
         if( $rootScope.nodeWebkit ){
           var gui = require('nw.gui');
           wkpopup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
+            "frame" : false,
+            "toolbar" : false,
             width: 400,
             height: 600,
             x:left,
@@ -304,7 +303,6 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
             popup = wkpopup.window;
 
             wkpopup.on('close', function() {
-              $rootScope.close();
               
               // Hide the window to give user the feeling of closing immediately
               this.hide();

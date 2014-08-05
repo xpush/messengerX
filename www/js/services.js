@@ -356,7 +356,7 @@ angular.module('starter.services', [])
             } else if( data.T == 'E' ){
               channel.message = "@emoticon@";
             } else if ( data.T == 'VI' || data.T == 'V' ) {
-              param.message = "@video@";
+              channel.message = "@video@";
             } else {
               channel.message = data.MG;
             }
@@ -772,16 +772,30 @@ angular.module('starter.services', [])
       var k;
       var groupKey = param.group;
 
-      if( jsonObject === undefined || jsonObject.length == 0 ){
-        jsonObject = {group:groupKey};
+      console.log( jsonObject );
+
+      if( jsonObject === undefined ){
+        jsonObject.group = groupKey;
         jsonObject.metas = 0;
-        jsonObject.items = [];
+        jsonObject.items = {};
+      }
+
+      if( jsonObject.metas  === undefined ){
+        jsonObject.metas = 0;
+      }
+
+      if( jsonObject.items === undefined ){
+        jsonObject.items = {};
       }
 
       var groupInx = jsonObject.metas;
 
       if( groupInx != 0 ){
         groupKey = groupKey + groupInx;
+      }
+
+      if( jsonObject.items[groupKey] === undefined ){
+        jsonObject.items[groupKey] = [];
       }
 
       if( jsonObject.items[groupKey].length < 4 ){
@@ -795,6 +809,8 @@ angular.module('starter.services', [])
       }
 
       jsonObject.items[k].push( param.image );
+
+      console.log( jsonObject );
     },
     all : function () {
       return emoticons;

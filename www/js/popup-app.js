@@ -28,6 +28,21 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
       $rootScope.deviceId = 'ionic';
     }
 
+    if( window.root ){
+      var gui = require('nw.gui');
+
+      $rootScope.nodeWebkit = true;
+
+      var winmain = gui.Window.get();
+      winmain.on('close', function(){
+         winmain.close(true);
+      });
+
+      $rootScope.close = function(){
+        winmain.close(true);
+      };
+    }
+
     $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";
     $rootScope.app  = 'messengerx';
 
