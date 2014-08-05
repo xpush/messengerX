@@ -3,14 +3,13 @@
   "main": "index.html",
   "description": "messengerX",
   "window": {
-    "frame" : true,
-    "toolbar" : true,
+    "frame" : false,
+    "toolbar" : false,
    	"width": 600,
   	"height": 800,
   	"title" : "messengerX",
   	"icon": "icon.png",
    	"min_width": 500,
-  	"min_height": 580,
-  	"user-agent": "%nwver %webkit_ver %osinfo"
+  	"min_height": 580
   }
 }
