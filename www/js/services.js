@@ -289,9 +289,9 @@ angular.module('starter.services', [])
           data.type = sr;
         }
 
-        // compare current channel id to received message's channel id
-        console.log(  ch + " : " + $rootScope.currentChannel );
-        if( ch == $rootScope.currentChannel ){
+        // compare current channel id to received message's channel id 
+        var currentChannel = $rootScope.xpush.getChannel( ch ) ;    
+        if( currentChannel != undefined &&  currentChannel._connected ){
           var latestDate = $rootScope.currentChannelLatestDate;
 
           /**
@@ -301,7 +301,6 @@ angular.module('starter.services', [])
           * dateStrs[2] : message's time( yyyy.mm.dd hh:min )
           * dateStrs[3] : message's time( yyyymmddhhm )
           */
-
           var dateStrs = UTIL.timeToString( data.TS );
 
           // if lastest date differ 10 minute and current channel's chatting is activated, show time message
@@ -513,8 +512,6 @@ angular.module('starter.services', [])
       $rootScope.currentChannel = '';
       $rootScope.totalUnreadCount = 0;
       $rootScope.firstFlag = true;
-
-      $state.transitionTo('signin', {}, { reload: true, notify: true });
     },
     /**
      * @ngdoc function

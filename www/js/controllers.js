@@ -1,7 +1,6 @@
 angular.module('starter.controllers', [])
 
 .controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign, NAVI ) {
-  $rootScope.currentChannel = '';
 
   ChannelDao.getAllCount().then( function ( result ){
     $rootScope.totalUnreadCount = result.total_count;
@@ -26,7 +25,6 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, Friends, Manager, NAVI, ChannelDao, Sign) {
-  $rootScope.currentChannel = '';
 
   /**
    * @ngdoc function
@@ -442,7 +440,6 @@ angular.module('starter.controllers', [])
 })
 
 .controller('AccountCtrl', function($scope, $rootScope, Sign) {
-  $rootScope.currentChannel = '';
   $scope.loginUser = Sign.getUser();
 
   $scope.newImage = '';
@@ -474,7 +471,6 @@ angular.module('starter.controllers', [])
   };
 })
 .controller('EmoticonCtrl', function($scope, $rootScope, Sign, ChannelDao, Chat, Emoticons) {
-  $rootScope.currentChannel = '';
   var loginUser = Sign.getUser();
   var channelId = '';
 
@@ -702,7 +698,6 @@ angular.module('starter.controllers', [])
    */
   var initChat = function( inviteMsg ){
 
-    $rootScope.currentChannel = channelId;
     $rootScope.currentScope = $scope;
 
     var param = {};
@@ -910,8 +905,6 @@ angular.module('starter.controllers', [])
     if( current.indexOf('/chat') > -1 ){
       if(!confirm("Are you sure you want to leave this page?")) {
         event.preventDefault();
-      } else {
-        $rootScope.currentChannel = '';
       }
     }
   });

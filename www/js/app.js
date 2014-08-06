@@ -1,6 +1,6 @@
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass'])
 
-.run(function($location, $ionicPlatform, $rootScope, DB, Sign ) {
+.run(function($location, $ionicPlatform, $rootScope, DB, Sign, NAVI, $state ) {
   $ionicPlatform.ready(function() {
 
     if(window.cordova && window.cordova.plugins.Keyboard) {
@@ -176,14 +176,24 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
 
       if(type == 'LOGOUT'){
-        window.location = $rootScope.rootPath + 'err.html?LOGOUT';
+        $rootScope.logout(true);
+        window.location = $rootScope.rootPath + 'err.html?LOGOUT';        
       }
     }, false );
 
     // tootScope function
-    $rootScope.logout = function(){
+    $rootScope.logout = function( skipLoginPageFlag ){
       Sign.logout();
       $rootScope.xpush.logout();
+
+      var popups = NAVI.getPopups();
+      for( var key in popups ){
+        popups[key].close();
+      }
+
+      if( skipLoginPageFlag ){
+        $state.transitionTo('signin', {}, { reload: true, notify: true });
+      }
     };
 
     $rootScope.totalUnreadCount = 0;
@@ -279,19 +289,22 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
 }])
 .factory('NAVI', function($rootScope, $state, Cache, Sign){
   var popupCount = 0;
-  var popupKeys = {};
+  var popups = {};
   var gui;
 
   if( $rootScope.nodeWebkit ){
     gui = require('nw.gui');
   }
 
-  return {    
+  return {
+    getPopups : function(){
+      return popups;
+    },
     gotoChat : function( scope, popupKey, stateParams ){
 
       if( $rootScope.usePopupFlag ){
-        if( popupKeys[popupKey] != undefined ){
-          popupKeys[popupKey].focus();
+        if( popups[popupKey] != undefined ){
+          popups[popupKey].focus();
         } else {
 
           var wkpopup;
@@ -320,7 +333,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           setTimeout( function(){
             if( $rootScope.nodeWebkit ){
               popup = wkpopup.window;
-              popupKeys[popupKey] = popup;
+              popups[popupKey] = popup;
 
               wkpopup.on('close', function() {
                 
@@ -330,7 +343,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
                 // If the new window is still open then close it.
                 if (wkpopup != null){
                   wkpopup.close(true);
-                  delete popupKeys[popupKey];
+                  delete popups[popupKey];
                 }
 
                 // After closing the new window, close the main window.
@@ -338,10 +351,10 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
               });
             } else {
               popup = popup.window;
-              popupKeys[popupKey] = popup;
+              popups[popupKey] = popup;
               popup.onbeforeunload = function(){
                 popupCount--;
-                delete popupKeys[popupKey];
+                delete popups[popupKey];
               };
             }
 
