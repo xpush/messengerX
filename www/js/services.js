@@ -294,6 +294,12 @@ angular.module('starter.services', [])
         if( currentChannel != undefined &&  currentChannel._connected ){
           var latestDate = $rootScope.currentChannelLatestDate;
 
+          var ele = angular.element( window.document.getElementById( 'navBar' ) );
+          ele.addClass( "blink_me" );
+          setTimeout( function(){
+            ele.removeClass( "blink_me" );
+          }, 10000 );
+
           /**
           * time stamp to date array
           * dateStrs[0] : message's time( yyyy.mm.dd )

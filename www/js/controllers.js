@@ -618,7 +618,7 @@ angular.module('starter.controllers', [])
         // Retrieve refresh history for sync friends
         Friends.getRefreshHistory(function(history){
 
-          // Do not update within an hour( 3600s )
+          // Do not update within an hour( 60s )
           if( history != undefined && ( history.time - Date.now() ) < 60000 ){
             $rootScope.syncFlag = false;
           } else {

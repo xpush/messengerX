@@ -292,14 +292,10 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
   var popups = {};
 
   return {
-    getPopups : function(){
-      return popups;
-    },
     gotoChat : function( scope, popupKey, stateParams ){
 
       if( $rootScope.usePopupFlag ){
         if( popups[popupKey] != undefined ){
-          console.log( popups[popupKey].window );
           popups[popupKey].window.focus();
         } else {
 
