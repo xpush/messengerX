@@ -191,7 +191,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         popups[key].close();
       }
 
-      if( skipLoginPageFlag ){
+      if( !skipLoginPageFlag ){
         $state.transitionTo('signin', {}, { reload: true, notify: true });
       }
     };
@@ -290,11 +290,6 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
 .factory('NAVI', function($rootScope, $state, Cache, Sign){
   var popupCount = 0;
   var popups = {};
-  var gui;
-
-  if( $rootScope.nodeWebkit ){
-    gui = require('nw.gui');
-  }
 
   return {
     getPopups : function(){
@@ -304,7 +299,8 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
 
       if( $rootScope.usePopupFlag ){
         if( popups[popupKey] != undefined ){
-          popups[popupKey].focus();
+          console.log( popups[popupKey].window );
+          popups[popupKey].window.focus();
         } else {
 
           var wkpopup;
@@ -315,6 +311,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           popupCount++;
 
           if( $rootScope.nodeWebkit ){
+            var gui = require('nw.gui');
             wkpopup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
               "frame" : false,
               "toolbar" : false,
@@ -331,9 +328,9 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           var interval = 1000;
 
           setTimeout( function(){
-            if( $rootScope.nodeWebkit ){
+            if( $rootScope.nodeWebkit ){              
+              popups[popupKey] = wkpopup;
               popup = wkpopup.window;
-              popups[popupKey] = popup;
 
               wkpopup.on('close', function() {
                 
@@ -350,7 +347,6 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
                 this.close(true);
               });
             } else {
-              popup = popup.window;
               popups[popupKey] = popup;
               popup.onbeforeunload = function(){
                 popupCount--;

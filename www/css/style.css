@@ -399,3 +399,65 @@ img.emoticon{
 	cursor : pointer;
 	-webkit-app-region: no-drag;
 }
+
+/**
+.bar {
+	display: flex;
+	-webkit-transform: translate3d(0, 0, 0);
+	-moz-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	position: fixed;
+	right: 0;
+	left: 0;
+	z-index: 10;
+	box-sizing: border-box;
+	padding: 5px;
+	width: 100%;
+	height: 44px;
+	border-width: 0;
+	border-style: solid;
+	border-top: 1px solid transparent;
+	border-bottom: 1px solid #ddd;
+}
+
+.bar-header {
+	top: 0;
+	border-top-width: 0;
+	border-bottom-width: 1px;
+}
+
+.bar.bar-dark {
+	border-color: #111;
+	background-color: #444444;
+	color: #fff;
+}
+
+.bar.bar-dark .title {
+ 	color: #fff;
+}
+
+.bar .title {
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	z-index: 0;
+	overflow: hidden;
+	margin: 0 10px;
+	min-width: 30px;
+	height: 43px;
+	text-align: center;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 17px;
+	line-height: 44px;
+}
+
+.bar .title.title-right {
+	text-align: right;
+}
+*/

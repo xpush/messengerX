@@ -82,10 +82,12 @@ angular.module('starter.directives', [])
           }
 
           var url = xpush.getFileUrl( scope.channelId, fileNm );
+          var encodedUrl = encodeURIComponent(  url );
+
 
           var left = screen.width/2 - 400
               , top = screen.height/2 - 300
-              , popup = $window.open(url, '', "top=" + top + ",left=" + left + ",width=800,height=600");          
+              , popup = $window.open( $rootScope.rootPath + 'popup-view.html?src='+encodedUrl, '', "top=" + top + ",left=" + left + ",width=0,height=0");
         });    
       });
     }
