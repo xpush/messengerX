@@ -120,6 +120,41 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         });
       }
     }
+
+    $rootScope.webNoti = function( message ) {
+      // Let's check if the browser supports notifications
+      if (!("Notification" in window)) {
+        alert("This browser does not support desktop notification");
+      }
+
+      // Let's check if the user is okay to get some notification
+      else if (Notification.permission === "granted") {
+        // If it's okay let's create a notification
+        console.log( message );
+        var notification = new Notification( message );
+      }
+
+      // Otherwise, we need to ask the user for permission
+      // Note, Chrome does not implement the permission static property
+      // So we have to check for NOT 'denied' instead of 'default'
+      else if (Notification.permission !== 'denied') {
+        Notification.requestPermission(function (permission) {
+
+          // Whatever the user answers, we make sure we store the information
+          if(!('permission' in Notification)) {
+            Notification.permission = permission;
+          }
+
+          // If the user is okay, let's create a notification
+          if (permission === "granted") {
+            var notification = new Notification( message );
+          }
+        });
+      }
+      // At last, if the user already denied any notification, and you 
+      // want to be respectful there is no need to bother him any more.
+    };
+
     // For android notification
     onNotification = function(e) {
       switch( e.event ){
@@ -309,8 +344,8 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           if( $rootScope.nodeWebkit ){
             var gui = require('nw.gui');
             wkpopup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
-              "frame" : false,
-              "toolbar" : false,
+              "frame" : true,
+              "toolbar" : true,
               width: 400,
               height: 600,
               x:left,
@@ -321,7 +356,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
 
-          var interval = 500;
+          var interval = 1000;
 
           setTimeout( function(){
             if( $rootScope.nodeWebkit ){              

@@ -311,8 +311,8 @@ angular.module('starter.services', [])
         }
 
         // compare current channel id to received message's channel id 
-        var currentChannel = $rootScope.xpush.getChannel( ch ) ;
-        if( currentChannel != undefined &&  currentChannel._connected ){
+        var currentChannel = $rootScope.xpush.getChannel( ch );
+        if( currentChannel != undefined && currentChannel._connected ){
           var latestDate = $rootScope.currentChannelLatestDate;
 
           /**
@@ -406,6 +406,8 @@ angular.module('starter.services', [])
             $rootScope.localNoti( { id : data.TS, message : data.MG, title : channel.name}, function(){
               console.log( '========= local noti callback =========');
             });
+
+            $rootScope.webNoti( data.MG );
           });
         }
       });

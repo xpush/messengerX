@@ -673,6 +673,8 @@ angular.module('starter.controllers', [])
     Cache.set( args.cache );
     loginUser = Sign.getUser();
 
+    console.log( $rootScope.xpush );
+
     $rootScope.xpush.setSessionInfo( loginUser.userId, loginUser.deviceId, function(){
 
       $rootScope.xpush._sessionConnection = args.sessionConnection;
@@ -680,6 +682,7 @@ angular.module('starter.controllers', [])
 
       // Initialize chat controller
       $rootScope.xpush._getChannelAsync( args.popupKey, function(){
+        console.log( args.popupKey );
         init( args.stateParams );
         Manager.addEvent();
       });
