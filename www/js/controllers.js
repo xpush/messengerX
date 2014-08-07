@@ -675,14 +675,14 @@ angular.module('starter.controllers', [])
 
     $rootScope.xpush.setSessionInfo( loginUser.userId, loginUser.deviceId, function(){
 
-
       $rootScope.xpush._sessionConnection = args.sessionConnection;
-      channelId = args.stateParams.channelId;
       $rootScope.xpush.isExistUnread = false;
 
       // Initialize chat controller
-      init( args.stateParams );
-      Manager.addEvent();        
+      $rootScope.xpush._getChannelAsync( args.popupKey, function(){
+        init( args.stateParams );
+        Manager.addEvent();
+      });
     });
   });
 
@@ -798,7 +798,6 @@ angular.module('starter.controllers', [])
 
   // Not
   if( stateParams != undefined ){
-    channelId = stateParams.channelId;
     init( stateParams );
   }
 

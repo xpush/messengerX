@@ -572,23 +572,25 @@
       switch(data.event){
         case 'NOTIFICATION':
           var ch = self.getChannel(data.C);
-          if(!ch){
-            ch = self._makeChannel(data.C);
+          if( self.autoInitFlag ){
+            if(!ch){
+              ch = self._makeChannel(data.C);
 
-            self.getChannelInfo(data.C,function(err,data){
+              self.getChannelInfo(data.C,function(err,data){
 
-              if(err){
-                console.log(" == node channel " ,err);
-              }else if ( data.status == 'ok'){
-                ch.setServerInfo(data.result);
+                if(err){
+                  console.log(" == node channel " ,err);
+                }else if ( data.status == 'ok'){
+                  ch.setServerInfo(data.result);
+                }
+              });
+              //self.emit('channel-created', {ch: ch, chNm: data.channel});
+              if(!self.isExistChannel(data.channel)) {
+                self.emit('newChannel', ch);
               }
-            });
-            //self.emit('channel-created', {ch: ch, chNm: data.channel});
-            if(!self.isExistChannel(data.channel)) {
-              self.emit('newChannel', ch);
             }
+            ch.emit(data.NM , data.DT);
           }
-          ch.emit(data.NM , data.DT);
           self.emit(RMKEY, data.C, data.NM, data.DT);
         break;
 

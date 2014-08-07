@@ -179,4 +179,55 @@ angular.module('starter.directives', [])
       }, DELAY_TIME_BEFORE_POSTING)
     }
   }
+})
+.directive('searchByKey', function($parse, $timeout, UTIL){
+  var DELAY_TIME_BEFORE_POSTING = 100;
+  return function(scope, elem, attrs) {
+
+    var element = angular.element(elem)[0];
+    var currentTimeout = null;
+
+    var poster = $parse(attrs.post)(scope);
+    var reseter = $parse(attrs.reset)(scope);
+
+    element.oninput = function() {
+
+      if(currentTimeout) {
+        $timeout.cancel(currentTimeout)
+      }
+      currentTimeout = $timeout(function(){
+
+        var searchKey = angular.element(element).val();
+
+        if( searchKey != '' ){
+          matches = [];
+          var separated = UTIL.getMorphemes( searchKey );
+
+          var datas = [];
+
+          var items =attrs.items.split('.');
+          if( items.length == 2  ){
+            var item1 = items[0];
+            var item2 = items[1];
+            datas= scope[item1][item2];
+          } else {
+            datas = scope[attrs.items];
+          }
+
+          for( var key in datas ){
+            var data = datas[key];
+            if( UTIL.getMorphemes( data.user_name ).indexOf( separated ) > -1
+              || data.chosung.indexOf( searchKey ) > -1 ){
+              matches.push( data );
+            }
+          }
+
+          poster( matches );
+        } else {
+          reseter();
+        }
+
+      }, DELAY_TIME_BEFORE_POSTING)
+    }
+  }
 });

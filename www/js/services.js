@@ -274,6 +274,8 @@ angular.module('starter.services', [])
     addEvent : function(){
 
       var loginUser = Sign.getUser();
+      var startTime = 0;
+      var endTime = 0;
       $rootScope.xpush.on('message', function (ch,name,data) {
         data.MG = decodeURIComponent(data.MG);
 
@@ -289,16 +291,29 @@ angular.module('starter.services', [])
           data.type = sr;
         }
 
+        if( sr == 'R' ){
+          try {
+            var element = angular.element( window.document.getElementById( 'navBar' ) );
+            
+            element.addClass( "blink_me" );
+            startTime = Date.now();
+
+            var clearBlink = setInterval( function(){
+              endTime = Date.now();
+              if( endTime - startTime > 5000 ){
+                element.removeClass( "blink_me" );
+                clearInterval( clearBlink );
+              }
+            }, 5000 );
+          } catch( err ){
+            console.log( err );
+          }
+        }
+
         // compare current channel id to received message's channel id 
-        var currentChannel = $rootScope.xpush.getChannel( ch ) ;    
+        var currentChannel = $rootScope.xpush.getChannel( ch ) ;
         if( currentChannel != undefined &&  currentChannel._connected ){
           var latestDate = $rootScope.currentChannelLatestDate;
-
-          var ele = angular.element( window.document.getElementById( 'navBar' ) );
-          ele.addClass( "blink_me" );
-          setTimeout( function(){
-            ele.removeClass( "blink_me" );
-          }, 10000 );
 
           /**
           * time stamp to date array

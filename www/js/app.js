@@ -321,7 +321,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
 
-          var interval = 1000;
+          var interval = 500;
 
           setTimeout( function(){
             if( $rootScope.nodeWebkit ){              
@@ -357,6 +357,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
             args.loginUser = Sign.getUser();
             args.stateParams = stateParams;
             args.cache = Cache.all();
+            args.popupKey = popupKey;
             args.sessionConnection = $rootScope.xpush._sessionConnection;
 
             newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
