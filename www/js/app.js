@@ -325,16 +325,17 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
 .factory('NAVI', function($rootScope, $state, Cache, Sign){
   var popupCount = 0;
   var popups = {};
+  var self;
 
   return {
     gotoChat : function( scope, popupKey, stateParams ){
+      self = this;
 
       if( $rootScope.usePopupFlag ){
         if( popups[popupKey] != undefined ){
-          popups[popupKey].window.focus();
+          popups[popupKey].focus();
         } else {
 
-          var wkpopup;
           var popup;
 
           var left = screen.width - 520 + ( popupCount * 25 );
@@ -343,65 +344,75 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
 
           if( $rootScope.nodeWebkit ){
             var gui = require('nw.gui');
-            wkpopup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
-              "frame" : true,
-              "toolbar" : true,
-              width: 400,
-              height: 600,
-              x:left,
-              y:top,
-              title:'Chat'
+            popup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
+              "frame" : false,
+              "toolbar" : false,
+              "width": 400,
+              "height": 600,
+              "x":left,
+              "y":top,
+              "title":"Chat",
+              "icon": "icon.png"
             });
-          } else {        
+          } else {
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
 
-          var interval = 1000;
-
-          setTimeout( function(){
-            if( $rootScope.nodeWebkit ){              
-              popups[popupKey] = wkpopup;
-              popup = wkpopup.window;
-
-              wkpopup.on('close', function() {
-                
-                // Hide the window to give user the feeling of closing immediately
-                this.hide();
-                popupCount--;
-                // If the new window is still open then close it.
-                if (wkpopup != null){
-                  wkpopup.close(true);
-                  delete popups[popupKey];
+          var popupInterval = setInterval( function(){
+            if( popup != undefined ) {
+              var popObj = popup.window.document.getElementById( "popupchat" );
+              if( popObj != undefined ){
+                var newWindowRootScope = popup.window.angular.element( popObj ).scope();
+                if( newWindowRootScope != undefined ){
+                  if( newWindowRootScope.$$listeners.INTER_WINDOW_DATA_TRANSFER != undefined ){
+                    clearInterval( popupInterval );
+                    self.openPopup( popup, popupKey, newWindowRootScope, stateParams );
+                  }
                 }
-
-                // After closing the new window, close the main window.
-                this.close(true);
-              });
-            } else {
-              popups[popupKey] = popup;
-              popup.onbeforeunload = function(){
-                popupCount--;
-                delete popups[popupKey];
-              };
+              }
             }
-
-            var popObj = popup.document.getElementById( "popupchat" );
-            var newWindowRootScope = popup.angular.element( popObj ).scope();
-
-            var args = {};
-            args.loginUser = Sign.getUser();
-            args.stateParams = stateParams;
-            args.cache = Cache.all();
-            args.popupKey = popupKey;
-            args.sessionConnection = $rootScope.xpush._sessionConnection;
-
-            newWindowRootScope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
-          }, interval);
+          }, 200 );
         }
       } else {
         $rootScope.$stateParams = stateParams;
         $state.go( 'chat' );
       }
+    },
+    openPopup : function( popupWin, popupKey, scope, stateParams ){
+
+
+      if( $rootScope.nodeWebkit ){
+        popups[popupKey] = popupWin.window;
+        popupWin.on('close', function() {
+          
+          // Hide the window to give user the feeling of closing immediately
+          this.hide();
+          popupCount--;
+          // If the new window is still open then close it.
+          if (popupWin != null){
+            popupWin.close(true);
+            delete popups[popupKey];
+          }
+
+          // After closing the new window, close the main window.
+          this.close(true);
+        });
+      } else {
+        popups[popupKey] = popupWin;
+        popupWin.onbeforeunload = function(){
+          popupCount--;
+          delete popups[popupKey];
+        };
+      }
+
+      var args = {};
+      args.loginUser = Sign.getUser();
+      args.stateParams = stateParams;
+      args.cache = Cache.all();
+      args.popupKey = popupKey;
+      args.sessionConnection = $rootScope.xpush._sessionConnection;
+
+      scope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
     }
   };
 });

@@ -669,11 +669,10 @@ angular.module('starter.controllers', [])
    */
   $rootScope.$on("INTER_WINDOW_DATA_TRANSFER", function (data, args) {
     // Copy session object and cache object
+
     Sign.setUser( args.loginUser );
     Cache.set( args.cache );
     loginUser = Sign.getUser();
-
-    console.log( $rootScope.xpush );
 
     $rootScope.xpush.setSessionInfo( loginUser.userId, loginUser.deviceId, function(){
 
@@ -681,11 +680,16 @@ angular.module('starter.controllers', [])
       $rootScope.xpush.isExistUnread = false;
 
       // Initialize chat controller
-      $rootScope.xpush._getChannelAsync( args.popupKey, function(){
-        console.log( args.popupKey );
+      var channelId = args.stateParams.channelId;
+      if( channelId != undefined ){
+        $rootScope.xpush._getChannelAsync( channelId, function(){
+          init( args.stateParams );
+          Manager.addEvent();
+        });
+      } else {
         init( args.stateParams );
         Manager.addEvent();
-      });
+      }
     });
   });
 
