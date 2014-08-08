@@ -66,6 +66,7 @@ angular.module('starter.controllers', [])
   // Init Socket
   if( $rootScope.syncFlag ) {
     $scope.syncFriends();
+    Manager.init();
   } else if( $rootScope.firstFlag ){
     $scope.listFriend();
     Manager.init();

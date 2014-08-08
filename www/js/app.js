@@ -338,6 +338,9 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
   var self;
 
   return {
+    getPopups : function(){
+      return popups;
+    },
     gotoChat : function( scope, popupKey, stateParams ){
       self = this;
 
@@ -373,7 +376,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
               var popObj = popup.window.document.getElementById( "popupchat" );
               if( popObj != undefined ){
                 var newWindowRootScope = popup.window.angular.element( popObj ).scope();
-                if( newWindowRootScope != undefined ){
+                if( newWindowRootScope != undefined && newWindowRootScope.xpush != undefined ){
                   if( newWindowRootScope.$$listeners.INTER_WINDOW_DATA_TRANSFER != undefined ){
                     clearInterval( popupInterval );
                     self.openPopup( popup, popupKey, newWindowRootScope, stateParams );
