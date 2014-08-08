@@ -388,7 +388,6 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
               }
             }
 
-
           }, 200 );
         }
       } else {
@@ -429,6 +428,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       args.cache = Cache.all();
       args.popupKey = popupKey;
       args.sessionConnection = $rootScope.xpush._sessionConnection;
+      args.parentScope = $rootScope;
 
       scope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
     }

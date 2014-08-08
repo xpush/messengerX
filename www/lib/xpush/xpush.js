@@ -318,10 +318,7 @@
         } else if ( file.size > ( 4 * 1024 * 1024 ) ){
           bufferSize = 512;
         }
-
-        console.log( ( file.size / 1024 ) + "k");
-        console.log( bufferSize );
-
+        
         var size   = 0;
         streams[i] = ss.createStream({highWaterMark: bufferSize * 1024});
         blobs[i]   = ss.createBlobReadStream(file, {highWaterMark: bufferSize * 1024});

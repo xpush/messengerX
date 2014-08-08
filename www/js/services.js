@@ -273,6 +273,16 @@ angular.module('starter.services', [])
     },
     addEvent : function(){
 
+      $rootScope.$on("ON_POPUP_OPEN", function (data, args) {
+        // get unread message count form local DB
+        ChannelDao.getAllCount().then( function ( result ){
+          // Set unread message count into rootScope
+          $rootScope.totalUnreadCount = result.total_count;
+
+          ChannelDao.resetCount( args.channelId );
+        });
+      });
+
       var loginUser = Sign.getUser();
       var startTime = 0;
       var endTime = 0;

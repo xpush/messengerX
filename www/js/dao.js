@@ -329,6 +329,23 @@ angular.module('starter.dao', [])
         return result;
       });
     },
+    resetCount : function( channelId ){
+      var unreadCount = 1;
+      var searchIndex = -1;
+      var until = scope.channelArray.length;
+      for( var inx = 0 ; inx < until; inx++ ){
+        if( scope.channelArray[inx].channel_id == channelId ){
+          searchIndex = inx;
+          break;
+        }
+      }
+
+      if( searchIndex > -1 ){
+        var channel = scope.channelArray[ searchIndex ];
+        channel.unread_count = 0;
+        scope.channelArray.splice(searchIndex, 1, channel);
+      }
+    },
 
     /**
      * @ngdoc function

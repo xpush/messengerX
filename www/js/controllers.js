@@ -689,15 +689,17 @@ angular.module('starter.controllers', [])
       $rootScope.xpush._sessionConnection = args.sessionConnection;
       $rootScope.xpush.isExistUnread = false;
 
+      console.log( args.parentScope );
+
       // Initialize chat controller
       var channelId = args.stateParams.channelId;
       if( channelId != undefined ){
         $rootScope.xpush._getChannelAsync( channelId, function(){
-          init( args.stateParams );
+          init( args.stateParams, args.parentScope );
           Manager.addEvent();
         });
       } else {
-        init( args.stateParams );
+        init( args.stateParams, args.parentScope );
         Manager.addEvent();
       }
     });
@@ -713,7 +715,7 @@ angular.module('starter.controllers', [])
    * @param {jsonObject}
    * @param {String} Invite Message
    */
-  var initChat = function( inviteMsg ){
+  var initChat = function( inviteMsg, parentScope ){
 
     $rootScope.currentScope = $scope;
 
@@ -733,6 +735,11 @@ angular.module('starter.controllers', [])
         setTimeout( function(){
           $ionicFrostedDelegate.update();
           $ionicScrollDelegate.scrollBottom(true);
+
+          if( parentScope != undefined ){
+            var args = {"channelId":channelId};
+            parentScope.$broadcast("ON_POPUP_OPEN", args);
+          }
         }, 300 );
       }
     });
@@ -751,7 +758,7 @@ angular.module('starter.controllers', [])
    * @description Initialize current controller
    * @param {jsonObject} channelId, channelName, channelUsers
    */
-  var init = function( stateParams ){
+  var init = function( stateParams, parentScope ){
 
     // If channelId is exist, use the channel
     if( stateParams.channelId != undefined ) {
@@ -761,7 +768,7 @@ angular.module('starter.controllers', [])
       channelUsers.sort();
       channelName = stateParams.channelName;
 
-      initChat( '' );
+      initChat( '', parentScope );
     } else {
       // make friend string to array
       var friendIds = stateParams.friendIds.split("$");
@@ -792,7 +799,7 @@ angular.module('starter.controllers', [])
           inviteMsg = UTIL.getInviteMessage( channelUsers );
         }
 
-        initChat( inviteMsg );
+        initChat( inviteMsg, parentScope );
       });
     }
 
