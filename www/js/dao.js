@@ -476,7 +476,7 @@ angular.module('starter.dao', [])
         columns.push(column.name + ' ' + column.type);
       });
 
-      if( !changeDBFlag ){
+      if( changeDBFlag ){
         $rootScope.syncFlag = true;
         var query = 'DROP TABLE ' + table.name;
         self.query(query);

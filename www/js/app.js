@@ -140,7 +140,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       // Let's check if the user is okay to get some notification
       else if (Notification.permission === "granted") {
         // If it's okay let's create a notification
-        console.log( message );
         var notification = new Notification( message );
       }
 
@@ -161,8 +160,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           }
         });
       }
-      // At last, if the user already denied any notification, and you 
-      // want to be respectful there is no need to bother him any more.
     };
 
     // For android notification
