@@ -653,7 +653,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicFrostedDelegate, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, UTIL, Emoticons) {
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $ionicFrostedDelegate, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, UTIL, Emoticons) {
 
   var loginUser = Sign.getUser();
 
@@ -688,8 +688,6 @@ angular.module('starter.controllers', [])
 
       $rootScope.xpush._sessionConnection = args.sessionConnection;
       $rootScope.xpush.isExistUnread = false;
-
-      console.log( args.parentScope );
 
       // Initialize chat controller
       var channelId = args.stateParams.channelId;
@@ -747,7 +745,6 @@ angular.module('starter.controllers', [])
 
   $scope.messages = [];
   var stateParams = $rootScope.$stateParams;
-  var rootImgPath = $rootScope.rootImgPath;
 
   /**
    * @ngdoc function
@@ -809,8 +806,10 @@ angular.module('starter.controllers', [])
     $scope.channelId = channelId;
     $scope.channelUsers = channelUsers;
 
+
     // Retrieve emoticon list from local db.
     Emoticons.list( {}, function(emoticons){
+      var rootImgPath = $rootScope.rootImgPath;
       $scope.emoticons.push( { group : 's2', tag : 'ion-happy', 'CN' : 'tab-item tab-item-active', items : {
           "01" : [rootImgPath+'/emo/s2/anger.PNG', rootImgPath+'/emo/s2/burn.PNG', rootImgPath+'/emo/s2/cool.PNG', rootImgPath+'/emo/s2/love.PNG'],
           "02" : [rootImgPath+'/emo/s2/shout.PNG', rootImgPath+'/emo/s2/smile.PNG']}}
@@ -820,7 +819,6 @@ angular.module('starter.controllers', [])
     });
   };
 
-  // Not
   if( stateParams != undefined ){
     init( stateParams );
   }
@@ -1181,6 +1179,37 @@ angular.module('starter.controllers', [])
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
 
       Chat.send( msg, msgType );
+    });
+  };
+
+  $scope.showNotiPopup = function() {
+    $scope.data = {}
+
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+      template: '<input type="type" ng-model="data.notice">',
+      title: 'Input Notice',
+      scope: $scope,
+      buttons: [
+        { text: 'Cancel' },
+        {
+          text: '<b>Save</b>',
+          type: 'button-positive',
+          onTap: function(e) {
+            if (!$scope.data.notice) {
+              //don't allow the user to close unless he enters wifi password
+              e.preventDefault();
+            } else {
+              return $scope.data.notice;
+            }
+          }
+        },
+      ]
+    });
+    myPopup.then(function(res) {
+      if( res != undefined ){
+        Chat.send( res, 'N' );
+      }
     });
   };
 });

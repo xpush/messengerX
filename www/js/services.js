@@ -63,7 +63,11 @@ angular.module('starter.services', [])
      * @return {Object} JSON Object. image and user name {'I' : image, 'NM' : userName }
      */
     get : function(key){
-      return cache[key];
+      if( cache[key] ){
+        return cache[key];
+      } else {
+        return {'I' : '', 'NM' : key };
+      }
     },
 
     /**
@@ -234,7 +238,7 @@ angular.module('starter.services', [])
     }
   };
 })
-.factory('Manager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, UTIL ) {
+.factory('Manager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, NoticeDao, UTIL ) {
   var initFlag = false;
   return {
 
@@ -318,6 +322,12 @@ angular.module('starter.services', [])
           } catch( err ){
             console.log( err );
           }
+        }
+
+        if( data.T == 'N' ){
+          console.log( data );
+          NoticeDao.add( data );
+          return;
         }
 
         // compare current channel id to received message's channel id 

@@ -8,7 +8,7 @@ angular.module('starter.constants', [])
   .constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
   .constant('DB_CONFIG', {
     name: 'stalk.db',
-    version: '0.1',
+    version: '0.2',
     tables: [
       {
         name: 'TB_MESSAGE',
@@ -24,11 +24,9 @@ angular.module('starter.constants', [])
         ],
         table_index : [{ type : '', name : 'IDX_TB_MESSAGE', columns : [ 'channel_id', 'owner_id' ] }]
       },
-
       {
         name: 'TB_CHANNEL',
         columns: [
-          //{name: '_id',     type: 'integer primary key autoincrement'},
           {name: 'channel_id',   type: 'text'},
           {name: 'channel_name',  type: 'text'},
           {name: 'channel_users',    type: 'text'},
@@ -39,6 +37,17 @@ angular.module('starter.constants', [])
           {name: 'owner_id', type: 'text'}
         ],
         table_index : [{ type : 'UNIQUE', name : 'IDX_U_TB_CHANNEL', columns : [ 'channel_id', 'owner_id' ] }, { type : '', name : 'IDX_TB_CHANNEL', columns : [ 'owner_id' ] }]
+      },
+      {
+        name: 'TB_NOTICE',
+        columns: [
+          {name: 'channel_id',   type: 'text'},
+          {name: 'notice', type: 'text DEFAULT "" '},
+          {name: 'sender_id', type: 'text'},
+          {name: 'updated', type: 'integer'},
+          {name: 'owner_id', type: 'text'}
+        ],
+        table_index : [{ type : 'UNIQUE', name : 'IDX_U_TB_NOTICE', columns : [ 'channel_id', 'owner_id' ] }]
       },
       {
         name: 'TB_USER',

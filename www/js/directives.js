@@ -13,7 +13,7 @@ angular.module('starter.directives', [])
     });
   };
 })
-.directive('channelImage', function(Cache, Sign) {
+.directive('channelImage', function(Cache, Sign, $rootScope) {
   return {
     restrict: 'A',
     scope: {
@@ -26,7 +26,7 @@ angular.module('starter.directives', [])
     transclude: false,
     controller: function($scope) {
       var loginUserId = Sign.getUser().userId;
-      var result = "../img/channel_image.jpg";
+      var result = $rootScope.rootImgPath+"/channel_image.jpg";
       var users = $scope.users;
 
       var friendId = '';

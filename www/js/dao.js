@@ -449,6 +449,57 @@ angular.module('starter.dao', [])
     }
   }
 })
+.factory('NoticeDao', function(DB, Sign) {
+
+  return {
+    /**
+     * @ngdoc function
+     * @name notice
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Retrieve notice message from local DB
+     * @return {string} Query Result
+     */
+    get : function( channel ){
+      var loginUserId = Sign.getUser().userId;
+      return DB.query(
+        'SELECT notice, sender_id, updated FROM TB_NOTICE WHERE channel_id = ? and owner_id = ? ;', [channel,loginUserId]
+      ).then(function(result) {
+        return DB.fetch(result);
+      });
+    },
+    /**
+     * @ngdoc function
+     * @name add
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Insert or replace notice message at local DB
+     * @return {string} Query Result
+     */
+    add : function( jsonObj ){
+      loginUserId = Sign.getUser().userId;
+
+      var query =  
+        "INSERT OR REPLACE INTO TB_NOTICE "+
+        "(notice, sender_id, channel_id, updated, owner_id ) VALUES "+
+        "(?, ?, ?, ?, ?)";
+
+      var cond = [
+        jsonObj.MG,
+        jsonObj.S,
+        jsonObj.C,
+        jsonObj.TS,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
+    }
+  }
+})
 .factory('DB', function($q, $rootScope, DB_CONFIG) {
   var self = this;
   self.db = null;
