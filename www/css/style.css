@@ -184,7 +184,7 @@ paper-input {
   width: 100%;
 }
 
-.button-add-friend {
+.button-add {
 	position: absolute;
 	right : 10px;
 	bottom : 60px;
@@ -398,6 +398,23 @@ img.emoticon{
 	margin-bottom: 6px;
 	cursor : pointer;
 	-webkit-app-region: no-drag;
+}
+
+.floating-progress {
+	position: absolute;
+	right : 10px;
+	bottom : 120px;
+	width : 120px;
+	z-index:999;
+}
+
+.floating-image {
+	position: absolute;
+	right: 56px;
+	bottom: 2px;
+	border-radius: 40px;
+	z-index: 999;
+	width: 36px;
 }
 
 .blink_me {

@@ -4,7 +4,7 @@
       LogOut
     </button>
     <div class="close-button" ng-if=" nodeWebkit ">
-      <img id="close-button" src="{{rootImgPath}}/button_close.png" ng-click="close()">
+      <img id="close-button" ng-src="{{rootImgPath}}/button_close.png" ng-click="close()">
     </div>    
   </ion-nav-buttons>
   <ion-content class="has-header">
@@ -14,11 +14,12 @@
 	        <img class="emoticon" ng-src="{{image}}" />
 	      </div>
 	    </div>
-		  <div class="item" ng-if="emoticon.length == 0">
-		  	There is no emoticons.
+		  <div class="item" style="text-align:center;" ng-if="!emoticon.items">
+		  	There is no custom emoticons.
 		  </div>
 		</ion-list>
 	 	<input type="file" id="file"/>
   </ion-content>
-  <button class="button icon ion-plus-round button-add-friend" ng-click="openFileDialog()"></button>
+  <progress id="progress_bar" class="floating-progress" style="display:none" value="0" max="100"></progress>
+  <button class="button icon ion-plus-round button-add" ng-click="openFileDialog()"></button>
 </ion-view>

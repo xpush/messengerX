@@ -3,7 +3,7 @@
     <div class="no-drag" >
       <button class="button icon ion-navicon" ng-click="openFriendModal();" ></button>
       <button class="button button-dark  no-drag" ng-if=" nodeWebkit " ng-click="close()">
-        <img src="{{rootImgPath}}/button_close.png">
+        <img ng-src="{{rootImgPath}}/button_close.png">
       </button>
     </div>
   </ion-nav-buttons>
@@ -102,7 +102,7 @@
     <button ng-if=" showEmo == 'true' " class="button icon ion-sad" ng-click="toggleEmoticons('false')"></button>
     <button ng-if=" showEmo =='false' " class="button icon ion-happy" ng-click="toggleEmoticons('true')"></button>
 
-    <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 10px 0 10px;"/>
+    <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 40px 0 10px;"/>
     <button class="button button-positive" style="min-width:50px;" ng-click="send()" >Send </button>
   </ion-footer-bar>
   <div class="chat-extends" id="chat-extends" style="display:none">
@@ -132,5 +132,7 @@
         </div>
       </div>
     </div>
-  </div>  
+  </div>
+
+  <img ng-src="{{loginUserImage}}" class="floating-image" />
 </ion-view>

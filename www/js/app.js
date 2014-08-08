@@ -368,7 +368,13 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
 
+          var startTime = Date.now();
           var popupInterval = setInterval( function(){
+            var endTime = Date.now();
+            if( endTime - startTime > 5000 ){
+              clearInterval( popupInterval );
+            }
+
             if( popup != undefined ) {
               var popObj = popup.window.document.getElementById( "popupchat" );
               if( popObj != undefined ){
@@ -381,6 +387,8 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
                 }
               }
             }
+
+
           }, 200 );
         }
       } else {

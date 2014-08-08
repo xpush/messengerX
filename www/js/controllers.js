@@ -539,6 +539,8 @@ angular.module('starter.controllers', [])
    * @description make self channel for emoticon file upload
    */
   var inputObj = document.getElementById('file');
+  var progressbar = document.getElementById( "progress_bar" );
+
   angular.element( inputObj ).on('change',function(event) {
 
     // upload file stream
@@ -546,7 +548,8 @@ angular.module('starter.controllers', [])
       file: inputObj
     }, function(data, idx){
       inputObj.value = "";
-      console.log("progress  ["+idx+"]: "+data);
+      progressbar.value = data;
+      progressbar.style.display = "block";
     }, function(data,idx){
       var name = data.result.name;
 
@@ -554,8 +557,8 @@ angular.module('starter.controllers', [])
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
 
       var imageUrl = $rootScope.xpush.getFileUrl(channelId, name );
-
       var param = {group:'custom', tag :'', image : imageUrl};
+      progressbar.style.display = "none";
 
       // Save emoticon to local db
       Emoticons.add( param, $scope.emoticon );
@@ -658,6 +661,10 @@ angular.module('starter.controllers', [])
   var channelName;
   var channelUsers = [];
 
+  if( loginUser !=undefined ){
+    $scope.loginUserImage = loginUser.image;
+  }
+
   /**
    * @ngdoc eventHandler
    * @name INTER_WINDOW_DATA_TRANSFER
@@ -674,6 +681,8 @@ angular.module('starter.controllers', [])
     Sign.setUser( args.loginUser );
     Cache.set( args.cache );
     loginUser = Sign.getUser();
+
+    $scope.loginUserImage = loginUser.image;
 
     $rootScope.xpush.setSessionInfo( loginUser.userId, loginUser.deviceId, function(){
 

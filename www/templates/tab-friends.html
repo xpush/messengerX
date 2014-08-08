@@ -4,7 +4,7 @@
       LogOut
     </button>
     <div class="close-button" ng-if=" nodeWebkit ">
-      <img id="close-button" src="{{rootImgPath}}/button_close.png" ng-click="close()">
+      <img id="close-button" ng-src="{{rootImgPath}}/button_close.png" ng-click="close()">
     </div>    
   </ion-nav-buttons>
   <ion-content class="has-header" >
@@ -37,5 +37,5 @@
       </ion-item>
     </ion-list>
   </ion-content>
-  <button class="button icon ion-person-add button-add-friend" ng-click="openUserModal()"></button>
+  <button class="button icon ion-person-add button-add" ng-click="openUserModal()"></button>
 </ion-view>

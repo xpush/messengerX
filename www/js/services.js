@@ -792,8 +792,6 @@ angular.module('starter.services', [])
       var k;
       var groupKey = param.group;
 
-      console.log( jsonObject );
-
       if( jsonObject === undefined ){
         jsonObject.group = groupKey;
         jsonObject.metas = 0;
@@ -823,14 +821,12 @@ angular.module('starter.services', [])
       } else {
 
         // Item count larger than 4. make new group key
-        k = group + (++groupInx);
+        k = groupKey + (++groupInx);
         jsonObject.items[k] = [];
         jsonObject.metas = groupInx;
       }
 
       jsonObject.items[k].push( param.image );
-
-      console.log( jsonObject );
     },
     all : function () {
       return emoticons;
