@@ -48,11 +48,22 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.rootPath = "../www/";
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
+      
+      // web
     } else {
       $rootScope.rootImgPath = "../img";
       $rootScope.rootPath = "/";
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
+
+      var mobileAgents = ["android","iphone","bb","symbian","nokia", "applewebkit"];
+      var agent = window.navigator.userAgent.toLowerCase();
+
+      for( var inx = 0; $rootScope.usePopupFlag && inx < mobileAgents.length ; inx++ ){
+        if( agent.indexOf( mobileAgents[inx] ) > -1 ){
+          $rootScope.usePopupFlag = false;
+        }
+      }
     }
 
     // node wekit ==  true
