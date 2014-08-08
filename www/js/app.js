@@ -48,7 +48,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.rootPath = "../www/";
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
-      
       // web
     } else {
       $rootScope.rootImgPath = "../img";
@@ -56,7 +55,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
 
-      var mobileAgents = ["android","iphone","bb","symbian","nokia", "applewebkit"];
+      var mobileAgents = ["android","iphone","bb","symbian","nokia"];
       var agent = window.navigator.userAgent.toLowerCase();
 
       for( var inx = 0; $rootScope.usePopupFlag && inx < mobileAgents.length ; inx++ ){
