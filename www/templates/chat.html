@@ -134,5 +134,13 @@
     </div>
   </div>
 
-  <img ng-src="{{loginUserImage}}" class="floating-image" />
+  <div class="item item-avatar chat-notice" id="chat-notice" >
+    <img ng-src="{{noticeMessage.image}}"  />
+    <h2>{{noticeMessage.message}}</h2>
+    <p>{{noticeMessage.name}}&nbsp;{{noticeMessage.date}}</p>
+  </div>
+
+  <img ng-src="{{loginUserImage}}" class="floating-image" ng-click="showNoticePopup();"/>
+
+
 </ion-view>

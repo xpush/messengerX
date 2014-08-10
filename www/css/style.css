@@ -318,13 +318,12 @@ paper-input {
 	display: none;
 }
 
-.chat-extends, .chat-emoticon{
-	display:none;
+.chat-extends, .chat-emoticon, .chat-notice{
 	position:absolute;
 	z-index:999;
 	top:44px;
 	left:0px;
-	opacity:0.8;
+	opacity:0.9;
 	display:none;
 	width:100%;
 	background: #F0F3F8;

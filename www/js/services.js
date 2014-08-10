@@ -324,15 +324,24 @@ angular.module('starter.services', [])
           }
         }
 
-        if( data.T == 'N' ){
-          console.log( data );
-          NoticeDao.add( data );
-          return;
-        }
-
         // compare current channel id to received message's channel id 
         var currentChannel = $rootScope.xpush.getChannel( ch );
         if( currentChannel != undefined && currentChannel._connected ){
+
+          if( data.T == 'N' ){
+            NoticeDao.add( data );
+            if( $rootScope.currentScope ){
+              var dateStrs = UTIL.timeToString( data.TS );
+              var dateMessage = dateStrs[1]+" "+dateStrs[2];
+
+              var noticeMessage = { date : dateMessage, message : data.MG, name : data.UO.NM, image : data.UO.I };
+
+              console.log( noticeMessage );
+              $rootScope.currentScope.setNotice( noticeMessage );
+            }
+            return;
+          }
+
           var latestDate = $rootScope.currentChannelLatestDate;
 
           /**
@@ -385,6 +394,11 @@ angular.module('starter.services', [])
           }
 
         } else {
+
+          if( data.T == 'N' ){
+            NoticeDao.add( data );
+            return;
+          }
 
           // differ from current channel, get channel data
           $rootScope.xpush.getChannelData( data.C, function( err, channelJson ){

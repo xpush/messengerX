@@ -461,10 +461,10 @@ angular.module('starter.dao', [])
      * @description Retrieve notice message from local DB
      * @return {string} Query Result
      */
-    get : function( channel ){
+    get : function( channelId ){
       var loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT notice, sender_id, updated FROM TB_NOTICE WHERE channel_id = ? and owner_id = ? ;', [channel,loginUserId]
+        'SELECT notice, sender_id, updated FROM TB_NOTICE WHERE channel_id = ? and owner_id = ? ;', [channelId,loginUserId]
       ).then(function(result) {
         return DB.fetch(result);
       });
@@ -568,8 +568,10 @@ angular.module('starter.dao', [])
     var deferred = $q.defer();
     self.db.transaction(function(transaction) {
       transaction.executeSql(query, binding, function(transaction, result) {
+        console.log( result );
         deferred.resolve(result);
       }, function(transaction, error) {
+        console.log( error );
         deferred.reject(error);
       });
     });

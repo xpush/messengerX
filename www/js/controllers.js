@@ -653,7 +653,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $ionicFrostedDelegate, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, UTIL, Emoticons) {
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $ionicFrostedDelegate, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons) {
 
   var loginUser = Sign.getUser();
 
@@ -740,6 +740,14 @@ angular.module('starter.controllers', [])
           }
         }, 300 );
       }
+
+      NoticeDao.get( channelId ).then(function(data) {
+        var dateStrs = UTIL.timeToString( data.updated );
+        var dateMessage = dateStrs[1]+" "+dateStrs[2];
+
+        var noticeMessage = { date : dateMessage, message : data.notice, name : Cache.get( data.sender_id ).NM, image : Cache.get( data.sender_id ).I };
+        $scope.setNotice( noticeMessage );
+      });
     });
   };
 
@@ -842,6 +850,20 @@ angular.module('starter.controllers', [])
       $ionicFrostedDelegate.update();
       $ionicScrollDelegate.scrollBottom(true);
     }
+  };
+
+  /**
+   * @ngdoc function
+   * @name addNotice
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Add message to screen and Update scroll
+   * @param {jsonObject} channelId, channelName, channelUsers
+   */
+  $scope.setNotice = function( noticeMsg ) {
+    $scope.noticeMessage = noticeMsg;
+    document.getElementById( "chat-notice" ).style.display = "block";
   };
 
   /**
@@ -1182,7 +1204,7 @@ angular.module('starter.controllers', [])
     });
   };
 
-  $scope.showNotiPopup = function() {
+  $scope.showNoticePopup = function() {
     $scope.data = {}
 
     // An elaborate, custom popup
