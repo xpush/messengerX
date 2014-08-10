@@ -72,6 +72,7 @@ angular.module('starter.directives', [])
                         
         xpush._getChannelAsync( scope.channelId, function(ch){
           var fileNm;
+          var type = attrs.type;
 
           if( attrs.fileName != undefined ){
             var srcUrl = attrs.fileName;
@@ -84,10 +85,10 @@ angular.module('starter.directives', [])
           var url = xpush.getFileUrl( scope.channelId, fileNm );
           var encodedUrl = encodeURIComponent(  url );
 
-
           var left = screen.width/2 - 400
-              , top = screen.height/2 - 300
-              , popup = $window.open( $rootScope.rootPath + 'popup-view.html?src='+encodedUrl, '', "top=" + top + ",left=" + left + ",width=0,height=0");
+            , top = screen.height/2 - 300;
+          
+          var  popup = $window.open( $rootScope.rootPath + 'popup-view.html?type='+type+'&src='+encodedUrl, '', "top=" + top + ",left=" + left + ",width=80,height=60");
         });    
       });
     }
@@ -128,57 +129,6 @@ angular.module('starter.directives', [])
     },
     template: '<span class="channel-time">{{timeString}}</span>'
   };
-})
-.directive('searchByKey', function($parse, $timeout, UTIL){
-  var DELAY_TIME_BEFORE_POSTING = 100;
-  return function(scope, elem, attrs) {
-
-    var element = angular.element(elem)[0];
-    var currentTimeout = null;
-
-    var poster = $parse(attrs.post)(scope);
-    var reseter = $parse(attrs.reset)(scope);
-
-    element.oninput = function() {
-
-      if(currentTimeout) {
-        $timeout.cancel(currentTimeout)
-      }
-      currentTimeout = $timeout(function(){
-
-        var searchKey = angular.element(element).val();
-
-        if( searchKey != '' ){
-          matches = [];
-          var separated = UTIL.getMorphemes( searchKey );
-
-          var datas = [];
-
-          var items =attrs.items.split('.');
-          if( items.length == 2  ){
-            var item1 = items[0];
-            var item2 = items[1];
-            datas= scope[item1][item2];
-          } else {
-            datas = scope[attrs.items];
-          }
-
-          for( var key in datas ){
-            var data = datas[key];
-            if( UTIL.getMorphemes( data.user_name ).indexOf( separated ) > -1
-              || data.chosung.indexOf( searchKey ) > -1 ){
-              matches.push( data );
-            }
-          }
-
-          poster( matches );
-        } else {
-          reseter();
-        }
-
-      }, DELAY_TIME_BEFORE_POSTING)
-    }
-  }
 })
 .directive('searchByKey', function($parse, $timeout, UTIL){
   var DELAY_TIME_BEFORE_POSTING = 100;

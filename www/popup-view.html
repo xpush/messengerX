@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-    <title>ImageViewer</title>
+    <title>ContentViewer</title>
 
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
@@ -33,7 +33,10 @@
           </div>
         </ion-nav-buttons>    
         <ion-content has-header="true" has-footer="true" padding="false" start-y="120">
-          <img id="popupImg" ng-src="{{imageSrc}}" />
+          <img id="imgContent" ng-src="{{imageSrc}}" style="display:none;"/>
+          <video id="videoContent" controls="" autoplay="" name="media" style="display:none;">
+            <source id="videoSource" ></source>
+          </video>
         </ion-content>
       </ion-view>
     </ion-pane>
