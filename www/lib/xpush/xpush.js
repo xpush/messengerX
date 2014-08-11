@@ -943,6 +943,11 @@
       self._xpush.emit(RMKEY, self.chNm, RMKEY , data);
     });
 
+    self._socket.on('system',function(data){
+      console.log("xpush : channel receive system", self.chNm, data, self._xpush.userId);
+      self._xpush.emit("system", self.chNm, "system" , data);
+    });
+
     if(self._xpush._isEventHandler) {
 
       self._socket.on('_event',function(data){

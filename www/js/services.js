@@ -290,6 +290,22 @@ angular.module('starter.services', [])
       var loginUser = Sign.getUser();
       var startTime = 0;
       var endTime = 0;
+
+      $rootScope.xpush.on('system', function (ch,name,data) {
+
+        // compare sender's userId to logined UserId. send or receive
+        var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
+
+        // compare current channel id to received message's channel id 
+        var currentChannel = $rootScope.xpush.getChannel( ch );
+        if( currentChannel != undefined && currentChannel._connected && sr == 'R') {
+          
+          if( $rootScope.currentScope ){
+            $rootScope.currentScope.setStatus( data.MG );
+          }          
+        }
+      });
+
       $rootScope.xpush.on('message', function (ch,name,data) {
         data.MG = decodeURIComponent(data.MG);
 
@@ -735,6 +751,19 @@ angular.module('starter.services', [])
       $rootScope.xpush.joinChannel( channelId, param, function (data) {
         callback( data );
       });
+    },
+    /**
+     * @ngdoc function
+     * @name send
+     * @module starter.services
+     * @kind function
+     *
+     * @description Send System Message
+     * @param {string} message
+     */
+    sendSys : function(msg){
+      var DT = { UO : CONF._user, MG : msg, S : CONF._user.U };
+      $rootScope.xpush.send(CONF._channel, 'system', DT );
     }
   };
 })

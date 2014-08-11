@@ -1,6 +1,6 @@
 angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic.contrib.frostedGlass'])
 
-.run(function($location, $ionicPlatform, $rootScope, DB, Sign ) {
+.run(function($location, $ionicPlatform, $window, $rootScope, DB, Sign ) {
   $ionicPlatform.ready(function() {
 
     if(window.cordova && window.cordova.plugins.Keyboard) {
@@ -32,16 +32,33 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
       var gui = require('nw.gui');
 
       $rootScope.nodeWebkit = true;
-
       var winmain = gui.Window.get();
-      winmain.on('close', function(){
-         winmain.close(true);
-      });
-
+ 
       $rootScope.close = function(){
         winmain.close();
       };
     }
+
+    var win = angular.element($window),
+        vendorPrefix, prevEvent;
+
+    // We'll let jQuery/jqLite handle cross-browser compatibility with window blur/focus
+    // Blur events can be double-fired, so we'll filter those out with prevEvent tracking
+    win.on('blur', function(event) {
+      if (prevEvent !== 'blur'){
+        console.log( "blur" );
+        $rootScope.$broadcast('$windowBlur', event);
+      }
+      prevEvent = 'blur';
+    });
+
+    win.on('focus', function(event) {
+      if (prevEvent !== 'focus'){
+        console.log( "focus" );
+        $rootScope.$broadcast('$windowFocus', event);
+      }
+      prevEvent = 'focus';
+    });
 
     $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";
     $rootScope.app  = 'messengerx';

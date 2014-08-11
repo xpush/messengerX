@@ -355,15 +355,15 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           if( $rootScope.nodeWebkit ){
             var gui = require('nw.gui');
             popup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
-              "frame" : false,
-              "toolbar" : false,
+              "frame" : true,
+              "toolbar" : true,
               "width": 400,
               "height": 600,
               "x":left,
               "y":top,
-              "title":"Chat",
+              "title":"Chat" + popupKey,
               "icon": "icon.png"
-            });
+            } );
           } else {
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
@@ -401,6 +401,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       if( $rootScope.nodeWebkit ){
         popups[popupKey] = popupWin.window;
         popupWin.on('close', function() {
+          console.log( "close : " + popupKey );
           
           // Hide the window to give user the feeling of closing immediately
           this.hide();
@@ -414,6 +415,15 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           // After closing the new window, close the main window.
           this.close(true);
         });
+
+        console.log( popupWin );
+        popupWin.on('focus', function() {
+          console.log( "focus : " + popupKey );
+        });        
+
+        popupWin.on('blur', function() {
+          console.log( "blur : " + popupKey );
+        });       
       } else {
         popups[popupKey] = popupWin;
         popupWin.onbeforeunload = function(){

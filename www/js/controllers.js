@@ -703,6 +703,15 @@ angular.module('starter.controllers', [])
     });
   });
 
+  $rootScope.$on('$windowBlur',  function (){
+    Chat.sendSys( 'out' );
+  });
+
+  $rootScope.$on('$windowFocus', function (){
+    Chat.sendSys( 'in' );
+  });
+      
+
   /**
    * @ngdoc function
    * @name initChat
@@ -1069,7 +1078,7 @@ angular.module('starter.controllers', [])
       }
     } else {
       document.getElementById( "chat-notice" ).style.display = "none";
-      document.getElementById( "chat-notice-icon" ).style.display = "none";
+      document.getElementById( "chat-notice-button" ).style.display = "none";
     }
   };
 
@@ -1319,5 +1328,10 @@ angular.module('starter.controllers', [])
     } else {
       $scope.toggleNotice( true );
     }
+  };
+
+  $scope.setStatus = function( msg ){
+    $scope.onlineStatus = '';
+    $scope.onlineStatus = msg;
   };
 });

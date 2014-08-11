@@ -1,4 +1,11 @@
 <ion-view title="{{channelName}}">
+  <ion-nav-buttons side="left">
+    <div class="no-drag" >
+      <button class="button icon ion-android-locate" ng-if=" onlineStatus == 'in' " ></button>
+      <button class="button icon ion-android-timer" ng-if=" onlineStatus == 'out'" ></button>
+    </div>
+  </ion-nav-buttons>
+
   <ion-nav-buttons side="right">
     <div class="no-drag" >
       <button class="button icon ion-navicon" ng-click="openFriendModal();" ></button>
