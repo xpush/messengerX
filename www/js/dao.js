@@ -332,18 +332,21 @@ angular.module('starter.dao', [])
     resetCount : function( channelId ){
       var unreadCount = 1;
       var searchIndex = -1;
-      var until = scope.channelArray.length;
-      for( var inx = 0 ; inx < until; inx++ ){
-        if( scope.channelArray[inx].channel_id == channelId ){
-          searchIndex = inx;
-          break;
-        }
-      }
 
-      if( searchIndex > -1 ){
-        var channel = scope.channelArray[ searchIndex ];
-        channel.unread_count = 0;
-        scope.channelArray.splice(searchIndex, 1, channel);
+      if( scope != undefined ){
+        var until = scope.channelArray.length;
+        for( var inx = 0 ; inx < until; inx++ ){
+          if( scope.channelArray[inx].channel_id == channelId ){
+            searchIndex = inx;
+            break;
+          }
+        }
+
+        if( searchIndex > -1 ){
+          var channel = scope.channelArray[ searchIndex ];
+          channel.unread_count = 0;
+          scope.channelArray.splice(searchIndex, 1, channel);
+        }
       }
     },
 
@@ -464,7 +467,7 @@ angular.module('starter.dao', [])
     get : function( channelId ){
       var loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT notice, sender_id, updated FROM TB_NOTICE WHERE channel_id = ? and owner_id = ? ;', [channelId,loginUserId]
+        'SELECT message, sender_id, updated, use_flag, fold_flag FROM TB_NOTICE WHERE channel_id = ? and owner_id = ? and use_flag = ? ;', [channelId,loginUserId,'Y']
       ).then(function(result) {
         return DB.fetch(result);
       });
@@ -483,21 +486,52 @@ angular.module('starter.dao', [])
 
       var query =  
         "INSERT OR REPLACE INTO TB_NOTICE "+
-        "(notice, sender_id, channel_id, updated, owner_id ) VALUES "+
-        "(?, ?, ?, ?, ?)";
+        "(message, sender_id, channel_id, updated, use_flag, fold_flag, owner_id ) VALUES "+
+        "(?, ?, ?, ?, ?, ?, ?) ;";
 
       var cond = [
         jsonObj.MG,
         jsonObj.S,
         jsonObj.C,
         jsonObj.TS,
+        'Y',
+        'N',
         loginUserId
       ];
 
       return DB.query(query, cond).then(function(result) {
         return result;
       });
-    }
+    },
+    /**
+     * @ngdoc function
+     * @name add
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Update notice message at local DB
+     * @return {object} Parameter 
+     * @return {string} Query Result
+     */
+    update : function( jsonObj ){
+      loginUserId = Sign.getUser().userId;
+
+      var query =  
+        "UPDATE TB_NOTICE "+
+        "SET use_flag = ? , fold_flag = ? "+
+        "WHERE channel_id = ? AND owner_id = ? ; ";
+
+      var cond = [
+        jsonObj.useFlag,
+        jsonObj.foldFlag,
+        jsonObj.channelId,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
+    }    
   }
 })
 .factory('DB', function($q, $rootScope, DB_CONFIG) {
@@ -568,10 +602,8 @@ angular.module('starter.dao', [])
     var deferred = $q.defer();
     self.db.transaction(function(transaction) {
       transaction.executeSql(query, binding, function(transaction, result) {
-        console.log( result );
         deferred.resolve(result);
       }, function(transaction, error) {
-        console.log( error );
         deferred.reject(error);
       });
     });

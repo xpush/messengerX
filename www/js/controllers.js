@@ -690,7 +690,7 @@ angular.module('starter.controllers', [])
       $rootScope.xpush.isExistUnread = false;
 
       // Initialize chat controller
-      var channelId = args.stateParams.channelId;
+      channelId = args.stateParams.channelId;
       if( channelId != undefined ){
         $rootScope.xpush._getChannelAsync( channelId, function(){
           init( args.stateParams, args.parentScope );
@@ -741,12 +741,16 @@ angular.module('starter.controllers', [])
         }, 300 );
       }
 
-      NoticeDao.get( channelId ).then(function(data) {
-        var dateStrs = UTIL.timeToString( data.updated );
-        var dateMessage = dateStrs[1]+" "+dateStrs[2];
 
-        var noticeMessage = { date : dateMessage, message : data.notice, name : Cache.get( data.sender_id ).NM, image : Cache.get( data.sender_id ).I };
-        $scope.setNotice( noticeMessage );
+      NoticeDao.get( channelId ).then(function(data) {
+        if( data != undefined ){
+          var dateStrs = UTIL.timeToString( data.updated );
+          var dateMessage = dateStrs[1]+" "+dateStrs[2];
+
+          var noticeMessage = { date : dateMessage, message : data.message, name : Cache.get( data.sender_id ).NM,
+                                image : Cache.get( data.sender_id ).I , useFlag : data.use_flag, foldFlag : data.fold_flag };
+          $scope.setNotice( noticeMessage );
+        }
       });
     });
   };
@@ -862,8 +866,8 @@ angular.module('starter.controllers', [])
    * @param {jsonObject} channelId, channelName, channelUsers
    */
   $scope.setNotice = function( noticeMsg ) {
-    $scope.noticeMessage = noticeMsg;
-    document.getElementById( "chat-notice" ).style.display = "block";
+    $scope.notice = noticeMsg;
+    $scope.toggleNotice( true );
   };
 
   /**
@@ -997,8 +1001,8 @@ angular.module('starter.controllers', [])
   $scope.emoticons = [];
 
   $scope.curEmoTabId = "0";
-  $scope.showEmo = "false";
-  $scope.showExt = "false";
+  $scope.showEmo = false;
+  $scope.showExt = false;
 
   /**
    * @ngdoc function
@@ -1007,17 +1011,19 @@ angular.module('starter.controllers', [])
    * @kind function
    *
    * @description show or hide emoticon div
-   * @param {string}
+   * @param {boolean}
    */
   $scope.toggleEmoticons = function( flag ){
     $scope.showEmo = flag;
-    if( $scope.showEmo == "true" ){
+    if( $scope.showEmo == true ){
       document.getElementById( 'tabbody'+$scope.curEmoTabId ).style.display = "block";
       document.getElementById( 'chat-emoticons' ).style.display = "block";
       document.getElementById( "chat-extends" ).style.display = "none";
-      $scope.showExt = "false";
+      document.getElementById( "chat-notice" ).style.display = "none";      
+      $scope.showExt = false;
     } else {
       document.getElementById( 'chat-emoticons' ).style.display = "none";
+      $scope.toggleNotice( true );
     }
   };
 
@@ -1028,18 +1034,65 @@ angular.module('starter.controllers', [])
    * @kind function
    *
    * @description show or hide extension div
-   * @param {string}
+   * @param {boolean}
    */
   $scope.toggleExt = function( flag ) {
     $scope.showExt = flag;
-    if( $scope.showExt == "true" ){
+    if( $scope.showExt == true ){
       document.getElementById( "chat-extends" ).style.display = "block";
       document.getElementById( 'chat-emoticons' ).style.display = "none";
-      $scope.showEmo = "false";
+      document.getElementById( "chat-notice" ).style.display = "none";
+      $scope.showEmo = false;
     } else {
       document.getElementById( "chat-extends" ).style.display = "none";
+      $scope.toggleNotice( true );
     }
   };
+
+  /**
+   * @ngdoc function
+   * @name toggleNotice
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description show or hide Notice div
+   * @param {boolean}
+   */
+  $scope.toggleNotice = function( flag ) {
+    if( flag && $scope.notice.useFlag == 'Y' && !$scope.showEmo && !$scope.showExt ){
+      if( $scope.notice.foldFlag == 'N' ) {
+        document.getElementById( "chat-notice" ).style.display = "block";
+        document.getElementById( "chat-notice-button" ).style.display = "none";
+      } else {
+        document.getElementById( "chat-notice" ).style.display = "none";
+        document.getElementById( "chat-notice-button" ).style.display = "block";
+      }
+    } else {
+      document.getElementById( "chat-notice" ).style.display = "none";
+      document.getElementById( "chat-notice-icon" ).style.display = "none";
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name toggleNotice
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description show or hide Notice div's menu
+   * @param {boolean}
+   */  
+  $scope.toggleNoticeMenu = function(){
+    if( $scope.showNoticeMenu ){      
+      document.getElementById( "chat-notice-menu" ).style.display = "none";
+      document.getElementById( "notice-message" ).style.whiteSpace =  "nowrap";      
+      $scope.showNoticeMenu = false;
+    } else {
+      document.getElementById( "notice-message" ).style.whiteSpace = "normal";
+      document.getElementById( "chat-notice-menu" ).style.display = "flex";      
+      $scope.showNoticeMenu = true;
+    }
+  }
 
   /**
    * @ngdoc function
@@ -1204,6 +1257,14 @@ angular.module('starter.controllers', [])
     });
   };
 
+  /**
+   * @ngdoc function
+   * @name showNoticePopup
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Open Notice popup to input notice message
+   */
   $scope.showNoticePopup = function() {
     $scope.data = {}
 
@@ -1228,10 +1289,35 @@ angular.module('starter.controllers', [])
         },
       ]
     });
-    myPopup.then(function(res) {
-      if( res != undefined ){
-        Chat.send( res, 'N' );
+    myPopup.then(function(noticeMessage) {
+      if( noticeMessage != undefined ){
+        Chat.send( noticeMessage, 'N' );
       }
     });
+  };
+
+  /**
+   * @ngdoc function
+   * @name showNoticePopup
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Update Notice option
+   */
+  $scope.updateNotice = function( useFlag, foldFlag ) {
+    var param = {'channelId': channelId, useFlag : useFlag, foldFlag : foldFlag };
+
+    NoticeDao.update( param );
+
+    if( $scope.notice != undefined ){
+      $scope.notice.useFlag = param.useFlag;
+      $scope.notice.foldFlag = param.foldFlag;
+    }
+
+    if( useFlag == 'N' ){
+      $scope.toggleNotice( false );      
+    } else {
+      $scope.toggleNotice( true );
+    }
   };
 });

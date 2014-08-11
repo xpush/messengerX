@@ -97,16 +97,16 @@
     <input type="file" id="file"/>    
   </ion-content>
   <ion-footer-bar class="bar-frosted" >
-    <button ng-if=" showExt == 'true' " class="button icon ion-close-round" ng-click="toggleExt('false')"></button>
-    <button ng-if=" showExt =='false' " class="button icon ion-plus-round" ng-click="toggleExt('true')"></button>
-    <button ng-if=" showEmo == 'true' " class="button icon ion-sad" ng-click="toggleEmoticons('false')"></button>
-    <button ng-if=" showEmo =='false' " class="button icon ion-happy" ng-click="toggleEmoticons('true')"></button>
+    <button ng-if=" showExt == true " class="button icon ion-close-round" ng-click="toggleExt(false)"></button>
+    <button ng-if=" showExt == false " class="button icon ion-plus-round" ng-click="toggleExt(true)"></button>
+    <button ng-if=" showEmo == true " class="button icon ion-sad" ng-click="toggleEmoticons(false)"></button>
+    <button ng-if=" showEmo == false " class="button icon ion-happy" ng-click="toggleEmoticons(true)"></button>
 
     <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 40px 0 10px;"/>
     <button class="button button-positive" style="min-width:50px;" ng-click="send()" >Send </button>
   </ion-footer-bar>
   <div class="chat-extends" id="chat-extends" style="display:none">
-    <div class="row">
+    <div class="row center">
       <div class="col">
         <img ng-src="{{rootImgPath}}/image.png" ng-click="openFileDialog('2')"/>
       </div>
@@ -119,7 +119,7 @@
     </div>
   </div>
  
-  <div class="chat-emoticon" id="chat-emoticons">
+  <div class="chat-extends" id="chat-emoticons">
     <div id="emoticon-tabs" class="tabs tab-emoticon" >
       <a ng-class="emoticon.CN" id="tab{{$index}}" ng-repeat="emoticon in emoticons" ng-click="tabActive('{{$index}}');">
         <i class="icon {{emoticon.tag}}"></i>
@@ -134,12 +134,25 @@
     </div>
   </div>
 
-  <div class="item item-avatar chat-notice" id="chat-notice" >
-    <img ng-src="{{noticeMessage.image}}"  />
-    <h2>{{noticeMessage.message}}</h2>
-    <p>{{noticeMessage.name}}&nbsp;{{noticeMessage.date}}</p>
+  <div class="chat-extends" id="chat-notice">
+    <div class="item item-avatar" >
+      <img ng-src="{{notice.image}}"  />
+      <h2 class="mw90" id="notice-message">{{notice.message}}</h2>
+      <p>{{notice.name}}&nbsp;{{notice.date}}</p>
+      <i class="icon ion-more btn-more" ng-click="toggleNoticeMenu();"></i>
+    </div>
+
+    <div class="chat-extends-menu" id="chat-notice-menu">
+      <div class="col" ng-click="updateNotice('N','N')">
+        <span>No more</span>
+      </div>
+      <div class="col" ng-click="updateNotice('Y','Y')">
+        <span>Fold</span>
+      </div>
+    </div>    
   </div>
 
+  <button class="button ion-arrow-expand btn-expand" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>
   <img ng-src="{{loginUserImage}}" class="floating-image" ng-click="showNoticePopup();"/>
 
 

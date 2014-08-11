@@ -8,7 +8,7 @@ angular.module('starter.constants', [])
   .constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
   .constant('DB_CONFIG', {
     name: 'stalk.db',
-    version: '0.2',
+    version: '0.3',
     tables: [
       {
         name: 'TB_MESSAGE',
@@ -42,8 +42,10 @@ angular.module('starter.constants', [])
         name: 'TB_NOTICE',
         columns: [
           {name: 'channel_id',   type: 'text'},
-          {name: 'notice', type: 'text DEFAULT "" '},
+          {name: 'message', type: 'text DEFAULT "" '},
           {name: 'sender_id', type: 'text'},
+          {name: 'use_flag', type: 'text'},
+          {name: 'fold_flag', type: 'text'},
           {name: 'updated', type: 'integer'},
           {name: 'owner_id', type: 'text'}
         ],

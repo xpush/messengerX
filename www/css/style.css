@@ -263,6 +263,10 @@ paper-input {
 	display: none;
 }
 
+.hidden {
+	display: none;	
+}
+
 .item-channel .item-img img{
 	width:20px;
 	height:20px;
@@ -283,27 +287,28 @@ paper-input {
 	width: 100%;
  }
 
- .account-profile {
-   position: absolute;
-   left:13px;
-   top:21px;
- }
+.account-profile {
+  position: absolute;
+  left:13px;
+  top:21px;
+}
 
- .account-profile img {
+.account-profile img {
 	max-width: 80px;
 	max-height: 80px;
 	display:block;
- }
+}
 
- .img-friend{
-    float: left;
-    margin-right: 10px;
-    top: 15px;
-    left: 15px;
-    max-width: 45px;
-    max-height: 45px;
-    width: 100%;
-    border-radius: 4px; }
+.img-friend {
+  float: left;
+  margin-right: 10px;
+  top: 15px;
+  left: 15px;
+  max-width: 45px;
+  max-height: 45px;
+  width: 100%;
+  border-radius: 4px;
+}
 
 /*
 * override ionic css
@@ -318,7 +323,7 @@ paper-input {
 	display: none;
 }
 
-.chat-extends, .chat-emoticon, .chat-notice{
+.chat-extends {
 	position:absolute;
 	z-index:999;
 	top:44px;
@@ -329,8 +334,23 @@ paper-input {
 	background: #F0F3F8;
 }
 
-.chat-extends div{
+.chat-extends .item {
+	background: #F0F3F8;
+}
+
+
+.chat-extends-menu{
+	display:none;
 	text-align: center;
+}
+
+.chat-extends-menu .col{
+	border:1px solid #ddd;
+	cursor : pointer;	
+}
+
+.chat-extends p{
+	margin:0px;
 }
 
 img.emoticon{
@@ -376,13 +396,6 @@ img.emoticon{
   background-color: #F7F7F7;
 }
 
-.top-titlebar-icon, .bottom-titlebar-icon {
-	position: absolute;
-	left: 6px;
-	margin-top: 6px;
-	margin-bottom: 6px;
-}
-
 .no-drag {
 	-webkit-app-region: no-drag;
 }
@@ -396,6 +409,34 @@ img.emoticon{
 	margin-bottom: 6px;
 	cursor : pointer;
 	-webkit-app-region: no-drag;
+}
+
+.btn-more {
+	position: absolute;
+	top: 40px;
+	right: 4px;
+	cursor: pointer;
+	width: 40px;
+	height: 30px;
+	text-align: center;
+	-webkit-app-region: no-drag;
+}
+
+.btn-expand	 {
+	display : none;
+	position: absolute;
+	font-size: 20px;
+	min-width: 32px;
+	min-height: 32px;
+	top: 48px;
+	right: 10px;
+	cursor: pointer;
+	text-align: center;
+	z-index: 999;
+	-webkit-app-region: no-drag;
+	line-height: 16px;
+	width: 10px;
+	padding: 0px;
 }
 
 .floating-progress {
@@ -413,6 +454,26 @@ img.emoticon{
 	border-radius: 40px;
 	z-index: 999;
 	width: 36px;
+}
+
+.mw60 {
+	max-width: 60%;
+	text-overflow:ellipsis;
+}
+
+.mw70 {
+	max-width: 70%;
+	text-overflow:ellipsis;
+}
+
+.mw80 {
+	max-width: 80%;
+	text-overflow:ellipsis;
+}
+
+.mw90 {
+	max-width: 90%;
+	text-overflow:ellipsis;
 }
 
 .blink_me {
