@@ -301,7 +301,7 @@ angular.module('starter.services', [])
         if( currentChannel != undefined && currentChannel._connected && sr == 'R') {
           
           if( $rootScope.currentScope ){
-            $rootScope.currentScope.setStatus( data.MG );
+            $rootScope.currentScope.setOnlineStatus( data.MG );
           }          
         }
       });
@@ -518,8 +518,16 @@ angular.module('starter.services', [])
       $rootScope.xpush.getUnreadMessage( function(err, messageArray) {
 
         for( var inx = 0 ; inx < messageArray.length ; inx++ ){
-          var data = messageArray[inx].MG.DT;
+
+          var messageObject = messageArray[inx];
+
+          if( messageObject.NM != 'message' ){
+            continue;
+          }
+
+          var data = messageObject.MG.DT;
           data = JSON.parse(data);
+
 
           data.MG = decodeURIComponent( data.MG );
           var sr = data.UO.U == loginUser.userId ? 'S':'R';
@@ -762,7 +770,7 @@ angular.module('starter.services', [])
      * @param {string} message
      */
     sendSys : function(msg){
-      var DT = { UO : CONF._user, MG : msg, S : CONF._user.U };
+      var DT = { UO : CONF._user, MG : msg, S : CONF._user.U, 'T' : 'S' };
       $rootScope.xpush.send(CONF._channel, 'system', DT );
     }
   };

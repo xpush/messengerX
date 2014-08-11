@@ -1,8 +1,7 @@
 <ion-view title="{{channelName}}">
   <ion-nav-buttons side="left">
     <div class="no-drag" >
-      <button class="button icon ion-android-locate" ng-if=" onlineStatus == 'in' " ></button>
-      <button class="button icon ion-android-timer" ng-if=" onlineStatus == 'out'" ></button>
+      <button class="button icon hidden" id="online-status" ></button>
     </div>
   </ion-nav-buttons>
 

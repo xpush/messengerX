@@ -46,7 +46,6 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
     // Blur events can be double-fired, so we'll filter those out with prevEvent tracking
     win.on('blur', function(event) {
       if (prevEvent !== 'blur'){
-        console.log( "blur" );
         $rootScope.$broadcast('$windowBlur', event);
       }
       prevEvent = 'blur';
@@ -54,7 +53,6 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
 
     win.on('focus', function(event) {
       if (prevEvent !== 'focus'){
-        console.log( "focus" );
         $rootScope.$broadcast('$windowFocus', event);
       }
       prevEvent = 'focus';

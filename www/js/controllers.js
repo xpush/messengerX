@@ -701,16 +701,15 @@ angular.module('starter.controllers', [])
         Manager.addEvent();
       }
     });
-  });
 
-  $rootScope.$on('$windowBlur',  function (){
-    Chat.sendSys( 'out' );
-  });
+    $rootScope.$on('$windowBlur',  function (){
+      Chat.sendSys( 'out' );
+    });
 
-  $rootScope.$on('$windowFocus', function (){
-    Chat.sendSys( 'in' );
+    $rootScope.$on('$windowFocus', function (){
+      Chat.sendSys( 'in' );
+    });
   });
-      
 
   /**
    * @ngdoc function
@@ -1330,8 +1329,12 @@ angular.module('starter.controllers', [])
     }
   };
 
-  $scope.setStatus = function( msg ){
-    $scope.onlineStatus = '';
-    $scope.onlineStatus = msg;
+  $scope.setOnlineStatus = function( msg ){
+    var btnStatus = document.getElementById( "online-status" );
+    if( msg == "in" ){
+      btnStatus.className = "button icon ion-android-timer";
+    } else {
+      btnStatus.className = "button icon ion-android-locate"
+    }
   };
 });

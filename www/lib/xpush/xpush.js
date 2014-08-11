@@ -581,6 +581,7 @@
       switch(data.event){
         case 'NOTIFICATION':
           var ch = self.getChannel(data.C);
+
           if( self.autoInitFlag ){
             if(!ch){
               ch = self._makeChannel(data.C);
@@ -600,7 +601,7 @@
             }
             ch.emit(data.NM , data.DT);
           }
-          self.emit(RMKEY, data.C, data.NM, data.DT);
+          self.emit(data.NM, data.C, data.NM, data.DT);
         break;
 
         case 'CONNECT' :
