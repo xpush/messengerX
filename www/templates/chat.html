@@ -1,7 +1,8 @@
 <ion-view title="{{channelName}}">
   <ion-nav-buttons side="left">
-    <div class="no-drag" >
-      <button class="button icon hidden" id="online-status" ></button>
+    <div >
+      <i class="icon icon-large ion-ios7-eye icon-nav-bar " ng-if=" watching == true  " ></i>
+      <i class="icon icon-large ion-android-timer icon-nav-bar " ng-if=" watching == false  " ></i>
     </div>
   </ion-nav-buttons>
 
@@ -158,7 +159,7 @@
     </div>    
   </div>
 
-  <button class="button ion-arrow-expand btn-expand" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>
+  <button class="button ion-arrow-expand btn-expand hidden icon-large" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>
   <img ng-src="{{loginUserImage}}" class="floating-image" ng-click="showNoticePopup();"/>
 
 

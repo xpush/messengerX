@@ -1011,6 +1011,7 @@ angular.module('starter.controllers', [])
   $scope.curEmoTabId = "0";
   $scope.showEmo = false;
   $scope.showExt = false;
+  $scope.watching = false;
 
   /**
    * @ngdoc function
@@ -1332,9 +1333,12 @@ angular.module('starter.controllers', [])
   $scope.setOnlineStatus = function( msg ){
     var btnStatus = document.getElementById( "online-status" );
     if( msg == "in" ){
-      btnStatus.className = "button icon ion-android-timer";
+      $scope.watching = true;
+      //btnStatus.className = "button icon ion-android-locate";
     } else {
-      btnStatus.className = "button icon ion-android-locate"
+      $scope.watching = false;
+      //btnStatus.className = "button icon ion-android-timer";
     }
+    $scope.$apply();
   };
 });
