@@ -241,6 +241,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     $rootScope.totalUnreadCount = 0;
     $rootScope.firstFlag = true;
   });
+
+  // Add Auth Interceptor
+  $rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams) {
+    if ( toState.name != 'signin' && Sign.getUser() === undefined ) {
+      event.preventDefault();
+
+      $rootScope.error = null;
+      $state.go('signin');
+    }
+  });
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
@@ -397,11 +407,9 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     },
     openPopup : function( popupWin, popupKey, scope, stateParams ){
 
-
       if( $rootScope.nodeWebkit ){
         popups[popupKey] = popupWin.window;
         popupWin.on('close', function() {
-          console.log( "close : " + popupKey );
           
           // Hide the window to give user the feeling of closing immediately
           this.hide();
@@ -414,16 +422,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
 
           // After closing the new window, close the main window.
           this.close(true);
-        });
-
-        console.log( popupWin );
-        popupWin.on('focus', function() {
-          console.log( "focus : " + popupKey );
-        });        
-
-        popupWin.on('blur', function() {
-          console.log( "blur : " + popupKey );
-        });       
+        });   
       } else {
         popups[popupKey] = popupWin;
         popupWin.onbeforeunload = function(){

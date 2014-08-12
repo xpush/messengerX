@@ -575,6 +575,7 @@ angular.module('starter.services', [])
 })
 .factory('Sign', function($http, $state, $rootScope, BASE_URL) {
   var loginUser;
+
   return {
     /**
      * @ngdoc function
@@ -585,8 +586,7 @@ angular.module('starter.services', [])
      * @description Clear login info and go to login page
      */
     logout : function(){
-
-      loginUser = {};
+      loginUser = undefined;
       $rootScope.loginUser = {};
       $rootScope.currentChannel = '';
       $rootScope.totalUnreadCount = 0;
