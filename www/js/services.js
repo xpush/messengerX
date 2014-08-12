@@ -527,9 +527,14 @@ angular.module('starter.services', [])
 
           var data = messageObject.MG.DT;
           data = JSON.parse(data);
-
-
           data.MG = decodeURIComponent( data.MG );
+
+          // Save notice
+          if( data.T == 'N' ){
+            NoticeDao.add( data );
+            return;
+          }
+
           var sr = data.UO.U == loginUser.userId ? 'S':'R';
 
           if( data.T == 'J' ){
