@@ -13,6 +13,17 @@ angular.module('starter.directives', [])
     });
   };
 })
+.directive('ngRefresh', function() {  
+  return function(scope, element, attrs) {
+    element.bind("keydown keypress", function(event) {
+      if(!event.ctrlKey){
+        if ((event.which || event.keyCode) == 116){
+          event.preventDefault();
+        }
+      }
+    });
+  };
+})
 .directive('channelImage', function(Cache, Sign, $rootScope) {
   return {
     restrict: 'A',

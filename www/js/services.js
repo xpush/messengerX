@@ -578,7 +578,7 @@ angular.module('starter.services', [])
     }
   };
 })
-.factory('Sign', function($http, $state, $rootScope, BASE_URL) {
+.factory('Sign', function($http, $state, $rootScope, $localStorage, BASE_URL) {
   var loginUser;
 
   return {
@@ -592,6 +592,7 @@ angular.module('starter.services', [])
      */
     logout : function(){
       loginUser = undefined;
+      $localStorage.loginUser = undefined;
       $rootScope.loginUser = {};
       $rootScope.currentChannel = '';
       $rootScope.totalUnreadCount = 0;
@@ -644,6 +645,7 @@ angular.module('starter.services', [])
      */
     setUser : function( user ){
       loginUser = user;
+      $localStorage.loginUser = user;
     },
     /**
      * @ngdoc function
@@ -656,8 +658,20 @@ angular.module('starter.services', [])
      */
     getUser : function(){
       return loginUser;
+    },
+    /**
+     * @ngdoc function
+     * @name getUser
+     * @module starter.services
+     * @kind function
+     *
+     * @description return stored user
+     * @return {Object} userInfo
+     */
+    restoreUser : function(){
+      return $localStorage.loginUser;
     }
-  };
+  }
 })
 .factory('Chat', function($http, $compile, $rootScope, BASE_URL, ChannelDao, MessageDao, UTIL, Cache, Sign ) {
 

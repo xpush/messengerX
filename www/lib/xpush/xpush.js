@@ -129,12 +129,19 @@
 
   XPush.prototype.logout = function(userId, deviceId){
     var self = this;
-    self._sessionConnection.disconnect();
-    for( var key in self._channels ){
-      if( self._channels[key]._connected ){
-        self._channels[key].disconnect();
+    if( self != undefined ) {
+      if( self._sessionConnection != undefined  ){
+        self._sessionConnection.disconnect();
       }
-    }
+
+      if( self._channels != undefined  ){
+        for( var key in self._channels ){
+          if( self._channels[key]._connected ){
+            self._channels[key].disconnect();
+          }
+        }
+      }
+    }      
   };
 
   // params.channel(option), params.users

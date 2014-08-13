@@ -1,6 +1,6 @@
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass', 'ngStorage'])
 
-.run(function($location, $ionicPlatform, $rootScope, DB, Sign, NAVI, $state ) {
+.run(function($location, $ionicPlatform, $rootScope, DB, Sign, NAVI, $state, $window, $localStorage, $sessionStorage ) {
   $ionicPlatform.ready(function() {
 
     if(window.cordova && window.cordova.plugins.Keyboard) {
@@ -40,7 +40,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
       function onPause() {
         console.log('On Pause');
-        $rootScope.xpush.logout();
       }
 
     } else if ( $location.absUrl().indexOf( 'file' ) > -1 ) {
@@ -73,13 +72,17 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
       var tray = new gui.Tray({ title: 'Tray', icon: 'icon.png' });
       var menu = new gui.Menu();
-      menu.append(new gui.MenuItem({ label: 'close' }));
+      menu.append(new gui.MenuItem({ label: 'Logout' }));
+      menu.append(new gui.MenuItem({ label: 'Close' }));
 
       menu.items[0].click = function() { 
-        console.log('clicked');
+        $rootScope.logout();
+      };
+
+      menu.items[1].click = function() { 
         tray.remove();
         gui.App.quit();
-      };
+      };      
 
       tray.menu = menu;
 
@@ -218,8 +221,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
 
       if(type == 'LOGOUT'){
-        $rootScope.logout(true);
-        window.location = $rootScope.rootPath + 'err.html?LOGOUT';        
+        console.log( $sessionStorage.reloading );
+        if( !$sessionStorage.reloading ){
+          $rootScope.logout(true);
+          window.location = $rootScope.rootPath + 'err.html?LOGOUT';
+        }
       }
     }, false );
 
@@ -243,14 +249,22 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   });
 
   // Add Auth Interceptor
-  $rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams) {
-    if ( toState.name != 'signin' && Sign.getUser() === undefined ) {
-      event.preventDefault();
-
-      $rootScope.error = null;
-      $state.go('signin');
+  $rootScope.$on("$stateChangeSuccess", function (event, toState, toParams, fromState, fromParams) {
+    if( toState.name == 'splash' ){
+      $sessionStorage.reloading = true;
+    } else {
+      $sessionStorage.reloading = false;
     }
   });
+
+  $rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams) {
+
+    if ( toState.name != 'signin' && toState.name != 'splash' && Sign.getUser() === undefined ) {
+      event.preventDefault();      
+      $rootScope.error = null;
+      $state.go('splash');
+    }
+  }); 
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
@@ -260,6 +274,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   // Set up the various states which the app can be in.
   // Each state's controller can be found in controllers.js
   $stateProvider
+
+    .state('splash', {
+      url: "/splash",
+      templateUrl: "templates/splash.html",
+      controller: 'SplashCtrl'
+    })  
 
     .state('signin', {
       url: "/sign-in",
@@ -327,7 +347,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     })
 
-  $urlRouterProvider.otherwise('/sign-in');
+  $urlRouterProvider.otherwise('/splash');
 });
 
 angular.module('ionic.contrib.frostedGlass', ['ionic'])

@@ -1,5 +1,4 @@
-angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic.contrib.frostedGlass'])
-
+angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic.contrib.frostedGlass', 'ngStorage'])
 .run(function($location, $ionicPlatform, $window, $rootScope, DB, Sign ) {
   $ionicPlatform.ready(function() {
 
@@ -39,8 +38,7 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
       };
     }
 
-    var win = angular.element($window),
-        vendorPrefix, prevEvent;
+    var win = angular.element($window), prevEvent;
 
     // We'll let jQuery/jqLite handle cross-browser compatibility with window blur/focus
     // Blur events can be double-fired, so we'll filter those out with prevEvent tracking

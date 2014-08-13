@@ -565,6 +565,41 @@ angular.module('starter.controllers', [])
     });
   });
 })
+.controller('SplashCtrl', function($state, $scope, $rootScope, Sign, Cache, Friends ) {
+
+  var delay = 1500;
+  setTimeout( function (){
+    var storedUser = Sign.restoreUser();
+    if( storedUser != undefined ){
+      
+      $rootScope.xpush.login( storedUser.userId, storedUser.password, storedUser.deviceId, 'ADD_DEVICE', function(err, result){
+
+        $rootScope.loginUser = storedUser;
+        
+        // Save session Info
+        Sign.setUser( storedUser );
+
+        // Push userImage and userName into local cache oject
+        Cache.add(storedUser.userId, {'NM':storedUser.userName, 'I':storedUser.image});
+
+        // Retrieve refresh history for sync friends
+        Friends.getRefreshHistory(function(history){
+
+          // Do not update within an hour( 60s )
+          if( history != undefined && ( history.time - Date.now() ) < 60000 ){
+            $rootScope.syncFlag = false;
+          } else {
+            $rootScope.syncFlag = true;
+          }
+
+          $state.go('tab.friends');
+        });
+      });
+    } else {
+      $state.go('signin');
+    }
+  }, delay);
+})
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $ionicPopup, Friends, Sign, Cache) {
 
   if( window.root ){
@@ -634,6 +669,10 @@ angular.module('starter.controllers', [])
       }
     });
   };
+
+  $scope.$watch('$viewContentLoaded', function() {
+    document.getElementById( "userId" ).focus();
+  });
 })
 .controller('SignUpCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
   /**
