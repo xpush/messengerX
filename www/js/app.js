@@ -3,11 +3,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 .run(function($location, $ionicPlatform, $rootScope, DB, Sign, NAVI, $state, $window, $localStorage, $sessionStorage ) {
   $ionicPlatform.ready(function() {
 
-    document.addEventListener("backbutton", function () {
-      alert( "backbutton" );
-      window.history.go(-1);
-    });
-
     if(window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
     }
