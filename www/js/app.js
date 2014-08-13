@@ -3,6 +3,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 .run(function($location, $ionicPlatform, $rootScope, DB, Sign, NAVI, $state, $window, $localStorage, $sessionStorage ) {
   $ionicPlatform.ready(function() {
 
+    document.addEventListener("backbutton", function () {
+      alert( "backbutton" );
+      window.history.go(-1);
+    });
+
     if(window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
     }
@@ -221,7 +226,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
 
       if(type == 'LOGOUT'){
-        console.log( $sessionStorage.reloading );
         if( !$sessionStorage.reloading ){
           $rootScope.logout(true);
           window.location = $rootScope.rootPath + 'err.html?LOGOUT';

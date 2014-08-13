@@ -24,6 +24,15 @@ angular.module('starter.directives', [])
     });
   };
 })
+.directive('ngBackButton', function() {  
+  return function(scope, element, attrs) {
+    element.bind("keydown keypress", function(event) {
+      if ( event.keyCode == 8 || event.keyCode == 27 ) {
+        event.preventDefault();
+      }
+    });
+  };
+})
 .directive('channelImage', function(Cache, Sign, $rootScope) {
   return {
     restrict: 'A',
