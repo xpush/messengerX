@@ -13,21 +13,11 @@ angular.module('starter.directives', [])
     });
   };
 })
-.directive('ngRefresh', function() {  
-  return function(scope, element, attrs) {
-    element.bind("keydown keypress", function(event) {
-      if(!event.ctrlKey){
-        if ((event.which || event.keyCode) == 116){
-          event.preventDefault();
-        }
-      }
-    });
-  };
-})
 .directive('ngBackButton', function() {  
   return function(scope, element, attrs) {
+    console.log( event.keyCode );
     element.bind("keydown keypress", function(event) {
-      if ( event.keyCode == 8 || event.keyCode == 27 ) {
+      if ( event.keyCode == 8 || event.keyCode == 4 ) {
         event.preventDefault();
       }
     });
