@@ -1013,7 +1013,7 @@ angular.module('starter.controllers', [])
    * @param {string} webRTC key
    */
   $scope.openWebRTC = function( key ){
-    $scope.toggleExt( "false" );
+    $scope.toggleExt( false );
 
     var newFlag = false;
     if( key === undefined ){
@@ -1107,7 +1107,7 @@ angular.module('starter.controllers', [])
    * @param {boolean}
    */
   $scope.toggleNotice = function( flag ) {
-    if( flag && $scope.notice.useFlag == 'Y' && !$scope.showEmo && !$scope.showExt ){
+    if( flag && $scope.notice && $scope.notice.useFlag == 'Y' && !$scope.showEmo && !$scope.showExt ){
       if( $scope.notice.foldFlag == 'N' ) {
         document.getElementById( "chat-notice" ).style.display = "block";
         document.getElementById( "chat-notice-button" ).style.display = "none";
@@ -1152,7 +1152,7 @@ angular.module('starter.controllers', [])
    * @param {string} url
    */
   $scope.sendEmoticon = function(url){
-    $scope.toggleEmoticons( "false" );
+    $scope.toggleEmoticons( false );
     document.getElementById( 'chat-emoticons' ).style.display = "none";
     Chat.send( url, 'E' );
   };
@@ -1206,7 +1206,7 @@ angular.module('starter.controllers', [])
       navigator.camera.getPicture(onSuccess, onFail, opts);
 
       function onSuccess(FILE_URI) {
-        $scope.toggleExt( "false" );
+        $scope.toggleExt( false );
         $rootScope.xpush.uploadFile(channelId, FILE_URI, {
           type: 'image'
         }, function (data){
@@ -1217,13 +1217,13 @@ angular.module('starter.controllers', [])
       }
 
       function onFail(message) {
-        $scope.toggleExt( "false" );
+        $scope.toggleExt( false );
         console.log(message);
       }
     } else {
 
       // If using browser, use file dialog
-      $scope.toggleExt( "false" );
+      $scope.toggleExt( false );
       ionic.trigger('click', { target: document.getElementById('file') });
     }
   };
