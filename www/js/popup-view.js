@@ -62,8 +62,6 @@ angular.module('popupview', ['ionic'])
       video.src = srcName;
 
       video.addEventListener('loadeddata', function (){
-        console.log( video.videoWidth +" : " + video.videoHeight  );
-
         offsetY = video.videoWidth > screen.width ? 84+ topBarY: 66+topBarY;
         window.resizeTo(video.videoWidth+offsetX, video.videoHeight+offsetY);  
       });    

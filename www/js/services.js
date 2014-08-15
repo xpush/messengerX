@@ -256,6 +256,8 @@ angular.module('starter.services', [])
 
       if( !initFlag ){
 
+        console.log( "init" );
+
         // Get channel list from server
         self.channelList(function( channels ){
 
@@ -726,12 +728,11 @@ angular.module('starter.services', [])
             }
 
             // 10 minute
-            if( latestDate != dateStrs[3] ){
+            if( latestDate !== dateStrs[3] ){
               var dateMessage = dateStrs[1]+" "+dateStrs[2];
               messages.push( { type : 'T', date : dateStrs[1], message : dateMessage } );
               latestDate = dateStrs[3];
             }
-
             messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I, active : "false" } );
           }
 
@@ -756,7 +757,7 @@ angular.module('starter.services', [])
     send : function(msg, type){
       var DT = { UO : CONF._user, MG : encodeURIComponent(msg), S : CONF._user.U };
 
-      if( type !=undefined ){
+      if( type !== undefined ){
         DT.T = type;
       }
 
@@ -812,17 +813,16 @@ angular.module('starter.services', [])
       EmoticonDao.list(param).then(function(emoticonArray) {
         var result = {};
 
-        for( var inx = 0 ; inx < emoticonArray.length ; inx++ ){
-          var emo = emoticonArray[inx];
-          var group = emo.group_id;
-          var tag = emo.tag;
+        angular.forEach( emoticonArray, function( emoticon ){
+          var group = emoticon.group_id;
+          var tag = emoticon.tag;
 
           if( result[group] === undefined ){
             result[group] = { group : group, tag : tag, items : [] };
           }
 
-          result[group].items.push( emo.image );
-        }
+          result[group].items.push( emoticon.image );
+        });
 
         var superResult = [];
         for( var key in result ){
@@ -896,7 +896,7 @@ angular.module('starter.services', [])
 
       var groupInx = jsonObject.metas;
 
-      if( groupInx != 0 ){
+      if( groupInx !== 0 ){
         groupKey = groupKey + groupInx;
       }
 
@@ -1000,7 +1000,7 @@ angular.module('starter.services', [])
      */
     getChosung : function(str) {
       var result = "";
-      for(var i=0;i<str.length;i++) {
+      for(var i=0,n=str.length;i<n;i++) {
         var code = str.charCodeAt(i)-44032;
         if(code>-1 && code<11172) result += cho[Math.floor(code/588)];
       }
@@ -1036,7 +1036,7 @@ angular.module('starter.services', [])
       'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ' );
 
       var result = "";
-      for( var inx =0 ; inx < str.length ; inx++ ){
+      for( var inx =0, until = str.length ; inx < until ; inx++ ){
         var ch = str.charAt(inx);
 
         // if Alphabet, set the character
@@ -1082,7 +1082,7 @@ angular.module('starter.services', [])
       }
 
       result = loginUser.userName+" invite ";
-      for( var jnx = 0 ; jnx < users.length ; jnx++ ){
+      for( var jnx = 0, until = users.length ; jnx < until ; jnx++ ){
         result += Cache.get( users[jnx] ).NM;
 
         if( jnx != users.length - 1 ){
@@ -1114,24 +1114,24 @@ angular.module('starter.services', [])
       var friends = Cache.all();
 
       // Room with 2 people
-      if( userArray.length == 2 && userArray.indexOf( loginUserId ) > -1 ){
+      if( userArray.length === 2 && userArray.indexOf( loginUserId ) > -1 ){
 
         // Remove loginUserId from userArray
         userArray.splice( userArray.indexOf( loginUserId ), 1 );
 
         var name = userArray[0];
-        if( friends[ userArray[0] ] != undefined ){
+        if( friends[ userArray[0] ] !== undefined ){
           name = friends[ userArray[0] ].NM;
         }
 
         userNames.push( name );
       } else {
 
-        for( var inx = 0 ; inx < userArray.length ; inx++ ){
+        for( var inx = 0, until = userArray.length ; inx < until ; inx++ ){
           var name = userArray[inx];
-          if( userArray[inx] == loginUserId ){
+          if( userArray[inx] === loginUserId ){
             name = loginUserName;
-          }else if( friends[ userArray[inx] ] != undefined ){
+          }else if( friends[ userArray[inx] ] !== undefined ){
             name = friends[ userArray[inx] ].NM;
           }
 

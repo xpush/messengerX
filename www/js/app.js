@@ -19,12 +19,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.cameraFlag = true;
       $rootScope.usePopupFlag = false;
 
-      if( device.model.indexOf('x86') === 0){ // emulator or desktop pc
+      if( device.model.indexOf('x86') === 0 ){ // emulator or desktop pc
         console.log('emulator or desktop pc');
       }else{
         var pushNotification = window.plugins.pushNotification;
 
-        if (device.platform == 'android' || device.platform == 'Android') {
+        if( device.platform === 'android' || device.platform === 'Android') {
           pushNotification.register(successHandler, errorHandler,{"senderID":"944977353393","ecb":"onNotification"});
         } else {
           pushNotification.register(tokenHandler, errorHandler,{"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});
@@ -57,7 +57,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       var mobileAgents = ["android","iphone","bb","symbian","nokia"];
       var agent = window.navigator.userAgent.toLowerCase();
 
-      for( var inx = 0; $rootScope.usePopupFlag && inx < mobileAgents.length ; inx++ ){
+      for( var inx = 0, until = mobileAgents.length ; $rootScope.usePopupFlag && inx < until ; inx++ ){
         if( agent.indexOf( mobileAgents[inx] ) > -1 ){
           $rootScope.usePopupFlag = false;
         }
@@ -220,7 +220,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
     $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
 
-      if(type == 'LOGOUT'){
+      if(type === 'LOGOUT'){
         if( !$sessionStorage.reloading ){
           $rootScope.logout(true);
           window.location = $rootScope.rootPath + 'err.html?LOGOUT';
@@ -249,7 +249,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
   // Add Auth Interceptor
   $rootScope.$on("$stateChangeSuccess", function (event, toState, toParams, fromState, fromParams) {
-    if( toState.name == 'splash' ){
+    if( toState.name === 'splash' ){
       $sessionStorage.reloading = true;
     } else {
       $sessionStorage.reloading = false;
@@ -258,7 +258,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
   $rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams) {
 
-    if ( toState.name != 'signin' && toState.name != 'splash' && Sign.getUser() === undefined ) {
+    if ( toState.name !== 'signin' && toState.name !== 'splash' && Sign.getUser() === undefined ) {
       event.preventDefault();      
       $rootScope.error = null;
       $state.go('splash');
@@ -371,7 +371,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       self = this;
 
       if( $rootScope.usePopupFlag ){
-        if( popups[popupKey] != undefined ){
+        if( popups[popupKey] !== undefined ){
           popups[popupKey].focus();
         } else {
 
@@ -404,12 +404,12 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
               clearInterval( popupInterval );
             }
 
-            if( popup != undefined ) {
+            if( popup !== undefined ) {
               var popObj = popup.window.document.getElementById( "popupchat" );
-              if( popObj != undefined ){
+              if( popObj !== undefined && popup.window.angular !== undefined ){
                 var newWindowRootScope = popup.window.angular.element( popObj ).scope();
-                if( newWindowRootScope != undefined && newWindowRootScope.xpush != undefined ){
-                  if( newWindowRootScope.$$listeners.INTER_WINDOW_DATA_TRANSFER != undefined ){
+                if( newWindowRootScope !== undefined && newWindowRootScope.xpush !== undefined ){
+                  if( newWindowRootScope.$$listeners.INTER_WINDOW_DATA_TRANSFER !== undefined ){
                     clearInterval( popupInterval );
                     self.openPopup( popup, popupKey, newWindowRootScope, stateParams );
                   }

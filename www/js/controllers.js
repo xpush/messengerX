@@ -36,7 +36,7 @@ angular.module('starter.controllers', [])
    */
   $scope.listFriend = function(){
     Friends.list(function(friends){
-      if( friends != undefined ){
+      if( friends !== undefined ){
         $scope.friends = [];
         $scope.friends = friends;
         $scope.friendCount = $scope.friends.length;
@@ -63,7 +63,7 @@ angular.module('starter.controllers', [])
   $scope.friendCount = 0;
   $scope.searchKey = "";
 
-  // Init Socket
+  // Init Manager
   if( $rootScope.syncFlag ) {
     $scope.syncFriends();
     Manager.init();
@@ -72,6 +72,7 @@ angular.module('starter.controllers', [])
     Manager.init();
   } else {
     $scope.listFriend();
+    Manager.init();
   }
 
   /**
@@ -84,7 +85,7 @@ angular.module('starter.controllers', [])
    * @param {array} filtered friends by searchKey;
    */
   $scope.postFriends = function(friends){
-    if( friends != undefined ){
+    if( friends !== undefined ){
       $scope.friends = [];
       $scope.friends = friends;
       $scope.friendCount = friends.length;
@@ -101,7 +102,7 @@ angular.module('starter.controllers', [])
    */
   $scope.resetFriends = function(){
     Friends.list(function(friends){
-      if( friends != undefined ){
+      if( friends !== undefined ){
         $scope.friends = [];
         $scope.friends = friends;
         $scope.friendCount = friends.length;
@@ -277,7 +278,7 @@ angular.module('starter.controllers', [])
 
       Users.search(query, $scope.modal.num, function(users){
 
-        if( users != undefined ){
+        if( users !== undefined ){
           if($scope.modal.num > 1) {
             $scope.modal.datas = $scope.modal.datas.concat(users);
           }else{
@@ -334,11 +335,12 @@ angular.module('starter.controllers', [])
     var channelName = $scope.modal.channelName;
     var channelUsers = $scope.modal.channelUsers;
 
+    // Selected Friends array
     if(res.length > 0){
 
       var joinUsers = [];
 
-      // selection -> join users
+      // Selection -> join users
       for( var key in res ){
         joinUsers.push( res[key] );
 
@@ -387,7 +389,6 @@ angular.module('starter.controllers', [])
    * @description Push selected userId into selection array
    */
   $scope.retrieveFriends = function() {
-    console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
     if($scope.modal.visible){
 
       Friends.list(function(friends){
@@ -455,16 +456,17 @@ angular.module('starter.controllers', [])
    * @param {string} new image url;
    */
   $scope.updateUserInfo = function(newImage){
-    if( newImage != '' ){
+    if( newImage !== '' ){
       $scope.loginUser.image = newImage;
     }
 
+    // A : applicationId
     var params = { 'A' : 'messengerx', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
                DT : { 'NM' : $scope.loginUser.userName, 'I': $scope.loginUser.image, 'MG' : $scope.loginUser.message } };
 
     // update userInfo in server
     Sign.update( params, function(data){
-      if( data.status == 'ok' ){
+      if( data.status === 'ok' ){
         // set updated user info current session
         Sign.setUser( $scope.loginUser );
       }
@@ -504,7 +506,7 @@ angular.module('starter.controllers', [])
    */
   var initSelfChannel = function(){
 
-    // channel for loginUser
+    // self channel for loginUser
     var channelUsers = [loginUser.userId];
 
     var createObject = {};
@@ -522,7 +524,7 @@ angular.module('starter.controllers', [])
       param.deviceId = loginUser.deviceId;
 
       // Channel Init
-      Chat.init( param, '', $scope, function( messages ){
+      Chat.init( param, $scope, function( messages ){
       });
     });
   };
@@ -742,11 +744,11 @@ angular.module('starter.controllers', [])
     });
 
     $rootScope.$on('$windowBlur',  function (){
-      Chat.sendSys( 'out' );
+      Chat.sendSys( 'off' );
     });
 
     $rootScope.$on('$windowFocus', function (){
-      Chat.sendSys( 'in' );
+      Chat.sendSys( 'on' );
     });
   });
 
@@ -783,15 +785,19 @@ angular.module('starter.controllers', [])
 
           if( parentScope != undefined ){
             var args = {"channelId":channelId};
+
+            // Broadcast ON_POPUP_OPEN event for 
             parentScope.$broadcast("ON_POPUP_OPEN", args);
           }
         }, 300 );
       }
 
-
+      // Retreive notice from DB
       NoticeDao.get( channelId ).then(function(data) {
-        if( data != undefined ){
+        if( data !== undefined ){
           var dateStrs = UTIL.timeToString( data.updated );
+
+          // YYYYMMDD min:ss
           var dateMessage = dateStrs[1]+" "+dateStrs[2];
 
           var noticeMessage = { date : dateMessage, message : data.message, name : Cache.get( data.sender_id ).NM,
@@ -817,7 +823,7 @@ angular.module('starter.controllers', [])
   var init = function( stateParams, parentScope ){
 
     // If channelId is exist, use the channel
-    if( stateParams.channelId != undefined ) {
+    if( stateParams.channelId !== undefined ) {
       channelId = stateParams.channelId;
 
       channelUsers = stateParams.channelUsers.split(",");
@@ -878,7 +884,7 @@ angular.module('starter.controllers', [])
     });
   };
 
-  if( stateParams != undefined ){
+  if( stateParams !== undefined ){
     init( stateParams );
   }
 
@@ -893,11 +899,10 @@ angular.module('starter.controllers', [])
    */
   $scope.add = function( nextMessage ) {
     $scope.messages.push(angular.extend({}, nextMessage));
-
     $scope.$apply();
 
     // Update the scroll area and tell the frosted glass to redraw itself
-    if( nextMessage.from != 'RI' && nextMessage.from != 'SI' ){
+    if( nextMessage.from !== 'RI' && nextMessage.from !== 'SI' ){
       $ionicFrostedDelegate.update();
       $ionicScrollDelegate.scrollBottom(true);
     }
@@ -909,8 +914,8 @@ angular.module('starter.controllers', [])
    * @module starter.controllers
    * @kind function
    *
-   * @description Add message to screen and Update scroll
-   * @param {jsonObject} channelId, channelName, channelUsers
+   * @description Display noticeMsg
+   * @param {string} noticeMsg
    */
   $scope.setNotice = function( noticeMsg ) {
     $scope.notice = noticeMsg;
@@ -927,7 +932,7 @@ angular.module('starter.controllers', [])
    * @param {jsonObject} channelId, channelName, channelUsers
    */
   $scope.send = function() {
-    if( $scope.inputMessage != '' ){
+    if( $scope.inputMessage !== '' ){
       var msg = $scope.inputMessage;
       $scope.inputMessage = '';
       Chat.send( msg );
@@ -1063,7 +1068,7 @@ angular.module('starter.controllers', [])
    */
   $scope.toggleEmoticons = function( flag ){
     $scope.showEmo = flag;
-    if( $scope.showEmo == true ){
+    if( $scope.showEmo === true ){
       document.getElementById( 'tabbody'+$scope.curEmoTabId ).style.display = "block";
       document.getElementById( 'chat-emoticons' ).style.display = "block";
       document.getElementById( "chat-extends" ).style.display = "none";
@@ -1086,7 +1091,7 @@ angular.module('starter.controllers', [])
    */
   $scope.toggleExt = function( flag ) {
     $scope.showExt = flag;
-    if( $scope.showExt == true ){
+    if( $scope.showExt === true ){
       document.getElementById( "chat-extends" ).style.display = "block";
       document.getElementById( 'chat-emoticons' ).style.display = "none";
       document.getElementById( "chat-notice" ).style.display = "none";
@@ -1107,7 +1112,7 @@ angular.module('starter.controllers', [])
    * @param {boolean}
    */
   $scope.toggleNotice = function( flag ) {
-    if( flag && $scope.notice && $scope.notice.useFlag == 'Y' && !$scope.showEmo && !$scope.showExt ){
+    if( flag && $scope.notice && $scope.notice.useFlag === 'Y' && !$scope.showEmo && !$scope.showExt ){
       if( $scope.notice.foldFlag == 'N' ) {
         document.getElementById( "chat-notice" ).style.display = "block";
         document.getElementById( "chat-notice-button" ).style.display = "none";
@@ -1170,7 +1175,7 @@ angular.module('starter.controllers', [])
     $scope.curEmoTabId = tabId;
     var tabs = document.getElementById( 'emoticon-tabs' ).getElementsByTagName( "a" );
 
-    for( var inx = 0 ; inx < tabs.length;inx++ ){
+    for( var inx = 0, until = tabs.length; inx < until; inx++ ){
       if( tabs[inx].id == "tab"+tabId ){
         tabs[inx].className = "tab-item tab-item-active";
         document.getElementById( "tabbody"+inx ).style.display = "block";
@@ -1237,14 +1242,14 @@ angular.module('starter.controllers', [])
       file: inputObj
     };
 
-    if( type == 'image' ){
+    if( type === 'image' ){
       options.type = "image";
     }
 
     var tp = "";
 
     // if video, add vido progress bar. Otherwise show progress bar.
-    if( type == 'video' ){
+    if( type === 'video' ){
       tp = "SVP";
     } else {
       tp = "SFP";
@@ -1285,10 +1290,10 @@ angular.module('starter.controllers', [])
       var msg;
       var msgType;
 
-      if( type == 'image' ){
+      if( type === 'image' ){
         msg = $rootScope.xpush.getFileUrl(channelId, data.result.tname );
         msgType = 'I';
-      } else if ( type == 'video' ) {
+      } else if ( type === 'video' ) {
         msg = data.result.name;
         msgType = 'V';
       } else {
@@ -1338,7 +1343,7 @@ angular.module('starter.controllers', [])
       ]
     });
     myPopup.then(function(noticeMessage) {
-      if( noticeMessage != undefined ){
+      if( noticeMessage !== undefined ){
         Chat.send( noticeMessage, 'N' );
       }
     });
@@ -1346,7 +1351,7 @@ angular.module('starter.controllers', [])
 
   /**
    * @ngdoc function
-   * @name showNoticePopup
+   * @name updateNotice
    * @module starter.controllers
    * @kind function
    *
@@ -1355,28 +1360,36 @@ angular.module('starter.controllers', [])
   $scope.updateNotice = function( useFlag, foldFlag ) {
     var param = {'channelId': channelId, useFlag : useFlag, foldFlag : foldFlag };
 
+    // Update notice at local DB;
     NoticeDao.update( param );
 
-    if( $scope.notice != undefined ){
+    if( $scope.notice !== undefined ){
       $scope.notice.useFlag = param.useFlag;
       $scope.notice.foldFlag = param.foldFlag;
     }
 
-    if( useFlag == 'N' ){
+    if( useFlag === 'N' ){
       $scope.toggleNotice( false );      
     } else {
       $scope.toggleNotice( true );
     }
   };
 
+
+  /**
+   * @ngdoc function
+   * @name setOnlineStatus
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Set frined's online status on off
+   */
   $scope.setOnlineStatus = function( msg ){
     var btnStatus = document.getElementById( "online-status" );
-    if( msg == "in" ){
+    if( msg === "on" ){
       $scope.watching = true;
-      //btnStatus.className = "button icon ion-android-locate";
     } else {
       $scope.watching = false;
-      //btnStatus.className = "button icon ion-android-timer";
     }
     $scope.$apply();
   };

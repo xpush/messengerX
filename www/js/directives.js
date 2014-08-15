@@ -15,8 +15,8 @@ angular.module('starter.directives', [])
 })
 .directive('ngBackButton', function() {  
   return function(scope, element, attrs) {
-    console.log( event.keyCode );
     element.bind("keydown keypress", function(event) {
+      console.log( event.keyCode );
       if ( event.keyCode == 8 || event.keyCode == 4 ) {
         event.preventDefault();
       }
@@ -44,20 +44,20 @@ angular.module('starter.directives', [])
       var channelImage = $scope.channelImage;
       var channelName = $scope.channelName;
 
-      if( users != undefined ){
+      if( users !== undefined ){
         var userArray = users.split( "," );
         if( userArray.length == 2  ){
           friendId = users.replace(",", "" ).replace( loginUserId, "" );
         }
       }
 
-      if( channelImage != '' ){
+      if( channelImage !== '' ){
         result = channelImage;
-        if( friendId != '' ){
+        if( friendId !== '' ){
           Cache.add( friendId, { 'NM':channelName , 'I': result } );
         }
 
-      } else if( Cache.get( friendId ) != undefined ){
+      } else if( Cache.get( friendId ) !== undefined ){
         result = Cache.get( friendId ).I;
       } 
 
@@ -70,7 +70,7 @@ angular.module('starter.directives', [])
   return {
     link: function(scope, element, attrs) {
 
-      if( attrs.popupLink == "true" ){
+      if( attrs.popupLink === "true" ){
         element.bind("load" , function(event){
           $ionicFrostedDelegate.update();
           $ionicScrollDelegate.scrollBottom(true);
@@ -84,7 +84,7 @@ angular.module('starter.directives', [])
           var fileNm;
           var type = attrs.type;
 
-          if( attrs.fileName != undefined ){
+          if( attrs.fileName !== undefined ){
             var srcUrl = attrs.fileName;
             fileNm = srcUrl.indexOf("/") > 0 ? srcUrl.substr( srcUrl.lastIndexOf("/") + 1 ) : srcUrl;
           } else {
@@ -159,14 +159,14 @@ angular.module('starter.directives', [])
 
         var searchKey = angular.element(element).val();
 
-        if( searchKey != '' ){
+        if( searchKey !== '' ){
           matches = [];
-          var separated = UTIL.getMorphemes( searchKey );
+          var separated = UTIL.getMorphemes( searchKey ).toLowerCase();
 
           var datas = [];
 
           var items =attrs.items.split('.');
-          if( items.length == 2  ){
+          if( items.length === 2  ){
             var item1 = items[0];
             var item2 = items[1];
             datas= scope[item1][item2];
@@ -174,13 +174,12 @@ angular.module('starter.directives', [])
             datas = scope[attrs.items];
           }
 
-          for( var key in datas ){
-            var data = datas[key];
-            if( UTIL.getMorphemes( data.user_name ).indexOf( separated ) > -1
+          angular.forEach(datas, function(data) {
+            if( UTIL.getMorphemes( data.user_name ).toLowerCase().indexOf( separated ) > -1
               || data.chosung.indexOf( searchKey ) > -1 ){
               matches.push( data );
             }
-          }
+          });
 
           poster( matches );
         } else {
