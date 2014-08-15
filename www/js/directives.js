@@ -16,7 +16,6 @@ angular.module('starter.directives', [])
 .directive('ngBackButton', function() {  
   return function(scope, element, attrs) {
     element.bind("keydown keypress", function(event) {
-      console.log( event.keyCode );
       if ( event.keyCode == 8 || event.keyCode == 4 ) {
         event.preventDefault();
       }

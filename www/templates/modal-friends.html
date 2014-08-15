@@ -1,4 +1,4 @@
-<div class="modal" ng-controller="FriendsModalCtrl" ng-back-button>
+<div class="modal" ng-controller="FriendsModalCtrl">
 
   <ion-header-bar class="bar bar-header bar-positive">
     <button class="button button-icon ion-close no-drag" ng-click="modal.hide()"></button>
@@ -10,7 +10,7 @@
     <ion-list>
       <div class="item item-input">
           <i class="icon ion-search placeholder-icon"></i>
-          <input type="text" placeholder="Search" search-by-key post="postFriends" reset="resetFriends" items="modal.datas">
+          <input type="text" id="searchKey" placeholder="Search" search-by-key post="postFriends" reset="resetFriends" items="modal.datas">
       </div>
       <ion-item class="item item-checkbox" ng-repeat="data in modal.datas">
         <label class="checkbox" >
@@ -21,8 +21,6 @@
         <p>{{data.message}}</p>
       </ion-item>
     </ion-list>
-
-    <ion-infinite-scroll ng-if="modal.visible" on-infinite="retrieveFriends()"  distance="1%"></ion-infinite-scroll>
 
     <div class="card" ng-if="modal.datas.length == 0">
       <div class="item item-text-wrap">

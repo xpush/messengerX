@@ -209,6 +209,7 @@ angular.module('starter.controllers', [])
    * @description event called when modal opening
    */
   $scope.$on('modal.shown', function() {
+    document.getElementById( "searchKey" ).value = "";
     $ionicScrollDelegate.$getByHandle('modalContent').scrollTop(true);
   });
 })
@@ -389,33 +390,6 @@ angular.module('starter.controllers', [])
 
       $scope.modal.changed = true;
       $scope.modal.hide();
-    }
-  };
-
-  /**
-   * @ngdoc function
-   * @name retrieveFriends
-   * @module starter.controllers
-   * @kind function
-   *
-   * @description Push selected userId into selection array
-   */
-  $scope.retrieveFriends = function() {
-    if($scope.modal.visible){
-
-      Friends.list(function(friends){
-
-        if( friends != undefined ){
-          $scope.modal.datas =  [];
-          $scope.modal.datas = friends;
-        }
-
-        $scope.$broadcast('scroll.infiniteScrollComplete');
-
-        if( !friends || friends.length < 1) {
-          $scope.modal.visible = false;
-        }
-      });
     }
   };
 
@@ -962,15 +936,23 @@ angular.module('starter.controllers', [])
    * @description Open User modal to friend management
    */
   $scope.openFriendModal = function() {
-    $scope.modal.datas = [];
-    $scope.modal.selection = [];
-    $scope.modal.num = 1;
-    $scope.modal.changed = false;
-    $scope.modal.visible = true;
-    $scope.modal.show();
-    $scope.modal.channelUsers = $scope.channelUsers;
-    $scope.modal.channelName = $scope.channelName;
-    $scope.modal.channelId = $scope.channelId;
+
+    Friends.list(function(friends){
+
+      if( friends != undefined ){
+        $scope.modal.datas =  [];
+        $scope.modal.datas = friends;
+      }
+
+      $scope.modal.selection = [];
+      $scope.modal.num = 1;
+      $scope.modal.changed = false;
+      $scope.modal.visible = true;
+      $scope.modal.show();
+      $scope.modal.channelUsers = $scope.channelUsers;
+      $scope.modal.channelName = $scope.channelName;
+      $scope.modal.channelId = $scope.channelId;
+    });
   };
 
   $ionicModal.fromTemplateUrl('templates/modal-friends.html', function(modal) {
@@ -993,6 +975,7 @@ angular.module('starter.controllers', [])
   });
 
   $scope.$on('modal.shown', function() {
+    document.getElementById( "searchKey" ).value = "";
   });
 
   $scope.$on('$destroy', function() {
