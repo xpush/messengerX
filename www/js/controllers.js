@@ -66,14 +66,11 @@ angular.module('starter.controllers', [])
   // Init Manager
   if( $rootScope.syncFlag ) {
     $scope.syncFriends();
-    Manager.init();
-  } else if( $rootScope.firstFlag ){
-    $scope.listFriend();
-    Manager.init();
   } else {
     $scope.listFriend();
-    Manager.init();
   }
+
+  Manager.init();
 
   /**
    * @ngdoc function
@@ -155,6 +152,21 @@ angular.module('starter.controllers', [])
     $scope.modal.visible = true;
     $scope.modal.search = '';
     $scope.modal.show();
+  };
+
+  /**
+   * @ngdoc function
+   * @name removeFriend
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description Save selected friends into server
+   */
+  $scope.removeFriend = function( friendId, inx ) {
+    Friends.remove( friendId, function( data ){
+      $scope.friends.splice(inx, 1);
+      $scope.friendCount = $scope.friends.length;
+    });
   };
 
   /**

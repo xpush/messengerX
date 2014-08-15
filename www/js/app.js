@@ -1,4 +1,4 @@
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass', 'ngStorage'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass', 'ngStorage', 'QuickList'])
 
 .run(function($location, $ionicPlatform, $rootScope, DB, Sign, NAVI, $state, $window, $localStorage, $sessionStorage ) {
   $ionicPlatform.ready(function() {

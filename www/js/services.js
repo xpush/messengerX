@@ -118,6 +118,7 @@ angular.module('starter.services', [])
     remove: function(userId, callback) {
       loginUserId = Sign.getUser().userId;
       $rootScope.xpush.removeUserFromGroup( loginUserId, userId, function( err, data ){
+        UserDao.remove(userId);
         callback( data );
       });
     },
@@ -234,7 +235,6 @@ angular.module('starter.services', [])
       $rootScope.xpush.queryUser(params, function( err, userArray, count){
         callback( userArray );
       });
-
     }
   };
 })

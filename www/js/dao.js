@@ -102,6 +102,24 @@ angular.module('starter.dao', [])
       ).then(function(result) {
         return DB.fetchAll(result);
       });
+    },
+
+    /**
+     * @ngdoc function
+     * @name remove
+     * @module starter.dao
+     * @kind function
+     *
+     * @description Delete user from local DB
+     * @return {Array} User Array
+     */
+    remove : function(userId){
+      var loginUserId = Sign.getUser().userId;
+      return DB.query(
+        'DELETE FROM TB_USER where user_id =? and owner_id = ? ', [userId, loginUserId]
+      ).then(function(result) {
+        return DB.fetchAll(result);
+      });
     }
   }
 })
