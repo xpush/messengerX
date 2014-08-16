@@ -56,16 +56,15 @@ angular.module('starter.directives', [])
           Cache.add( friendId, { 'NM':channelName , 'I': result } );
         }
 
-      } else if( Cache.get( friendId ) !== undefined ){
+      } else if( friendId !== '' && Cache.get( friendId ) !== undefined ){
         result = Cache.get( friendId ).I;
       } 
-
       $scope.image = result;
     },
     template: '<img ng-src="{{image}}" />'
   };
 })
-.directive('popupLink', function ( $rootScope, $window, $ionicFrostedDelegate, $ionicScrollDelegate, $ionicPopup ) {       
+.directive('popupLink', function ( $rootScope, $window, $state, $ionicFrostedDelegate, $ionicScrollDelegate, $ionicPopup ) {       
   return {
     link: function(scope, element, attrs) {
 
@@ -96,8 +95,14 @@ angular.module('starter.directives', [])
 
           var left = screen.width/2 - 400
             , top = screen.height/2 - 300;
-          
-          var  popup = $window.open( $rootScope.rootPath + 'popup-view.html?type='+type+'&src='+encodedUrl, '', "top=" + top + ",left=" + left + ",width=80,height=60");
+
+          if( window.device ){
+            //var popup = $window.open( $rootScope.rootPath + 'popup-view.html?type='+type+'&src='+encodedUrl, '', "top=" + top + ",left=" + left + ",width=80,height=60");
+            var popup = window.open(url, '_blank', 'location=no');
+          } else {
+            var popup = $window.open( '#/view?type='+type+'&src='+encodedUrl, '_blank', "top=" + top + ",left=" + left + ",width=80,height=60");
+          }
+          //var  popup = $window.open( $rootScope.rootPath + 'popup-view.html?type='+type+'&src='+encodedUrl, '', "top=" + top + ",left=" + left + ",width=80,height=60");
         });    
       });
     }

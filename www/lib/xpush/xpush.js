@@ -351,7 +351,7 @@
 
   };
 
-  XPush.prototype.uploadFile = function(channel, img, inputObj, fnCallback){
+  XPush.prototype.uploadFile = function(channel, img, inputObj, fnPrg, fnCallback){
     var self = this;
 
     self._getChannelAsync(channel, function(err, ch){
@@ -381,6 +381,15 @@
         if(inputObj.type)      options.headers['XP-FU-tp'] = inputObj.type;
 
         var ft = new FileTransfer();
+        if( fnPrg != undefined ){
+          ft.onprogress = function(progressEvent) {
+            if (progressEvent.lengthComputable) {
+              var perc = Math.floor(progressEvent.loaded / progressEvent.total * 100);
+              fnPrg( perc);
+            }
+          };
+        }
+
         ft.upload(img, encodeURI(url), function(data){
 
           console.log(data);

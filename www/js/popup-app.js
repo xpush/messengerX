@@ -96,6 +96,12 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
       url: '/chat',
       templateUrl: "templates/chat.html",
       controller: 'ChatCtrl'
+    })
+
+    .state('view', {
+      url: "/view",
+      templateUrl: "templates/view.html",
+      controller: 'ViewCtrl'
     });
 
   $urlRouterProvider.otherwise('/chat');

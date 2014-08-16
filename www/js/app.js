@@ -344,7 +344,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           controller: 'EmoticonCtrl'
         }
       }
-    })
+    });
 
   $urlRouterProvider.otherwise('/splash');
 });
@@ -390,6 +390,8 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
               "height": 600,
               "x":left,
               "y":top,
+              "min_width": 100,
+              "min_height": 100,
               "title":"Chat" + popupKey,
               "icon": "icon.png"
             } );

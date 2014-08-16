@@ -39,8 +39,9 @@ $ cordova plugin add org.apache.cordova.device
 $ cordova plugin add https://github.com/driftyco/ionic-plugins-keyboard
 $ cordova plugin add de.appplant.cordova.plugin.local-notification
 $ cordova plugin add https://github.com/phonegap-build/PushPlugin.git
+$ cordova plugins add org.apache.cordova.inappbrowser
 
-```
+`` `
 
 ## Using Sass (optional)
 

@@ -31,7 +31,7 @@
         <img ng-src="{{friend.image}}" />
         <h2>{{friend.user_name}}</h2>
         <p>{{friend.message}}</p>
-        <ion-option-button class="button-assertive" ng-click='removeFriend("{{friend.user_id}}")'>
+        <ion-option-button class="button-assertive" ng-click='removeFriend("{{friend.user_id}}", $index)'>
           <B>Remove</B>
         </ion-option-button>
       </ion-item>

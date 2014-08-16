@@ -1152,10 +1152,10 @@ angular.module('starter.services', [])
      * @param {Object} file DOM object
      * @return {string} file type
      */
-    getType : function( inputObj ){
+    getType : function( fileUrl ){
       var images = ['bmp','jpeg','jpg','png'];
       var movies = ['mp4','avi','asf','mov'];
-      var filename = inputObj.value;
+      var filename = fileUrl;
       var ext = filename.substr( filename.lastIndexOf('.')+1 );
 
       var result = "";

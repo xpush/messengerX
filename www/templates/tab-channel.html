@@ -12,7 +12,7 @@
       <ion-item ng-repeat="channel in channelArray" ng-click='gotoChat("{{channel.channel_id}}")' class="item item-channel">
         <img channel-image users="channel.channel_users" channel-name="channel.channel_name" image="channel.channel_image" ></img>
         <div>
-          <h2 class="name" style="width:80%">{{channel.channel_name}}</h2>
+          <h2 class="name" style="max-width:80%">{{channel.channel_name}}</h2>
           <span channel-users users="channel.channel_users">
           </span>
         </div>

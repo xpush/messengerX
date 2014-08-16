@@ -162,9 +162,9 @@ angular.module('starter.controllers', [])
    *
    * @description Save selected friends into server
    */
-  $scope.removeFriend = function( friendId, inx ) {
+  $scope.removeFriend = function( friendId, itemInx ) {
     Friends.remove( friendId, function( data ){
-      $scope.friends.splice(inx, 1);
+      $scope.friends.splice(itemInx, 1);
       $scope.friendCount = $scope.friends.length;
     });
   };
@@ -459,7 +459,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('EmoticonCtrl', function($scope, $rootScope, Sign, ChannelDao, Chat, Emoticons) {
+.controller('EmoticonCtrl', function($scope, $rootScope, $ionicPopup, Sign, ChannelDao, Chat, Emoticons) {
   var loginUser = Sign.getUser();
   var channelId = '';
 
@@ -530,6 +530,18 @@ angular.module('starter.controllers', [])
   var progressbar = document.getElementById( "progress_bar" );
 
   angular.element( inputObj ).on('change',function(event) {
+
+    var file = inputObj.files[0];
+
+    // Type check
+    if( file.type.indexOf( "image" ) < 0 ){
+      var alertMessage = {title: 'Upload Failed'};
+      alertMessage.subTitle = 'Upload only images';
+
+      $ionicPopup.alert( alertMessage );
+      inputObj.value = ""
+      return;
+    }
 
     // upload file stream
     $rootScope.xpush.uploadStream( channelId, {
@@ -978,9 +990,11 @@ angular.module('starter.controllers', [])
     document.getElementById( "searchKey" ).value = "";
   });
 
+  /**
   $scope.$on('$destroy', function() {
      window.onbeforeunload = undefined;
   });
+  */
 
   /**
    * @ngdoc eventHandler
@@ -993,6 +1007,8 @@ angular.module('starter.controllers', [])
    * @param {object} next state
    * @param {object} currnet state
    */
+
+  /**
   $scope.$on('$locationChangeStart', function(event, next, current) {
 
     // called when chat screen out
@@ -1002,6 +1018,7 @@ angular.module('starter.controllers', [])
       }
     }
   });
+  */
 
   /**
    * @ngdoc function
@@ -1190,9 +1207,8 @@ angular.module('starter.controllers', [])
    *
    * @description make self channel for emoticon file upload
    */
-  var inputObj = document.getElementById('file');
+  var itemInx = 0;
   $scope.openFileDialog = function( sourceType ) {
-
     // If android or IOS, use native plugin
     if( navigator.camera ){
 
@@ -1207,31 +1223,69 @@ angular.module('starter.controllers', [])
 
       function onSuccess(FILE_URI) {
         $scope.toggleExt( false );
-        $rootScope.xpush.uploadFile(channelId, FILE_URI, {
-          type: 'image'
-        }, function (data){
-          var imageUrl = $rootScope.xpush.getFileUrl(channelId, JSON.parse(data.response).result.tname );
-          Chat.send( imageUrl, 'I' );
-        });
 
+        var options = {type : 'image'};
+
+        var tp = "SFP";
+
+        var thisInx = itemInx;
+        var nextMessage = { type : tp, inx : thisInx, message : inputObj.value };
+
+        $scope.messages.push(angular.extend({}, nextMessage));
+        $scope.$apply();
+
+        setTimeout( function(){
+          var progressbar = document.getElementById( "progress_bar"+thisInx );
+          var tempDiv = document.getElementById( "progress_div"+thisInx );
+
+          $ionicFrostedDelegate.update();
+          $ionicScrollDelegate.scrollBottom(true);
+
+          $rootScope.xpush.uploadFile(channelId, FILE_URI,
+          options,
+          function ( data ){
+            progressbar.value = data;
+          },
+          function (data){
+            var imageUrl = $rootScope.xpush.getFileUrl(channelId, JSON.parse(data.response).result.tname );
+
+            angular.element( tempDiv ).remove();
+            Chat.send( imageUrl, 'I' );
+          });
+        }, 100 );
+        itemInx++;
       }
 
       function onFail(message) {
         $scope.toggleExt( false );
         console.log(message);
+        itemInx++;
       }
     } else {
-
       // If using browser, use file dialog
       $scope.toggleExt( false );
       ionic.trigger('click', { target: document.getElementById('file') });
     }
   };
 
-  var itemInx = 0;
+  var inputObj = document.getElementById('file');
   angular.element( inputObj ).on('change',function(event) {
 
-    var type = UTIL.getType( inputObj );
+    var file = inputObj.files[0];
+    var sizeLimit = 20;
+
+    if( file.size > 1024 * 1024 * sizeLimit ){
+
+      $ionicPopup.alert({
+        title: 'Upload failed',
+        template: 'File size exceeds limit : '+ sizeLimit +'M'
+      });
+
+      inputObj.value = "";
+      return;
+    }
+
+    var type = UTIL.getType( inputObj.value );
 
     var options = {
       file: inputObj
@@ -1387,5 +1441,62 @@ angular.module('starter.controllers', [])
       $scope.watching = false;
     }
     $scope.$apply();
+  };
+})
+.controller('ViewCtrl', function($scope, $rootScope) {
+
+  if( window.root ){
+    $scope.hideNavbar = "false";
+
+    var gui = require('nw.gui');
+    var win = gui.Window.get();
+    win.setMinimumSize(100, 100);
+  } else {
+    $scope.hideNavbar = "true";
+  }
+
+  var query = document.location.href;
+  var vars = query.split("&");
+  var type = vars[0].split("=")[1];
+  var srcName=decodeURIComponent( query.split("src=")[1] ).replace( "#/", "");
+
+  $scope.movieSrc = "";
+
+  $scope.$watch('$viewContentLoaded', function() {
+
+    var offsetX = $scope.hideNavbar=="true"?16:0;
+    var offsetY = 0;
+
+    var topBarY = $scope.hideNavbar=="true"?0:44;
+
+    if( type == 'SI' || type == 'RI'  ){
+      var imgObj =  document.getElementById('imgContent');
+      imgObj.style.display = "block";
+      var element = angular.element( imgObj );
+
+      element.bind( 'load', function (){
+        offsetY = imgObj.scrollWidth > screen.width ? 84+ topBarY: 66+topBarY;
+        console.log( imgObj.width );
+        console.log( imgObj.height );
+        window.resizeTo(imgObj.width+offsetX, imgObj.height+offsetY);
+      });
+
+      $scope.imageSrc = srcName;
+    } else if( type == 'SV' || type == 'RV' ) {
+      var video =  document.getElementById('videoContent');
+      var videoSourceObj =  document.getElementById('videoSource');
+
+      video.style.display = "block";
+      video.src = srcName;
+
+      video.addEventListener('loadeddata', function (){
+        offsetY = video.videoWidth > screen.width ? 84+ topBarY: 66+topBarY;
+        window.resizeTo(video.videoWidth+offsetX, video.videoHeight+offsetY);  
+      });    
+    }
+  });
+
+  $scope.close = function(){
+    window.close();
   };
 });
