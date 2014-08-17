@@ -686,7 +686,7 @@ angular.module('starter.controllers', [])
    */
   $scope.signUp = function(user) {
     var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
-     'DT' : {'NM' : user.userName, 'I':'img/default_image.jpg', 'MG':'' } };
+     'DT' : {'NM' : user.userName, 'I':'http://messenger.stalk.io:8080/img/default_image.jpg', 'MG':'' } };
     Sign.register( params, function(data){
       $state.go('signin');
     });
