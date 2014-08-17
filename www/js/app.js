@@ -1,7 +1,29 @@
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass', 'ngStorage'])
 
-.run(function($location, $ionicPlatform, $rootScope, DB, Sign, NAVI, $state, $window, $localStorage, $sessionStorage ) {
+.run(function($location, $ionicPlatform, $rootScope, DB, Sign, NAVI, $state, $window, $localStorage, $sessionStorage, $templateCache ) {
   $ionicPlatform.ready(function() {
+
+    $ionicPlatform.registerBackButtonAction(function(e){
+
+      if ($rootScope.backButtonPressedOnceToExit) {
+        ionic.Platform.exitApp();
+      }
+      else if('/tab/friends' === $location.path() ) {
+        $rootScope.backButtonPressedOnceToExit = true;
+        window.plugins.toast.showShortCenter(
+          "'뒤로가기'버튼을 한번 더 누르시면, \n종료됩니다.",function(a){},function(b){}
+        );
+        setTimeout(function(){
+          $rootScope.backButtonPressedOnceToExit = false;
+        },2000);
+      }
+      else if ($rootScope.$viewHistory.backView) {
+        console.log( $rootScope.$viewHistory.backView );
+        $rootScope.$viewHistory.backView.go();
+      }
+      e.preventDefault();
+      return false;
+    },101);
 
     if(window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
@@ -239,6 +261,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
 
       if( !skipLoginPageFlag ){
+        $templateCache.removeAll();
         $state.transitionTo('signin', {}, { reload: true, notify: true });
       }
     };

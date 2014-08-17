@@ -24,7 +24,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, Friends, Manager, NAVI, ChannelDao, Sign) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, $templateCache, Friends, Manager, NAVI, ChannelDao, Sign) {
 
   /**
    * @ngdoc function
@@ -40,6 +40,8 @@ angular.module('starter.controllers', [])
         $scope.friends = [];
         $scope.friends = friends;
         $scope.friendCount = $scope.friends.length;
+
+        $templateCache.removeAll();
       }
     });
   };

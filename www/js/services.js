@@ -594,7 +594,7 @@ angular.module('starter.services', [])
      */
     logout : function(){
       loginUser = undefined;
-      $localStorage.loginUser = undefined;
+      delete $localStorage.loginUser;
       $rootScope.loginUser = {};
       $rootScope.currentChannel = '';
       $rootScope.totalUnreadCount = 0;
