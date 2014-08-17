@@ -1221,17 +1221,42 @@ angular.module('starter.controllers', [])
 
       navigator.camera.getPicture(onSuccess, onFail, opts);
 
-      function onSuccess(FILE_URI) {
+      function onSuccess(FILE_URI){
         $scope.toggleExt( false );
 
-        var options = {type : 'image'};
+        window.resolveLocalFileSystemURL(
+          FILE_URI,
+          function(fileEntry){
+            fileEntry.file(function(file){
+              var sizeLimit = 20;
+              if( file.size  > 1024 * 1024 * sizeLimit ){
+                $ionicPopup.alert({
+                  title: 'Upload failed',
+                  template: 'File size exceeds limit : '+ sizeLimit +'M'
+                });
+                return;
+              }
 
+              var orgFileName = fileEntry.nativeURL.substring( fileEntry.nativeURL.lastIndexOf( "/" )+1 );
+              uploadFile( FILE_URI, orgFileName );
+            }, function(){
+            //error                                                 
+            });
+          },
+          function(){
+          }
+        );
+      }
+
+      function uploadFile(FILE_URI, orgFileName) {
+
+        var options = {type : 'image', name:orgFileName };
         var tp = "SFP";
 
         var thisInx = itemInx;
-        var nextMessage = { type : tp, inx : thisInx, message : inputObj.value };
+        var newMessage = { type : tp, inx : thisInx, message : inputObj.value };
 
-        $scope.messages.push(angular.extend({}, nextMessage));
+        $scope.messages.push(angular.extend({}, newMessage));
         $scope.$apply();
 
         setTimeout( function(){
@@ -1248,17 +1273,16 @@ angular.module('starter.controllers', [])
           },
           function (data){
             var imageUrl = $rootScope.xpush.getFileUrl(channelId, JSON.parse(data.response).result.tname );
-
             angular.element( tempDiv ).remove();
             Chat.send( imageUrl, 'I' );
           });
+
         }, 100 );
         itemInx++;
       }
 
       function onFail(message) {
         $scope.toggleExt( false );
-        console.log(message);
         itemInx++;
       }
     } else {
@@ -1476,8 +1500,6 @@ angular.module('starter.controllers', [])
 
       element.bind( 'load', function (){
         offsetY = imgObj.scrollWidth > screen.width ? 84+ topBarY: 66+topBarY;
-        console.log( imgObj.width );
-        console.log( imgObj.height );
         window.resizeTo(imgObj.width+offsetX, imgObj.height+offsetY);
       });
 

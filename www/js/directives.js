@@ -97,6 +97,7 @@ angular.module('starter.directives', [])
             , top = screen.height/2 - 300;
 
           if( window.device ){
+            console.log( url );
             //var popup = $window.open( $rootScope.rootPath + 'popup-view.html?type='+type+'&src='+encodedUrl, '', "top=" + top + ",left=" + left + ",width=80,height=60");
             var popup = window.open(url, '_blank', 'location=no');
           } else {
