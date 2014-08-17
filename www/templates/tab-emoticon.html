@@ -7,7 +7,7 @@
       <img id="close-button" ng-src="{{rootImgPath}}/button_close.png" ng-click="close()">
     </div>    
   </ion-nav-buttons>
-  <ion-content class="has-header">
+  <ion-content class="has-header" has-bouncing="true">
     <ion-list>
 	    <div class="row" ng-repeat="item in emoticon.items" >
 	      <div class="col" ng-repeat="image in item">
