@@ -127,6 +127,12 @@ body {
 	float: left;
 }
 
+.messages img.star {
+	display:inline;
+	float: left;
+	cursor: pointer;
+}
+
 .signin-content {
     bottom: 1px !important; /* place bar-subfooter above footer */
 }

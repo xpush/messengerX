@@ -22,13 +22,15 @@
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
             <span class="from">{{message.message}}</span>
+            <img ng-src="{{rootImgPath}}/star.png" class="star" ng-if="message.bookmark_flag != 'Y'"/>
+            <img ng-src="{{rootImgPath}}/star_on.png" class="star" ng-if="message.bookmark_flag == 'Y' "/>
           </div>
         </div>
         <div ng-if="message.type=='RI'">
           <div class="small">{{message.name}}</div>
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
-            <span>
+            <span
               <img ng-src="{{message.message}}" popup-link="{{message.active}}" class="from" type="{{message.type}}"/>
             </span>
           </div>

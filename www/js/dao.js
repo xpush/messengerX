@@ -467,6 +467,25 @@ angular.module('starter.dao', [])
       return DB.query(query, cond).then(function(result) {
         return result;
       });
+    },
+    update : function(jsonObj){
+      var loginUserId = Sign.getUser().userId;
+      var query =
+        "UPDATE TB_MESSAGE "+
+        "SET bookmark_flag = ? "+
+        "WHERE channel_id = ? and sender_id = ? and time = ? and owner_id = ? ";
+
+      var cond = [
+        jsonObj.BF,
+        jsonObj.C,
+        jsonObj.S,
+        jsonObj.TS,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
     }
   }
 })
