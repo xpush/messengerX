@@ -1,0 +1,15 @@
+<ion-view title="Images" hide-nav-bar="{{hideNavbar}}">
+  <ion-nav-buttons side="right">
+    <div class="no-drag" >
+      <button class="button button-dark no-drag" ng-click="close()" >
+        <img ng-src="{{rootImgPath}}/button_close.png">
+      </button>
+    </div>
+  </ion-nav-buttons>    
+  <ion-content has-header="true" has-footer="true" padding="false" start-y="120">
+    <img id="imgContent" ng-src="{{imageSrc}}" style="display:none;"/>
+    <video id="videoContent" controls="" autoplay="" name="media" style="display:none;">
+      <source id="videoSource" ></source>
+    </video>
+	</ion-content>
+</ion-view>
