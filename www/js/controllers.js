@@ -498,8 +498,8 @@ angular.module('starter.controllers', [])
     var channelUsers = [loginUser.userId];
 
     var createObject = {};
-    createObject.U = channelUsers;    
-    channelId = ChannelDao.generateId(createObject);    
+    createObject.U = channelUsers;
+    channelId = ChannelDao.generateId(createObject);
     createObject.DT = { 'US' : channelUsers, 'UC': channelUsers.length };
     createObject.C = channelId;
 
@@ -573,11 +573,11 @@ angular.module('starter.controllers', [])
   setTimeout( function (){
     var storedUser = Sign.restoreUser();
     if( storedUser != undefined ){
-      
+
       $rootScope.xpush.login( storedUser.userId, storedUser.password, storedUser.deviceId, 'ADD_DEVICE', function(err, result){
 
         $rootScope.loginUser = storedUser;
-        
+
         // Save session Info
         Sign.setUser( storedUser );
 
@@ -793,7 +793,7 @@ angular.module('starter.controllers', [])
           if( parentScope != undefined ){
             var args = {"channelId":channelId};
 
-            // Broadcast ON_POPUP_OPEN event for 
+            // Broadcast ON_POPUP_OPEN event for
             parentScope.$broadcast("ON_POPUP_OPEN", args);
           }
         }, 300 );
@@ -1060,9 +1060,9 @@ angular.module('starter.controllers', [])
       }
     };
 
-    var url = $rootScope.rootPath+'videoChat.html?'+encodeURIComponent(JSON.stringify(params));
+    var url = $rootScope.rootPath+'popup-video.html?'+encodeURIComponent(JSON.stringify(params));
 
-    var popup = $window.open(url, chKey, "width=800,height=600");
+    var popup = $window.open(url, chKey, "width=800,height=600,location=no,toolbar=no,menubar=no,scrollbars=no,resizable=yes");
     popup.onbeforeunload = function(){
       Chat.send( chKey, 'VO' );
     };
@@ -1187,15 +1187,15 @@ angular.module('starter.controllers', [])
    *
    * @description show or hide Notice div's menu
    * @param {boolean}
-   */  
+   */
   $scope.toggleNoticeMenu = function(){
-    if( $scope.showNoticeMenu ){      
+    if( $scope.showNoticeMenu ){
       document.getElementById( "chat-notice-menu" ).style.display = "none";
-      document.getElementById( "notice-message" ).style.whiteSpace =  "nowrap";      
+      document.getElementById( "notice-message" ).style.whiteSpace =  "nowrap";
       $scope.showNoticeMenu = false;
     } else {
       document.getElementById( "notice-message" ).style.whiteSpace = "normal";
-      document.getElementById( "chat-notice-menu" ).style.display = "flex";      
+      document.getElementById( "chat-notice-menu" ).style.display = "flex";
       $scope.showNoticeMenu = true;
     }
   }
@@ -1281,7 +1281,7 @@ angular.module('starter.controllers', [])
               var orgFileName = fileEntry.nativeURL.substring( fileEntry.nativeURL.lastIndexOf( "/" )+1 );
               uploadFile( FILE_URI, orgFileName );
             }, function(){
-            //error                                                 
+            //error
             });
           },
           function(){
@@ -1483,7 +1483,7 @@ angular.module('starter.controllers', [])
     }
 
     if( useFlag === 'N' ){
-      $scope.toggleNotice( false );      
+      $scope.toggleNotice( false );
     } else {
       $scope.toggleNotice( true );
     }
@@ -1566,7 +1566,7 @@ angular.module('starter.controllers', [])
 
       video.addEventListener('loadeddata', function (){
         offsetY = video.videoWidth > screen.width ? 84+ topBarY: 66+topBarY;
-        window.resizeTo(video.videoWidth+offsetX, video.videoHeight+offsetY);  
+        window.resizeTo(video.videoWidth+offsetX, video.videoHeight+offsetY);
       });
     }
   });
