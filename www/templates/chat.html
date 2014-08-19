@@ -150,7 +150,7 @@
       <i class="icon ion-more btn-more" ng-click="toggleNoticeMenu();"></i>
     </div>
 
-    <div class="chat-extends-buttons" id="chat-notice-menu">
+    <div class="chat-extends-buttons hidden" id="chat-notice-menu">
       <div class="col" ng-click="updateNotice('N','N')">
         <span>No more</span>
       </div>
@@ -161,11 +161,20 @@
   </div>
 
   <div ng-class="chatExtendsMenuClass" id="chat-extends-menu">
+    <div class="center flex" id="chat-notice-menu">
+      <div class="col" ng-click="showNoticePopup();">
+        <button class="button ion-alert-circled"></button>
+        <p>Notice</p>
+      </div>
+      <div class="col" ng-click="showNoticePopup();">
+        <button class="button ion-checkmark-round"></button>
+        <p>Vote</p>
+      </div>
+    </div>
     <ion-list>
       <ion-item class="item item-icon-left transparent" ng-click="openFriendModal();">
         <i class="icon ion-plus"></i>Invite
       </ion-item>
-
       <ion-item class="item transparent" ng-repeat="user in channelUserDatas">
         <img class="img-friend" ng-src="{{user.I}}" />
         <h2 style="margin: 14px 0 0 0;">{{user.NM}}</h2>
@@ -174,7 +183,7 @@
   </div>
 
   <button class="button ion-arrow-expand btn-expand hidden icon-large" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>
-  <img ng-src="{{loginUserImage}}" class="floating-image" ng-click="showNoticePopup();"/>
+  <img ng-src="{{loginUserImage}}" class="floating-image" />
 
 
 </ion-view>
