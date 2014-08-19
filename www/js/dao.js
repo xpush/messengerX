@@ -438,7 +438,7 @@ angular.module('starter.dao', [])
     list : function( channel ){
       var loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT sender_id, sender_name, sender_image, message, time, type FROM TB_MESSAGE WHERE channel_id = ? and owner_id = ? ;', [channel,loginUserId]
+        'SELECT sender_id, sender_name, sender_image, message, time, type, bookmark_flag FROM TB_MESSAGE WHERE channel_id = ? and owner_id = ? ;', [channel,loginUserId]
       ).then(function(result) {
         return DB.fetchAll(result);
       });

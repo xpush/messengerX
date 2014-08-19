@@ -159,7 +159,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     $rootScope.webNoti = function( message ) {
       // Let's check if the browser supports notifications
       if (!("Notification" in window)) {
-        alert("This browser does not support desktop notification");
+        console.log("This browser does not support desktop notification");
       }
 
       // Let's check if the user is okay to get some notification
@@ -244,14 +244,15 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
       if(type === 'LOGOUT'){
         if( !$sessionStorage.reloading ){
-          $rootScope.logout(true);
-          window.location = $rootScope.rootPath + 'err.html?LOGOUT';
+          $rootScope.logout(true, function(){
+            window.location = $rootScope.rootPath + 'err.html?LOGOUT';
+          });
         }
       }
     }, false );
 
     // tootScope function
-    $rootScope.logout = function( skipLoginPageFlag ){
+    $rootScope.logout = function( skipLoginPageFlag, callback ){
       Sign.logout();
       $rootScope.xpush.logout();
 
@@ -263,6 +264,10 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       if( !skipLoginPageFlag ){
         $templateCache.removeAll();
         $state.transitionTo('signin', {}, { reload: true, notify: true });
+      }
+
+      if ( callback && typeof callback === 'function') {
+        callback();
       }
     };
 

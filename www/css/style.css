@@ -51,7 +51,7 @@ body {
 	text-overflow: ellipsis;
 	overflow-x: hidden;
 	word-wrap: break-word;
-	max-width:82%;
+	max-width:75%;
 }
 
 .messages img {
@@ -335,7 +335,7 @@ paper-input {
 	top:44px;
 	left:0px;
 	opacity:0.85;
-	display:none;
+	/* display:none; */
 	width:100%;
 	background: #F0F3F8;
 }
@@ -345,18 +345,28 @@ paper-input {
 }
 
 
-.chat-extends-menu{
+.chat-extends-buttons{
 	display:none;
 	text-align: center;
 }
 
-.chat-extends-menu .col{
+.chat-extends-buttons .col{
 	border:1px solid #ddd;
 	cursor : pointer;	
 }
 
 .chat-extends p{
 	margin:0px;
+}
+
+.chat-extends-menu {
+	position:absolute;
+	z-index:999;
+	top: 44px;
+	right:0px;
+	/* display:none; */
+	width:80%;
+	background: #F0F3F8;
 }
 
 img.emoticon{
@@ -491,6 +501,35 @@ img.emoticon{
 .mw90 {
 	max-width: 90%;
 	text-overflow:ellipsis;
+}
+
+.slider-top {
+	overflow-y: hidden;
+	max-height: 400px;
+
+	-webkit-transition-property: all;
+	-webkit-transition-duration: .7s;
+	-webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+
+	-moz-transition-property: all;
+	-moz-transition-duration: .7s;
+	-moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+
+	-ms-transition-property: all;
+	-ms-transition-duration: .7s;
+	-ms-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+
+	transition-property: all;
+	transition-duration: .7s;
+	transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+}
+
+.slider-top.closed {
+	max-height: 0;
+}
+
+.transparent {
+	background-color: transparent;
 }
 
 .blink_me {

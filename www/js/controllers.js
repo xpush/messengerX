@@ -702,6 +702,8 @@ angular.module('starter.controllers', [])
   var channelName;
   var channelUsers = [];
 
+  $scope.channelUserDatas = [];
+
   if( loginUser !=undefined ){
     $scope.loginUserImage = loginUser.image;
   }
@@ -771,6 +773,11 @@ angular.module('starter.controllers', [])
     param.channel = channelId;
     param.userId = loginUser.userId;
     param.deviceId = loginUser.deviceId;
+
+    channelUsers.forEach( function( user ){
+      $scope.channelUserDatas.push( angular.extend({}, { "NM" : Cache.get( user ).NM, "I" : Cache.get( user ).I } ) );
+      console.log( $scope.channelUserDatas );
+    });
 
     // Channel Init
     Chat.init( param, inviteMsg, $scope, function( messages ){
@@ -951,6 +958,8 @@ angular.module('starter.controllers', [])
    */
   $scope.openFriendModal = function() {
 
+    $scope.toggleMenu(false);
+
     Friends.list(function(friends){
 
       if( friends != undefined ){
@@ -1069,6 +1078,7 @@ angular.module('starter.controllers', [])
   $scope.curEmoTabId = "0";
   $scope.showEmo = false;
   $scope.showExt = false;
+  $scope.showMenu = false;
   $scope.watching = false;
 
   /**
@@ -1084,12 +1094,14 @@ angular.module('starter.controllers', [])
     $scope.showEmo = flag;
     if( $scope.showEmo === true ){
       document.getElementById( 'tabbody'+$scope.curEmoTabId ).style.display = "block";
+      document.getElementById( 'chat-extends' ).style.display = "none";
+      document.getElementById( "chat-notice" ).style.display = "none";
+
       document.getElementById( 'chat-emoticons' ).style.display = "block";
-      document.getElementById( "chat-extends" ).style.display = "none";
-      document.getElementById( "chat-notice" ).style.display = "none";      
+      document.getElementById( 'chat-emoticons' ).className = "chat-extends slider-top";
       $scope.showExt = false;
     } else {
-      document.getElementById( 'chat-emoticons' ).style.display = "none";
+      document.getElementById( 'chat-emoticons' ).className = "chat-extends slider-top closed";
       $scope.toggleNotice( true );
     }
   };
@@ -1106,13 +1118,40 @@ angular.module('starter.controllers', [])
   $scope.toggleExt = function( flag ) {
     $scope.showExt = flag;
     if( $scope.showExt === true ){
-      document.getElementById( "chat-extends" ).style.display = "block";
+
       document.getElementById( 'chat-emoticons' ).style.display = "none";
-      document.getElementById( "chat-notice" ).style.display = "none";
+      document.getElementById( 'chat-notice' ).style.display = "none";
+
+      document.getElementById( 'chat-extends' ).style.display = "block";
+      document.getElementById( 'chat-extends' ).className = "chat-extends slider-top";
       $scope.showEmo = false;
     } else {
-      document.getElementById( "chat-extends" ).style.display = "none";
+      document.getElementById( 'chat-extends' ).className = "chat-extends slider-top closed";
       $scope.toggleNotice( true );
+    }
+  };
+
+ /**
+   * @ngdoc function
+   * @name toggleExt
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description show or hide extension div
+   * @param {boolean}
+   */
+  $scope.chatExtendsMenuClass = "hidden";
+  $scope.toggleMenu = function( flag ) {
+    $scope.showMenu = flag;
+    if( $scope.showMenu === true ){
+
+      document.getElementById( 'chat-emoticons' ).style.display = "none";
+      document.getElementById( 'chat-notice' ).style.display = "none";
+
+      document.getElementById( 'chat-extends' ).style.display = "none";
+      $scope.chatExtendsMenuClass = "chat-extends-menu slide-in-right";
+    } else {
+      $scope.chatExtendsMenuClass = "chat-extends-menu slide-out-right";
     }
   };
 
@@ -1468,9 +1507,16 @@ angular.module('starter.controllers', [])
     $scope.$apply();
   };
 
-  $scope.setBookmark = function( message ){
-    console.log( message );
-    var param = {'channelId': channelId, 'bookmarkFlag' : message.bookmarkFlag, 'senderId' : message.senderId, 'timestamp' : message.timestamp };
+  $scope.setBookmark = function( message, inx ){
+    var param = {'channel': channelId, 'senderId' : message.senderId, 'timestamp' : message.timestamp };
+    if( message.bookmarkFlag == 'Y' ){
+      message.bookmarkFlag = 'N';
+      param.bookmarkFlag = 'N';
+    } else {
+      message.bookmarkFlag = 'Y';
+      param.bookmarkFlag = 'Y';
+    }
+
     Chat.updateMessage( param );
   };
 })

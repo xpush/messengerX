@@ -733,7 +733,8 @@ angular.module('starter.services', [])
               messages.push( { type : 'T', date : dateStrs[1], message : dateMessage } );
               latestDate = dateStrs[3];
             }
-            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I, senderId : data.sender_id, timestamp : data.time, active : "false" } );
+            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name,image : Cache.get( data.sender_id ).I,
+                          senderId : data.sender_id, timestamp : data.time, active : "false", bookmarkFlag : data.bookmark_flag } );
           }
 
           $rootScope.currentChannelLatestDate = latestDate;

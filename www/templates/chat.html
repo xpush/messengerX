@@ -1,14 +1,15 @@
 <ion-view title="{{channelName}}">
   <ion-nav-buttons side="left">
     <div >
-      <i class="icon icon-large ion-ios7-eye icon-nav-bar " ng-if=" watching == true  " ></i>
-      <i class="icon icon-large ion-android-timer icon-nav-bar " ng-if=" watching == false  " ></i>
+      <i class="icon icon-large ion-ios7-eye icon-nav-bar " ng-if=" watching == true " ></i>
+      <i class="icon icon-large ion-android-timer icon-nav-bar " ng-if=" watching == false " ></i>
     </div>
   </ion-nav-buttons>
 
   <ion-nav-buttons side="right">
     <div class="no-drag" >
-      <button class="button icon ion-navicon" ng-click="openFriendModal();" ></button>
+      <button class="button icon ion-navicon" ng-if=" showMenu == false " ng-click="toggleMenu(true);" ></button>
+      <button class="button icon ion-close-round" ng-if=" showMenu == true " ng-click="toggleMenu(false);" ></button>
       <button class="button button-dark  no-drag" ng-if=" nodeWebkit " ng-click="close()">
         <img ng-src="{{rootImgPath}}/button_close.png">
       </button>
@@ -22,8 +23,7 @@
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
             <span class="from">{{message.message}}</span>
-            <img ng-src="{{rootImgPath}}/star.png" class="star" ng-if="message.bookmark_flag != 'Y' " ng-click="setBookmark( message );"/>
-            <img ng-src="{{rootImgPath}}/star_on.png" class="star" ng-if="message.bookmark_flag == 'Y' " ng-click="setBookmark( message );"/>
+            <img ng-src="{{rootImgPath}}/star_{{message.bookmarkFlag}}.png" class="star"  ng-click="setBookmark( message, $index );"/>
           </div>
         </div>
         <div ng-if="message.type=='RI'">
@@ -114,7 +114,7 @@
     <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 40px 0 10px;"/>
     <button class="button button-positive" style="min-width:50px;" ng-click="send()" >Send </button>
   </ion-footer-bar>
-  <div class="chat-extends" id="chat-extends" style="display:none">
+  <div class="chat-extends slider-top closed" id="chat-extends" style="display:none">
     <div class="row center">
       <div class="col">
         <img ng-src="{{rootImgPath}}/image.png" ng-click="openFileDialog('2')"/>
@@ -128,7 +128,7 @@
     </div>
   </div>
  
-  <div class="chat-extends" id="chat-emoticons">
+  <div class="chat-extends slider-top closed" id="chat-emoticons">
     <div id="emoticon-tabs" class="tabs tab-emoticon" >
       <a ng-class="emoticon.CN" id="tab{{$index}}" ng-repeat="emoticon in emoticons" ng-click="tabActive('{{$index}}');">
         <i class="icon {{emoticon.tag}}"></i>
@@ -143,7 +143,7 @@
     </div>
   </div>
 
-  <div class="chat-extends" id="chat-notice">
+  <div class="chat-extends slider-top closed" id="chat-notice">
     <div class="item item-avatar" >
       <img ng-src="{{notice.image}}"  />
       <h2 class="mw90" id="notice-message">{{notice.message}}</h2>
@@ -151,7 +151,7 @@
       <i class="icon ion-more btn-more" ng-click="toggleNoticeMenu();"></i>
     </div>
 
-    <div class="chat-extends-menu" id="chat-notice-menu">
+    <div class="chat-extends-buttons" id="chat-notice-menu">
       <div class="col" ng-click="updateNotice('N','N')">
         <span>No more</span>
       </div>
@@ -159,6 +159,19 @@
         <span>Fold</span>
       </div>
     </div>    
+  </div>
+
+  <div ng-class="chatExtendsMenuClass" id="chat-extends-menu">
+    <ion-list>
+      <ion-item class="item item-icon-left transparent" ng-click="openFriendModal();">
+        <i class="icon ion-plus"></i>Invite
+      </ion-item>
+
+      <ion-item class="item transparent" ng-repeat="user in channelUserDatas">
+        <img class="img-friend" ng-src="{{user.I}}" />
+        <h2 style="margin: 14px 0 0 0;">{{user.NM}}</h2>
+      </ion-item>
+    </ion-list>
   </div>
 
   <button class="button ion-arrow-expand btn-expand hidden icon-large" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>
