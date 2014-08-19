@@ -377,7 +377,7 @@ angular.module('starter.services', [])
             $rootScope.currentChannelLatestDate = latestDate;
           }
 
-          var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, active : "true" };
+          var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, senderId : data.UO.U, timestamp : data.TS, active : "true", bookmarkFlag : 'N' };
 
           // Add to local DB
           MessageDao.add( data );
@@ -733,7 +733,7 @@ angular.module('starter.services', [])
               messages.push( { type : 'T', date : dateStrs[1], message : dateMessage } );
               latestDate = dateStrs[3];
             }
-            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I, active : "false" } );
+            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I, senderId : data.sender_id, timestamp : data.time, active : "false" } );
           }
 
           $rootScope.currentChannelLatestDate = latestDate;
@@ -792,6 +792,18 @@ angular.module('starter.services', [])
     sendSys : function(msg){
       var DT = { UO : CONF._user, MG : msg, S : CONF._user.U, 'T' : 'S' };
       $rootScope.xpush.send(CONF._channel, 'system', DT );
+    },
+    /**
+     * @ngdoc function
+     * @name send
+     * @module starter.services
+     * @kind function
+     *
+     * @description Send System Message
+     * @param {string} message
+     */
+    updateMessage : function( param ){
+      MessageDao.update( param );
     }
   };
 })

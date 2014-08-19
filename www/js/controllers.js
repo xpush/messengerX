@@ -1460,13 +1460,18 @@ angular.module('starter.controllers', [])
    * @description Set frined's online status on off
    */
   $scope.setOnlineStatus = function( msg ){
-    var btnStatus = document.getElementById( "online-status" );
     if( msg === "on" ){
       $scope.watching = true;
     } else {
       $scope.watching = false;
     }
     $scope.$apply();
+  };
+
+  $scope.setBookmark = function( message ){
+    console.log( message );
+    var param = {'channelId': channelId, 'bookmarkFlag' : message.bookmarkFlag, 'senderId' : message.senderId, 'timestamp' : message.timestamp };
+    Chat.updateMessage( param );
   };
 })
 .controller('ViewCtrl', function($scope, $rootScope) {
@@ -1516,7 +1521,7 @@ angular.module('starter.controllers', [])
       video.addEventListener('loadeddata', function (){
         offsetY = video.videoWidth > screen.width ? 84+ topBarY: 66+topBarY;
         window.resizeTo(video.videoWidth+offsetX, video.videoHeight+offsetY);  
-      });    
+      });
     }
   });
 

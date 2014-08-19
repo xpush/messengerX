@@ -476,10 +476,10 @@ angular.module('starter.dao', [])
         "WHERE channel_id = ? and sender_id = ? and time = ? and owner_id = ? ";
 
       var cond = [
-        jsonObj.BF,
-        jsonObj.C,
-        jsonObj.S,
-        jsonObj.TS,
+        jsonObj.bookmarkFlag,
+        jsonObj.channel,
+        jsonObj.senderId,
+        jsonObj.timestamp,
         loginUserId
       ];
 
