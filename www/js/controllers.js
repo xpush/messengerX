@@ -694,7 +694,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $ionicFrostedDelegate, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons) {
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $xpushSlide, $ionicBackdrop, $ionicFrostedDelegate, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons) {
 
   var loginUser = Sign.getUser();
 
@@ -1144,14 +1144,23 @@ angular.module('starter.controllers', [])
   $scope.toggleMenu = function( flag ) {
     $scope.showMenu = flag;
     if( $scope.showMenu === true ){
-
+      
       document.getElementById( 'chat-emoticons' ).style.display = "none";
-      document.getElementById( 'chat-notice' ).style.display = "none";
-
       document.getElementById( 'chat-extends' ).style.display = "none";
-      $scope.chatExtendsMenuClass = "chat-extends-menu slide-in-right";
+      //$scope.chatExtendsMenuClass = "chat-extends-menu slide-in-right";
+      //$ionicBackdrop.retain();
+
+      // An elaborate, custom popup
+      var myPopup = $xpushSlide.show({
+        templateUrl : 'templates/test.html',
+        scope: $scope
+      });
+      myPopup.then(function(noticeMessage) {
+
+      });  
     } else {
-      $scope.chatExtendsMenuClass = "chat-extends-menu slide-out-right";
+      //$ionicBackdrop.release();
+      //$scope.chatExtendsMenuClass = "chat-extends-menu slide-out-right";
     }
   };
 
@@ -1165,6 +1174,10 @@ angular.module('starter.controllers', [])
    * @param {boolean}
    */
   $scope.toggleNotice = function( flag ) {
+    console.log( $scope.notice  );
+    console.log( $scope.showEmo );    
+    console.log( $scope.showExt );    
+
     if( flag && $scope.notice && $scope.notice.useFlag === 'Y' && !$scope.showEmo && !$scope.showExt ){
       if( $scope.notice.foldFlag == 'N' ) {
         document.getElementById( "chat-notice" ).style.display = "block";
@@ -1198,7 +1211,7 @@ angular.module('starter.controllers', [])
       document.getElementById( "chat-notice-menu" ).style.display = "flex";
       $scope.showNoticeMenu = true;
     }
-  }
+  };
 
   /**
    * @ngdoc function
@@ -1433,6 +1446,8 @@ angular.module('starter.controllers', [])
    * @description Open Notice popup to input notice message
    */
   $scope.showNoticePopup = function() {
+    $scope.toggleMenu( false );
+
     $scope.data = {}
 
     // An elaborate, custom popup
@@ -1519,6 +1534,44 @@ angular.module('starter.controllers', [])
 
     Chat.updateMessage( param );
   };
+
+  /**
+   * @ngdoc function
+   * @name toggleNotice
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description show or hide Notice div
+   * @param {boolean}
+   */
+  $scope.viewBookmarkOnlyFlag = false;
+  $scope.favoriteButtonClass = "button ion-ios7-star-outline"
+  $scope.viewBookmarkOnly = function() {
+    if( $scope.viewBookmarkOnlyFlag ){
+      $scope.favoriteButtonClass = "button ion-ios7-star-outline";
+      $scope.viewBookmarkOnlyFlag = false;
+    } else {
+      $scope.favoriteButtonClass = "button ion-ios7-star";
+      $scope.viewBookmarkOnlyFlag = true;
+    }
+
+    $scope.toggleMenu( false );
+    var param = { 'channel' : channelId } ;
+    if( $scope.viewBookmarkOnlyFlag ){
+      param.bookmarkFlag = 'Y';
+    }
+
+    Chat.list( param, function( messages ){
+
+      $scope.messages = [];
+      $scope.messages = $scope.messages.concat(messages);
+
+      setTimeout( function(){
+        $ionicFrostedDelegate.update();
+        $ionicScrollDelegate.scrollBottom(true);
+      }, 100 );
+    });
+  };  
 })
 .controller('ViewCtrl', function($scope, $rootScope) {
 

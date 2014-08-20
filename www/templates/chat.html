@@ -142,7 +142,7 @@
     </div>
   </div>
 
-  <div class="chat-extends slider-top closed" id="chat-notice">
+  <div class="chat-extends hidden" id="chat-notice">
     <div class="item item-avatar" >
       <img ng-src="{{notice.image}}"  />
       <h2 class="mw90" id="notice-message">{{notice.message}}</h2>
@@ -161,25 +161,31 @@
   </div>
 
   <div ng-class="chatExtendsMenuClass" id="chat-extends-menu">
-    <div class="center flex" id="chat-notice-menu">
-      <div class="col" ng-click="showNoticePopup();">
-        <button class="button ion-alert-circled"></button>
-        <p>Notice</p>
+    <ion-content padding="false" style="top:0px;" >
+      <div class="center flex" id="chat-notice-menu">
+        <div class="col" ng-click="showNoticePopup();">
+          <button class="button ion-alert-circled"></button>
+          <p>Notice</p>
+        </div>
+        <div class="col" ng-click="showNoticePopup();">
+          <button class="button ion-checkmark-round"></button>
+          <p>Vote</p>
+        </div>
+        <div class="col" ng-click="viewBookmarkOnly();" >
+          <button ng-class="favoriteButtonClass"></button>
+          <p>Bookmark</p>
+        </div>    
       </div>
-      <div class="col" ng-click="showNoticePopup();">
-        <button class="button ion-checkmark-round"></button>
-        <p>Vote</p>
+      <div class="list">
+        <div class="item item-icon-left transparent" ng-click="openFriendModal();">
+          <i class="icon ion-plus"></i>Invite
+        </div>
+        <div class="item transparent" ng-repeat="user in channelUserDatas">
+          <img class="img-friend" ng-src="{{user.I}}" />
+          <h2 style="margin: 14px 0 0 0;">{{user.NM}}</h2>
+        </div>
       </div>
-    </div>
-    <ion-list>
-      <ion-item class="item item-icon-left transparent" ng-click="openFriendModal();">
-        <i class="icon ion-plus"></i>Invite
-      </ion-item>
-      <ion-item class="item transparent" ng-repeat="user in channelUserDatas">
-        <img class="img-friend" ng-src="{{user.I}}" />
-        <h2 style="margin: 14px 0 0 0;">{{user.NM}}</h2>
-      </ion-item>
-    </ion-list>
+    </ion-content>    
   </div>
 
   <button class="button ion-arrow-expand btn-expand hidden icon-large" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>

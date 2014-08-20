@@ -435,10 +435,16 @@ angular.module('starter.dao', [])
   var scope;
 
   return {
-    list : function( channel ){
+    list : function( params ){
       var loginUserId = Sign.getUser().userId;
+      var query = 'SELECT sender_id, sender_name, sender_image, message, time, type, bookmark_flag FROM TB_MESSAGE WHERE channel_id = ? and owner_id = ? ';
+      
+      if( params.bookmarkFlag !== undefined ){        
+        query += 'AND bookmark_flag = "' + params.bookmarkFlag + '" ';
+      }
+
       return DB.query(
-        'SELECT sender_id, sender_name, sender_image, message, time, type, bookmark_flag FROM TB_MESSAGE WHERE channel_id = ? and owner_id = ? ;', [channel,loginUserId]
+        query, [params.channel,loginUserId]
       ).then(function(result) {
         return DB.fetchAll(result);
       });

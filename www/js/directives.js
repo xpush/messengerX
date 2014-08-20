@@ -194,4 +194,255 @@ angular.module('starter.directives', [])
       }, DELAY_TIME_BEFORE_POSTING)
     }
   }
-});
+})
+.factory('$xpushSlide', [
+  '$ionicTemplateLoader',
+  '$ionicBackdrop',
+  '$q',
+  '$timeout',
+  '$rootScope',
+  '$document',
+  '$compile',
+  '$ionicPlatform',
+function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $document, $compile, $ionicPlatform) {
+
+  extend = angular.extend,
+  forEach = angular.forEach,
+  isDefined = angular.isDefined,
+  isString = angular.isString,
+  jqLite = angular.element;
+
+  var POPUP_TPL =
+      '<div class="chat-extends-menu">' +
+      '</div>';
+
+  var PLATFORM_BACK_BUTTON_PRIORITY_POPUP = 400;
+
+  //TODO allow this to be configured
+  var config = {
+    stackPushDelay: 50
+  };
+  var popupStack = [];
+  var $xpushSlide = {
+    /**
+     * @ngdoc method
+     * @description
+     * Show a complex popup. This is the master show function for all popups.
+     *
+     * A complex popup has a `buttons` array, with each button having a `text` and `type`
+     * field, in addition to an `onTap` function.  The `onTap` function, called when
+     * the correspondingbutton on the popup is tapped, will by default close the popup
+     * and resolve the popup promise with its return value.  If you wish to prevent the
+     * default and keep the popup open on button tap, call `event.preventDefault()` on the
+     * passed in tap event.  Details below.
+     *
+     * @name $xpushSlide#show
+     * @param {object} options The options for the new popup, of the form:
+     *
+     * ```
+     * {
+     *   title: '', // String. The title of the popup.
+     *   subTitle: '', // String (optional). The sub-title of the popup.
+     *   template: '', // String (optional). The html template to place in the popup body.
+     *   templateUrl: '', // String (optional). The URL of an html template to place in the popup   body.
+     *   scope: null, // Scope (optional). A scope to link to the popup content.
+     *   buttons: [{ //Array[Object] (optional). Buttons to place in the popup footer.
+     *     text: 'Cancel',
+     *     type: 'button-default',
+     *     onTap: function(e) {
+     *       // e.preventDefault() will stop the popup from closing when tapped.
+     *       e.preventDefault();
+     *     }
+     *   }, {
+     *     text: 'OK',
+     *     type: 'button-positive',
+     *     onTap: function(e) {
+     *       // Returning a value will cause the promise to resolve with the given value.
+     *       return scope.data.response;
+     *     }
+     *   }]
+     * }
+     * ```
+     *
+     * @returns {object} A promise which is resolved when the popup is closed. Has an additional
+     * `close` function, which can be used to programmatically close the popup.
+     */
+    show: showPopup,
+    /**
+     * @private for testing
+     */
+    _createPopup: createPopup,
+    _popupStack: popupStack
+  };
+
+  return $xpushSlide;
+
+  function createPopup(options) {
+    options = extend({
+      scope: null,
+      title: '',
+      buttons: [],
+    }, options || {});
+
+    var popupPromise = $ionicTemplateLoader.compile({
+      template: POPUP_TPL,
+      scope: options.scope && options.scope.$new(),
+      appendTo: $document[0].body
+    });
+    var contentPromise = options.templateUrl ?
+      $ionicTemplateLoader.load(options.templateUrl) :
+      $q.when(options.template || options.content || '');
+
+    return $q.all([popupPromise, contentPromise])
+    .then(function(results) {
+      var self = results[0];
+      var content = results[1];
+      var responseDeferred = $q.defer();
+
+      self.responseDeferred = responseDeferred;
+
+      //Can't ng-bind-html for popup-body because it can be insecure html
+      //(eg an input in case of prompt)
+      var body = jqLite(self.element[0].querySelector('.chat-extends-menu'));
+      if (content) {
+        body.html(content);
+        $compile(body.contents())(self.scope);
+      } else {
+        body.remove();
+      }
+
+      extend(self.scope, {
+        title: options.title,
+        buttons: options.buttons,
+        subTitle: options.subTitle,
+        $buttonTapped: function(button, event) {
+          var result = (button.onTap || angular.noop)(event);
+          event = event.originalEvent || event; //jquery events
+
+          if (!event.defaultPrevented) {
+            responseDeferred.resolve(result);
+          }
+        }
+      });
+
+      self.show = function() {
+        if (self.isShown) return;
+
+        self.isShown = true;
+        ionic.requestAnimationFrame(function() {
+          //if hidden while waiting for raf, don't show
+          if (!self.isShown) return;
+
+          //if the popup is taller than the window, make the popup body scrollable
+          if(self.element[0].offsetHeight > window.innerHeight - 20){
+            self.element[0].style.height = window.innerHeight - 20+'px';
+            popupBody = self.element[0].querySelectorAll('.chat-extends-menu');
+            //popupHead = self.element[0].querySelectorAll('.popup-head');
+            //popupButtons = self.element[0].querySelectorAll('.popup-buttons');
+            //self.element.addClass('popup-tall');
+            newHeight = window.innerHeight - popupHead[0].offsetHeight - popupButtons[0].offsetHeight -20;
+            popupBody[0].style.height =  newHeight + 'px';
+          }
+
+          self.element.removeClass('slide-out-right');
+          self.element.addClass('slide-in-right');
+          ionic.DomUtil.centerElementByMarginTwice(self.element[0]);
+          focusInput(self.element);
+        });
+      };
+      self.hide = function(callback) {
+        callback = callback || angular.noop;
+        if (!self.isShown) return callback();
+
+        self.isShown = false;
+        self.element.removeClass('slide-in-right');
+        self.element.addClass('slide-out-right');
+        $timeout(callback, 250);
+      };
+      self.remove = function() {
+        if (self.removed) return;
+
+        self.hide(function() {
+          self.element.remove();
+          self.scope.$destroy();
+        });
+
+        self.removed = true;
+      };
+
+      return self;
+    });
+  }
+
+  function onHardwareBackButton(e) {
+    popupStack[0] && popupStack[0].responseDeferred.resolve();
+  }
+
+  function showPopup(options) {
+    var popupPromise = $xpushSlide._createPopup(options);
+    var previousPopup = popupStack[0];
+
+    if (previousPopup) {
+      previousPopup.hide();
+    }
+
+    var resultPromise = $timeout(angular.noop, previousPopup ? config.stackPushDelay : 0)
+    .then(function() { return popupPromise; })
+    .then(function(popup) {
+      if (!previousPopup) {
+        //Add popup-open & backdrop if this is first popup
+        document.body.classList.add('popup-open');
+        $ionicBackdrop.retain();
+        $xpushSlide._backButtonActionDone = $ionicPlatform.registerBackButtonAction(
+          onHardwareBackButton,
+          PLATFORM_BACK_BUTTON_PRIORITY_POPUP
+        );
+      }
+      popupStack.unshift(popup);
+      popup.show();
+
+      //DEPRECATED: notify the promise with an object with a close method
+      popup.responseDeferred.notify({
+        close: resultPromise.close
+      });
+
+      return popup.responseDeferred.promise.then(function(result) {
+        var index = popupStack.indexOf(popup);
+        if (index !== -1) {
+          popupStack.splice(index, 1);
+        }
+        popup.remove();
+
+        var previousPopup = popupStack[0];
+        if (previousPopup) {
+          previousPopup.show();
+        } else {
+          //Remove popup-open & backdrop if this is last popup
+          document.body.classList.remove('popup-open');
+          ($xpushSlide._backButtonActionDone || angular.noop)();
+        }
+        // always release the backdrop since it has an internal backdrop counter
+        $ionicBackdrop.release();
+        return result;
+      });
+    });
+
+    function close(result) {
+      popupPromise.then(function(popup) {
+        if (!popup.removed) {
+          popup.responseDeferred.resolve(result);
+        }
+      });
+    }
+    resultPromise.close = close;
+
+    return resultPromise;
+  }
+
+  function focusInput(element) {
+    var focusOn = element[0].querySelector('[autofocus]');
+    if (focusOn) {
+      focusOn.focus();
+    }
+  }
+}]);

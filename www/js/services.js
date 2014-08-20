@@ -698,7 +698,6 @@ angular.module('starter.services', [])
       self = this;
 
       var loginUser = Sign.getUser();
-      var latestDate;
 
       CONF._app = params.app;
       CONF._channel = params.channel;
@@ -713,36 +712,45 @@ angular.module('starter.services', [])
         var param = { 'channel' :  params.channel, 'reset' : true, 'message': latestMessage };
         ChannelDao.update( param );
 
-        var messages = [];
-
-        // Get message list from local DB
-        MessageDao.list( params.channel ).then(function(messageArray) {
-
-          for( var inx = 0 ; inx < messageArray.length ; inx++ ){
-            var data = messageArray[inx];
-            var dateStrs = UTIL.timeToString( data.time );
-
-            // Get previous message's time yyyyMMddhhm
-            if( inx > 0 ){
-              latestDate =  UTIL.timeToString( messageArray[inx-1].time )[3];
-            }
-
-            // 10 minute
-            if( latestDate !== dateStrs[3] ){
-              var dateMessage = dateStrs[1]+" "+dateStrs[2];
-              messages.push( { type : 'T', date : dateStrs[1], message : dateMessage } );
-              latestDate = dateStrs[3];
-            }
-            messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name,image : Cache.get( data.sender_id ).I,
-                          senderId : data.sender_id, timestamp : data.time, active : "false", bookmarkFlag : data.bookmark_flag } );
-          }
-
-          $rootScope.currentChannelLatestDate = latestDate;
-          callback(messages);
+        self.list( params, function( messages ){
+          callback( messages );
         });
+
       } else {
         self.send( inviteMessage, 'J' );
       }
+    },
+
+    list : function( params, callback ){
+      var messages = [];
+
+      var latestDate;
+
+      // Get message list from local DB
+      MessageDao.list( params ).then(function(messageArray) {
+
+        for( var inx = 0 ; inx < messageArray.length ; inx++ ){
+          var data = messageArray[inx];
+          var dateStrs = UTIL.timeToString( data.time );
+
+          // Get previous message's time yyyyMMddhhm
+          if( inx > 0 ){
+            latestDate =  UTIL.timeToString( messageArray[inx-1].time )[3];
+          }
+
+          // 10 minute
+          if( latestDate !== dateStrs[3] ){
+            var dateMessage = dateStrs[1]+" "+dateStrs[2];
+            messages.push( { type : 'T', date : dateStrs[1], message : dateMessage } );
+            latestDate = dateStrs[3];
+          }
+          messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name,image : Cache.get( data.sender_id ).I,
+                        senderId : data.sender_id, timestamp : data.time, active : "false", bookmarkFlag : data.bookmark_flag } );
+        }
+
+        $rootScope.currentChannelLatestDate = latestDate;
+        callback(messages);
+      });
     },
 
     /**

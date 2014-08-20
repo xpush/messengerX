@@ -331,7 +331,7 @@ paper-input {
 
 .chat-extends {
 	position:absolute;
-	z-index:999;
+	z-index:997;
 	top:44px;
 	left:0px;
 	opacity:0.85;
@@ -455,7 +455,7 @@ img.emoticon{
 	top: 48px;
 	right: 10px;
 	cursor: pointer;
-	z-index: 999;
+	z-index: 998;
 	-webkit-app-region: no-drag;
 	line-height: 16px;
 	padding: 0px;
