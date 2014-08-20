@@ -37564,7 +37564,11 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
       //Can't ng-bind-html for popup-body because it can be insecure html
       //(eg an input in case of prompt)
       var body = jqLite(self.element[0].querySelector('.popup-body'));
+
+      console.log( body );
+
       if (content) {
+        console.log( content );
         body.html(content);
         $compile(body.contents())(self.scope);
       } else {

@@ -1148,18 +1148,13 @@ angular.module('starter.controllers', [])
       document.getElementById( 'chat-emoticons' ).style.display = "none";
       document.getElementById( 'chat-extends' ).style.display = "none";
       //$scope.chatExtendsMenuClass = "chat-extends-menu slide-in-right";
-      //$ionicBackdrop.retain();
 
       // An elaborate, custom popup
       var myPopup = $xpushSlide.show({
-        templateUrl : 'templates/test.html',
+        templateUrl : 'templates/chat-menu.html',
         scope: $scope
       });
-      myPopup.then(function(noticeMessage) {
-
-      });  
     } else {
-      //$ionicBackdrop.release();
       //$scope.chatExtendsMenuClass = "chat-extends-menu slide-out-right";
     }
   };

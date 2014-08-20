@@ -214,6 +214,17 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
 
   var POPUP_TPL =
       '<div class="chat-extends-menu">' +
+        //'<div style="height:44px;">' +
+        //  '<button class="button icon ion-close-round" ng-click="$buttonTapped(button, $event)" ></button>' +
+        //'</div>' +
+        '<ion-header-bar class="bar-dark">'+
+          '<h1 class="title"></h1>'+
+          '<div class="buttons">'+
+            '<button class="button icon ion-close-round" ng-click="$buttonTapped(button, $event)" ></button>'+
+          '</div>'+
+        '</ion-header-bar>'+
+        '<div class="menu-body">' +
+        '</div>' +
       '</div>';
 
   var PLATFORM_BACK_BUTTON_PRIORITY_POPUP = 400;
@@ -303,7 +314,7 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
 
       //Can't ng-bind-html for popup-body because it can be insecure html
       //(eg an input in case of prompt)
-      var body = jqLite(self.element[0].querySelector('.chat-extends-menu'));
+      var body = jqLite(self.element[0].querySelector('.menu-body'));
       if (content) {
         body.html(content);
         $compile(body.contents())(self.scope);
@@ -312,11 +323,8 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
       }
 
       extend(self.scope, {
-        title: options.title,
-        buttons: options.buttons,
-        subTitle: options.subTitle,
         $buttonTapped: function(button, event) {
-          var result = (button.onTap || angular.noop)(event);
+          var result = (angular.noop)(event);
           event = event.originalEvent || event; //jquery events
 
           if (!event.defaultPrevented) {
@@ -334,20 +342,22 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
           if (!self.isShown) return;
 
           //if the popup is taller than the window, make the popup body scrollable
+          /**
           if(self.element[0].offsetHeight > window.innerHeight - 20){
             self.element[0].style.height = window.innerHeight - 20+'px';
-            popupBody = self.element[0].querySelectorAll('.chat-extends-menu');
+            popupBody = self.element[0].querySelectorAll('.popup-body');
             //popupHead = self.element[0].querySelectorAll('.popup-head');
             //popupButtons = self.element[0].querySelectorAll('.popup-buttons');
             //self.element.addClass('popup-tall');
-            newHeight = window.innerHeight - popupHead[0].offsetHeight - popupButtons[0].offsetHeight -20;
-            popupBody[0].style.height =  newHeight + 'px';
+            //newHeight = window.innerHeight - popupHead[0].offsetHeight - popupButtons[0].offsetHeight -20;
+            //popupBody[0].style.height =  newHeight + 'px';
           }
+          */
 
           self.element.removeClass('slide-out-right');
           self.element.addClass('slide-in-right');
-          ionic.DomUtil.centerElementByMarginTwice(self.element[0]);
-          focusInput(self.element);
+          //ionic.DomUtil.centerElementByMarginTwice(self.element[0]);
+          //focusInput(self.element);
         });
       };
       self.hide = function(callback) {
@@ -390,8 +400,8 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
     .then(function() { return popupPromise; })
     .then(function(popup) {
       if (!previousPopup) {
-        //Add popup-open & backdrop if this is first popup
-        document.body.classList.add('popup-open');
+        //Add menu-open & backdrop if this is first popup
+        document.body.classList.add('menu-open');
         $ionicBackdrop.retain();
         $xpushSlide._backButtonActionDone = $ionicPlatform.registerBackButtonAction(
           onHardwareBackButton,
@@ -417,8 +427,8 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
         if (previousPopup) {
           previousPopup.show();
         } else {
-          //Remove popup-open & backdrop if this is last popup
-          document.body.classList.remove('popup-open');
+          //Remove menu-open & backdrop if this is last popup
+          document.body.classList.remove('menu-open');
           ($xpushSlide._backButtonActionDone || angular.noop)();
         }
         // always release the backdrop since it has an internal backdrop counter

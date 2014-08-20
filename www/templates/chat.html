@@ -8,9 +8,8 @@
 
   <ion-nav-buttons side="right">
     <div class="no-drag" >
-      <button class="button icon ion-navicon" ng-if=" showMenu == false " ng-click="toggleMenu(true);" ></button>
-      <button class="button icon ion-close-round" ng-if=" showMenu == true " ng-click="toggleMenu(false);" ></button>
-      <button class="button button-dark  no-drag" ng-if=" nodeWebkit " ng-click="close()">
+      <button class="button icon ion-navicon" ng-click="toggleMenu(true);" ></button>
+      <button class="button button-dark no-drag" ng-if=" nodeWebkit " ng-click="close()">
         <img ng-src="{{rootImgPath}}/button_close.png">
       </button>
     </div>
@@ -161,31 +160,29 @@
   </div>
 
   <div ng-class="chatExtendsMenuClass" id="chat-extends-menu">
-    <ion-content padding="false" style="top:0px;" >
-      <div class="center flex" id="chat-notice-menu">
-        <div class="col" ng-click="showNoticePopup();">
-          <button class="button ion-alert-circled"></button>
-          <p>Notice</p>
-        </div>
-        <div class="col" ng-click="showNoticePopup();">
-          <button class="button ion-checkmark-round"></button>
-          <p>Vote</p>
-        </div>
-        <div class="col" ng-click="viewBookmarkOnly();" >
-          <button ng-class="favoriteButtonClass"></button>
-          <p>Bookmark</p>
-        </div>    
+    <div class="center flex" id="chat-notice-menu">
+      <div class="col" ng-click="showNoticePopup();">
+        <button class="button ion-alert-circled"></button>
+        <p>Notice</p>
       </div>
-      <div class="list">
-        <div class="item item-icon-left transparent" ng-click="openFriendModal();">
-          <i class="icon ion-plus"></i>Invite
-        </div>
-        <div class="item transparent" ng-repeat="user in channelUserDatas">
-          <img class="img-friend" ng-src="{{user.I}}" />
-          <h2 style="margin: 14px 0 0 0;">{{user.NM}}</h2>
-        </div>
+      <div class="col" ng-click="showNoticePopup();">
+        <button class="button ion-checkmark-round"></button>
+        <p>Vote</p>
       </div>
-    </ion-content>    
+      <div class="col" ng-click="viewBookmarkOnly();" >
+        <button ng-class="favoriteButtonClass"></button>
+        <p>Bookmark</p>
+      </div>    
+    </div>
+    <div class="list">
+      <div class="item item-icon-left transparent" ng-click="openFriendModal();">
+        <i class="icon ion-plus"></i>Invite
+      </div>
+      <div class="item transparent" ng-repeat="user in channelUserDatas">
+        <img class="img-friend" ng-src="{{user.I}}" />
+        <h2 style="margin: 14px 0 0 0;">{{user.NM}}</h2>
+      </div>
+    </div> 
   </div>
 
   <button class="button ion-arrow-expand btn-expand hidden icon-large" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>

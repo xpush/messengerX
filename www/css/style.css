@@ -361,7 +361,6 @@ paper-input {
 .chat-extends-menu {
 	position:absolute;
 	z-index:999;
-	top: 44px;
 	right:0px;
 	/* display:none; */
 	width:80%;
@@ -379,6 +378,11 @@ paper-input {
 
 .chat-extends-menu p{
 	margin:0px;
+}
+
+.menu-open .menu-body {
+	pointer-events: auto;
+	margin-top: 44px;
 }
 
 img.emoticon{
