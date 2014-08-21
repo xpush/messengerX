@@ -1076,11 +1076,7 @@ angular.module('starter.controllers', [])
   $scope.emoticons = [];
 
   $scope.curEmoTabId = "0";
-  $scope.showEmo = false;
-  $scope.showExt = false;
-  $scope.showMenu = false;
-  $scope.watching = false;
-
+  $scope.toggles = { 'showEmo' : false, 'showExt' : false, 'showMenu' : false, 'watching' : false};
   /**
    * @ngdoc function
    * @name toggleEmoticons
@@ -1091,15 +1087,15 @@ angular.module('starter.controllers', [])
    * @param {boolean}
    */
   $scope.toggleEmoticons = function( flag ){
-    $scope.showEmo = flag;
-    if( $scope.showEmo === true ){
+    $scope.toggles.showEmo = flag;
+    if( $scope.toggles.showEmo === true ){
       document.getElementById( 'tabbody'+$scope.curEmoTabId ).style.display = "block";
       document.getElementById( 'chat-extends' ).style.display = "none";
       document.getElementById( "chat-notice" ).style.display = "none";
 
       document.getElementById( 'chat-emoticons' ).style.display = "block";
       document.getElementById( 'chat-emoticons' ).className = "chat-extends slider-top";
-      $scope.showExt = false;
+      $scope.toggles.showExt = false;
     } else {
       document.getElementById( 'chat-emoticons' ).className = "chat-extends slider-top closed";
       $scope.toggleNotice( true );
@@ -1116,15 +1112,15 @@ angular.module('starter.controllers', [])
    * @param {boolean}
    */
   $scope.toggleExt = function( flag ) {
-    $scope.showExt = flag;
-    if( $scope.showExt === true ){
+    $scope.toggles.showExt = flag;
+    if( $scope.toggles.showExt === true ){
 
       document.getElementById( 'chat-emoticons' ).style.display = "none";
       document.getElementById( 'chat-notice' ).style.display = "none";
 
       document.getElementById( 'chat-extends' ).style.display = "block";
       document.getElementById( 'chat-extends' ).className = "chat-extends slider-top";
-      $scope.showEmo = false;
+      $scope.toggles.showEmo = false;
     } else {
       document.getElementById( 'chat-extends' ).className = "chat-extends slider-top closed";
       $scope.toggleNotice( true );
@@ -1141,21 +1137,26 @@ angular.module('starter.controllers', [])
    * @param {boolean}
    */
   $scope.chatExtendsMenuClass = "hidden";
+  // An elaborate, custom popup
+  $scope.slidePopup;
   $scope.toggleMenu = function( flag ) {
-    $scope.showMenu = flag;
-    if( $scope.showMenu === true ){
+    $scope.toggles.showMenu = flag;
+
+    if( $scope.toggles.showMenu === true ){
       
       document.getElementById( 'chat-emoticons' ).style.display = "none";
       document.getElementById( 'chat-extends' ).style.display = "none";
       //$scope.chatExtendsMenuClass = "chat-extends-menu slide-in-right";
 
-      // An elaborate, custom popup
-      var myPopup = $xpushSlide.show({
+      $scope.slidePopup = $xpushSlide.show({
         templateUrl : 'templates/chat-menu.html',
         scope: $scope
       });
+
     } else {
-      //$scope.chatExtendsMenuClass = "chat-extends-menu slide-out-right";
+      if( $scope.slidePopup != undefined ){
+        $scope.slidePopup.close();
+      }
     }
   };
 
@@ -1168,12 +1169,9 @@ angular.module('starter.controllers', [])
    * @description show or hide Notice div
    * @param {boolean}
    */
-  $scope.toggleNotice = function( flag ) {
-    console.log( $scope.notice  );
-    console.log( $scope.showEmo );    
-    console.log( $scope.showExt );    
+  $scope.toggleNotice = function( flag ) { 
 
-    if( flag && $scope.notice && $scope.notice.useFlag === 'Y' && !$scope.showEmo && !$scope.showExt ){
+    if( flag && $scope.notice && $scope.notice.useFlag === 'Y' && !$scope.toggles.showEmo && !$scope.toggles.showExt ){
       if( $scope.notice.foldFlag == 'N' ) {
         document.getElementById( "chat-notice" ).style.display = "block";
         document.getElementById( "chat-notice-button" ).style.display = "none";
@@ -1510,9 +1508,9 @@ angular.module('starter.controllers', [])
    */
   $scope.setOnlineStatus = function( msg ){
     if( msg === "on" ){
-      $scope.watching = true;
+      $scope.toggles.watching = true;
     } else {
-      $scope.watching = false;
+      $scope.toggles.watching = false;
     }
     $scope.$apply();
   };

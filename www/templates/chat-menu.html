@@ -1,23 +1,25 @@
-<div class="center flex" id="chat-notice-menu">
-  <div class="col" ng-click="showNoticePopup();">
-    <button class="button ion-alert-circled"></button>
-    <p>Notice</p>
+<ion-content>
+  <div class="center flex" id="chat-notice-menu">
+    <div class="col" ng-click="showNoticePopup();">
+      <button class="button ion-alert-circled"></button>
+      <p>Notice</p>
+    </div>
+    <div class="col" ng-click="showNoticePopup();">
+      <button class="button ion-checkmark-round"></button>
+      <p>Vote</p>
+    </div>
+    <div class="col" ng-click="viewBookmarkOnly();" >
+      <button ng-class="favoriteButtonClass"></button>
+      <p>Bookmark</p>
+    </div>    
   </div>
-  <div class="col" ng-click="showNoticePopup();">
-    <button class="button ion-checkmark-round"></button>
-    <p>Vote</p>
+  <div class="list">
+    <div class="item item-icon-left transparent" ng-click="openFriendModal();">
+      <i class="icon ion-plus"></i>Invite
+    </div>
+    <div class="item transparent" ng-repeat="user in channelUserDatas">
+      <img class="img-friend" ng-src="{{user.I}}" />
+      <h2 style="margin: 14px 0 0 0;">{{user.NM}}</h2>
+    </div>
   </div>
-  <div class="col" ng-click="viewBookmarkOnly();" >
-    <button ng-class="favoriteButtonClass"></button>
-    <p>Bookmark</p>
-  </div>    
-</div>
-<div class="list">
-  <div class="item item-icon-left transparent" ng-click="openFriendModal();">
-    <i class="icon ion-plus"></i>Invite
-  </div>
-  <div class="item transparent" ng-repeat="user in channelUserDatas">
-    <img class="img-friend" ng-src="{{user.I}}" />
-    <h2 style="margin: 14px 0 0 0;">{{user.NM}}</h2>
-  </div>
-</div>
+</ion-content>

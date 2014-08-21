@@ -380,9 +380,12 @@ paper-input {
 	margin:0px;
 }
 
+.menu-body {
+	margin-top: 44px;
+}
+
 .menu-open .menu-body {
 	pointer-events: auto;
-	margin-top: 44px;
 }
 
 img.emoticon{

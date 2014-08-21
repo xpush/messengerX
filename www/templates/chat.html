@@ -1,8 +1,8 @@
 <ion-view title="{{channelName}}">
   <ion-nav-buttons side="left">
     <div >
-      <i class="icon icon-large ion-ios7-eye icon-nav-bar " ng-if=" watching == true " ></i>
-      <i class="icon icon-large ion-android-timer icon-nav-bar " ng-if=" watching == false " ></i>
+      <i class="icon icon-large ion-ios7-eye icon-nav-bar " ng-if=" toggles.watching == true " ></i>
+      <i class="icon icon-large ion-android-timer icon-nav-bar " ng-if=" toggles.watching == false " ></i>
     </div>
   </ion-nav-buttons>
 
@@ -105,10 +105,10 @@
     <input type="file" id="file"/>
   </ion-content>
   <ion-footer-bar class="bar-frosted" >
-    <button ng-if=" showExt == true " class="button icon ion-close-round" ng-click="toggleExt(false)"></button>
-    <button ng-if=" showExt == false " class="button icon ion-plus-round" ng-click="toggleExt(true)"></button>
-    <button ng-if=" showEmo == true " class="button icon ion-sad" ng-click="toggleEmoticons(false)"></button>
-    <button ng-if=" showEmo == false " class="button icon ion-happy" ng-click="toggleEmoticons(true)"></button>
+    <button ng-if=" toggles.showExt == true " class="button icon ion-close-round" ng-click="toggleExt(false)"></button>
+    <button ng-if=" toggles.showExt == false " class="button icon ion-plus-round" ng-click="toggleExt(true)"></button>
+    <button ng-if=" toggles.showEmo == true " class="button icon ion-sad" ng-click="toggleEmoticons(false)"></button>
+    <button ng-if=" toggles.showEmo == false " class="button icon ion-happy" ng-click="toggleEmoticons(true)"></button>
 
     <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 40px 0 10px;"/>
     <button class="button button-positive" style="min-width:50px;" ng-click="send()" >Send </button>

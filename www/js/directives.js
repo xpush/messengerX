@@ -212,12 +212,9 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
   isString = angular.isString,
   jqLite = angular.element;
 
-  var POPUP_TPL =
-      '<div class="chat-extends-menu">' +
-        //'<div style="height:44px;">' +
-        //  '<button class="button icon ion-close-round" ng-click="$buttonTapped(button, $event)" ></button>' +
-        //'</div>' +
-        '<ion-header-bar class="bar-dark">'+
+  var MENU_TPL =
+      '<div ng-class=" className ">' +
+        '<ion-header-bar class="bar-stable">'+
           '<h1 class="title"></h1>'+
           '<div class="buttons">'+
             '<button class="button icon ion-close-round" ng-click="$buttonTapped(button, $event)" ></button>'+
@@ -225,6 +222,11 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
         '</ion-header-bar>'+
         '<div class="menu-body">' +
         '</div>' +
+        '<ion-footer-bar class="bar-stable">' +
+          '<div class="buttons">' +
+            '<button class="button icon-left button-clear ion-log-out">Exit</button>' +
+          '</div>' +
+        '</ion-footer-bar>' +
       '</div>';
 
   var PLATFORM_BACK_BUTTON_PRIORITY_POPUP = 400;
@@ -235,53 +237,7 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
   };
   var popupStack = [];
   var $xpushSlide = {
-    /**
-     * @ngdoc method
-     * @description
-     * Show a complex popup. This is the master show function for all popups.
-     *
-     * A complex popup has a `buttons` array, with each button having a `text` and `type`
-     * field, in addition to an `onTap` function.  The `onTap` function, called when
-     * the correspondingbutton on the popup is tapped, will by default close the popup
-     * and resolve the popup promise with its return value.  If you wish to prevent the
-     * default and keep the popup open on button tap, call `event.preventDefault()` on the
-     * passed in tap event.  Details below.
-     *
-     * @name $xpushSlide#show
-     * @param {object} options The options for the new popup, of the form:
-     *
-     * ```
-     * {
-     *   title: '', // String. The title of the popup.
-     *   subTitle: '', // String (optional). The sub-title of the popup.
-     *   template: '', // String (optional). The html template to place in the popup body.
-     *   templateUrl: '', // String (optional). The URL of an html template to place in the popup   body.
-     *   scope: null, // Scope (optional). A scope to link to the popup content.
-     *   buttons: [{ //Array[Object] (optional). Buttons to place in the popup footer.
-     *     text: 'Cancel',
-     *     type: 'button-default',
-     *     onTap: function(e) {
-     *       // e.preventDefault() will stop the popup from closing when tapped.
-     *       e.preventDefault();
-     *     }
-     *   }, {
-     *     text: 'OK',
-     *     type: 'button-positive',
-     *     onTap: function(e) {
-     *       // Returning a value will cause the promise to resolve with the given value.
-     *       return scope.data.response;
-     *     }
-     *   }]
-     * }
-     * ```
-     *
-     * @returns {object} A promise which is resolved when the popup is closed. Has an additional
-     * `close` function, which can be used to programmatically close the popup.
-     */
     show: showPopup,
-    /**
-     * @private for testing
-     */
     _createPopup: createPopup,
     _popupStack: popupStack
   };
@@ -293,10 +249,12 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
       scope: null,
       title: '',
       buttons: [],
+      className : ''
     }, options || {});
 
+
     var popupPromise = $ionicTemplateLoader.compile({
-      template: POPUP_TPL,
+      template: MENU_TPL,
       scope: options.scope && options.scope.$new(),
       appendTo: $document[0].body
     });
@@ -323,6 +281,7 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
       }
 
       extend(self.scope, {
+        className : 'chat-extends-menu slide-in-right',
         $buttonTapped: function(button, event) {
           var result = (angular.noop)(event);
           event = event.originalEvent || event; //jquery events
@@ -338,26 +297,8 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
 
         self.isShown = true;
         ionic.requestAnimationFrame(function() {
-          //if hidden while waiting for raf, don't show
           if (!self.isShown) return;
-
-          //if the popup is taller than the window, make the popup body scrollable
-          /**
-          if(self.element[0].offsetHeight > window.innerHeight - 20){
-            self.element[0].style.height = window.innerHeight - 20+'px';
-            popupBody = self.element[0].querySelectorAll('.popup-body');
-            //popupHead = self.element[0].querySelectorAll('.popup-head');
-            //popupButtons = self.element[0].querySelectorAll('.popup-buttons');
-            //self.element.addClass('popup-tall');
-            //newHeight = window.innerHeight - popupHead[0].offsetHeight - popupButtons[0].offsetHeight -20;
-            //popupBody[0].style.height =  newHeight + 'px';
-          }
-          */
-
-          self.element.removeClass('slide-out-right');
-          self.element.addClass('slide-in-right');
-          //ionic.DomUtil.centerElementByMarginTwice(self.element[0]);
-          //focusInput(self.element);
+          self.scope.className = 'chat-extends-menu slide-in-right';
         });
       };
       self.hide = function(callback) {
@@ -365,8 +306,7 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
         if (!self.isShown) return callback();
 
         self.isShown = false;
-        self.element.removeClass('slide-in-right');
-        self.element.addClass('slide-out-right');
+        self.scope.className = 'chat-extends-menu slide-out-right';
         $timeout(callback, 250);
       };
       self.remove = function() {
