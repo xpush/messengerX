@@ -176,6 +176,8 @@ angular.module('starter.services', [])
       var loginUserId = Sign.getUser().userId;
       $rootScope.xpush.getGroupUsers( loginUserId, function( err, users ){
 
+        console.log( users );
+
         // Users : JSONArray from server
         UserDao.addAll( users, function( result ){
           UserDao.updateRefreshHistory();
@@ -340,7 +342,8 @@ angular.module('starter.services', [])
 
         // compare current channel id to received message's channel id 
         var currentChannel = $rootScope.xpush.getChannel( ch );
-        if( currentChannel != undefined && currentChannel._connected ){
+        if( ( $rootScope.usePopupFlag && currentChannel != undefined && currentChannel._connected )
+          || ( !$rootScope.usePopupFlag && ch === $rootScope.currentChannel ) ) {
 
           if( data.T == 'N' ){
             NoticeDao.add( data );
@@ -473,7 +476,7 @@ angular.module('starter.services', [])
         var channels = {};
 
         // foreach channelArray channelInfo
-        for( var inx = 0 ; inx < channelArray.length ; inx++ ){
+        for( var inx = 0, until = channelArray.length ; inx < until ; inx++ ){
           var data = channelArray[inx];
           var channel = {'channel': data.channel };
 

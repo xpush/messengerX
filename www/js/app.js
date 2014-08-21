@@ -240,6 +240,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
     DB.init();
 
+    var autoInitFlag = false;
+    if( !$rootScope.usePopupFlag ){
+      autoInitFlag = true;
+    }
+
     $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
 
       if(type === 'LOGOUT'){
@@ -249,7 +254,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           });
         }
       }
-    }, false );
+    }, autoInitFlag );
 
     // tootScope function
     $rootScope.logout = function( skipLoginPageFlag, callback ){

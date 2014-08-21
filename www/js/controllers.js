@@ -1005,11 +1005,9 @@ angular.module('starter.controllers', [])
     document.getElementById( "searchKey" ).value = "";
   });
 
-  /**
   $scope.$on('$destroy', function() {
      window.onbeforeunload = undefined;
   });
-  */
 
   /**
    * @ngdoc eventHandler
@@ -1023,17 +1021,13 @@ angular.module('starter.controllers', [])
    * @param {object} currnet state
    */
 
-  /**
   $scope.$on('$locationChangeStart', function(event, next, current) {
 
     // called when chat screen out
     if( current.indexOf('/chat') > -1 ){
-      if(!confirm("Are you sure you want to leave this page?")) {
-        event.preventDefault();
-      }
+      $rootScope.currentChannel = '';
     }
   });
-  */
 
   /**
    * @ngdoc function
@@ -1509,17 +1503,25 @@ angular.module('starter.controllers', [])
     myPopup.then(function(res) {
       if( res === true ){
         Chat.exitChannel( channelId, function(){
-          if( $rootScope.usePopupFlag && $scope.parentScope && $scope.parentScope.refreshChannel ){
-            $scope.parentScope.refreshChannel();
+          if( $rootScope.usePopupFlag ){
+            if( $scope.parentScope && $scope.parentScope.refreshChannel ){
+              $scope.parentScope.refreshChannel();
+              setTimeout( function(){
+                window.close();
+              }, 100 );
+            }
+          } else {
+            if( $scope.slidePopup ){
+              $scope.slidePopup.close();
+            }
             setTimeout( function(){
-              window.close();
+              $state.go( 'tab.channel' );
             }, 100 );
           }
         });
       }
     });
   };
-
 
   /**
    * @ngdoc function
