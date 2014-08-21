@@ -13,6 +13,8 @@
   var localVideo;
   var remoteVideo;
 
+  var turnUrl='https://computeengineondemand.appspot.com/turn?username=92474599&key=4080218913';
+
   var CONFIG = {};
   var STATUS = {
     READY: false,
@@ -24,6 +26,8 @@
     console.log('EVENT', type, data);
 
     if(data.event == 'CONNECTION' && userId == data.U){
+
+      maybeRequestTurn();
 
       if(!channel){
         channel = xpush.getChannel(channelNm);
@@ -135,6 +139,47 @@
   window.onbeforeunload = function(e){
   	//sendMessage('bye');
   };
+
+  var turnDone = false;
+  function maybeRequestTurn() {
+    if (turnUrl === '') {
+        turnDone = true;
+        return;
+    }
+    for (var i = 0, len = CONFIG.pc.iceServers.length; i < len; i++) {
+      console.log('TURN---', CONFIG.pc.iceServers[i]);
+        if (CONFIG.pc.iceServers[i].url.substr(0, 5) === 'turn:') {
+            turnDone = true;
+            return;
+        }
+    }
+    var currentDomain = document.domain;
+    //if (currentDomain.search('localhost') === -1 && currentDomain.search('apprtc') === -1) {
+    //    turnDone = true;
+    //    return;
+    //}
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function () {
+
+        if (xmlhttp.readyState !== 4) {
+            return;
+        }
+        if (xmlhttp.status === 200) {
+            var turnServer = JSON.parse(xmlhttp.responseText);
+            var iceServers = createIceServers(turnServer.uris, turnServer.username, turnServer.password);
+            if (iceServers !== null) {
+                CONFIG.pc.iceServers = CONFIG.pc.iceServers.concat(iceServers);
+            }
+        } else {
+            messageError('No TURN server; unlikely that media will traverse networks. ' + 'If this persists please report it to ' + 'discuss-webrtc@googlegroups.com.');
+        }
+        turnDone = true;
+        maybeStart();
+    };
+    console.log(turnUrl);
+    xmlhttp.open('GET', turnUrl, true);
+    xmlhttp.send();
+  }
 
 
   // ********** P2P Connections *********
