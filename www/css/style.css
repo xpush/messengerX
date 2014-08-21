@@ -360,7 +360,7 @@ paper-input {
 
 .chat-extends-menu {
 	position:absolute;
-	z-index:999;
+	z-index:11;
 	right:0px;
 	/* display:none; */
 	width:80%;
@@ -384,8 +384,16 @@ paper-input {
 	margin-top: 44px;
 }
 
-.menu-open .menu-body {
+.menu-open {
 	pointer-events: auto;
+}
+
+.menu-open.popup-open {
+	pointer-events: none;
+}
+
+.popup-open .chat-extends-menu{
+	z-index: 9;
 }
 
 img.emoticon{

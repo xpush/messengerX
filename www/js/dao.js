@@ -124,6 +124,7 @@ angular.module('starter.dao', [])
   }
 })
 .factory('ChannelDao', function(DB, UTIL, APP_INFO, Sign) {
+  // Channel Screen scope
   var scope;
   var loginUserId;
 
@@ -310,14 +311,17 @@ angular.module('starter.dao', [])
         "   FROM TB_CHANNEL " +
         " ) AS old ON new.channel_id = old.channel_id AND old.owner_id = new.owner_id ; ";
 
-      var currentTimestamp = Date.now();
+      if( jsonObj.updated == undefined ){
+        jsonObj.updated = Date.now();
+      }
+
       var cond = [
         jsonObj.channel,
         jsonObj.name,
         jsonObj.users,
         jsonObj.image,
         jsonObj.message,
-        currentTimestamp,
+        jsonObj.updated,
         loginUserId
       ];
 
@@ -337,7 +341,7 @@ angular.module('starter.dao', [])
           scope.channelArray.splice(searchIndex, 1);
         }
 
-        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message, 'channel_users':jsonObj.users.join(','), 'channel_image':jsonObj.image, 'channel_updated': currentTimestamp};
+        var channel = {'channel_id':jsonObj.channel,'channel_name':jsonObj.name,'unread_count': unreadCount, 'latest_message':jsonObj.message, 'channel_users':jsonObj.users.join(','), 'channel_image':jsonObj.image, 'channel_updated': jsonObj.updated};
 
         scope.channelArray.unshift( channel );
         scope.$apply();
@@ -378,16 +382,40 @@ angular.module('starter.dao', [])
      * @return {string} channelId
      */
     generateId : function(jsonObj){
-      var channelId;
 
       // multi user channel = generate uuid
       if( jsonObj.U.length > 2 ){
-        channelId = UTIL.getUniqueKey()+"^"+APP_INFO.appKey;;
+        return UTIL.getUniqueKey()+"^"+APP_INFO.appKey;;
       } else {
         // 1:1 channel = userId concat friendId
-        channelId = jsonObj.U.sort().join( "$" )+"^"+APP_INFO.appKey;
+        return jsonObj.U.sort().join( "$" )+"^"+APP_INFO.appKey;
       }
-      return channelId;
+    },
+
+    /**
+     * @ngdoc function
+     * @name delete
+     * @module starter.dao
+     * @kind function
+     *
+     * @description delelte channel Id
+     * @return {string} channelId
+     */
+    remove : function(channel){
+
+      loginUserId = Sign.getUser().userId;
+      var query =
+        "DELETE FROM TB_CHANNEL "+
+        "WHERE channel_id = ? AND owner_id = ? ";
+
+      var cond = [
+        channel,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
     }
   }
 })
@@ -486,6 +514,21 @@ angular.module('starter.dao', [])
         jsonObj.channel,
         jsonObj.senderId,
         jsonObj.timestamp,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });
+    },
+    removeAll : function(channel){
+      var loginUserId = Sign.getUser().userId;
+      var query =
+        "DELETE FROM TB_MESSAGE "+
+        "WHERE channel_id = ? and owner_id = ? ";
+
+      var cond = [
+        channel,
         loginUserId
       ];
 

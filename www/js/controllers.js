@@ -2,16 +2,7 @@ angular.module('starter.controllers', [])
 
 .controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign, NAVI ) {
 
-  ChannelDao.getAllCount().then( function ( result ){
-    $rootScope.totalUnreadCount = result.total_count;
-  });
-
   $scope.channelArray = [];
-
-  ChannelDao.list( $scope ).then(function(channels) {
-    $scope.channelArray = [];
-    $scope.channelArray = channels;
-  });
 
   $scope.gotoChat = function( channelId ) {
 
@@ -23,6 +14,19 @@ angular.module('starter.controllers', [])
       NAVI.gotoChat( $scope, channelId, $stateParams );
     });
   };
+
+  $rootScope.refreshChannel = function( ){
+    ChannelDao.list( $scope ).then(function(channels) {
+      $scope.channelArray = [];
+      $scope.channelArray = channels;
+    });
+
+    ChannelDao.getAllCount().then( function ( result ){
+      $rootScope.totalUnreadCount = result.total_count;
+    });
+  };
+
+  $scope.refreshChannel();
 })
 .controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, $templateCache, Friends, Manager, NAVI, ChannelDao, Sign) {
 
@@ -725,6 +729,7 @@ angular.module('starter.controllers', [])
     Cache.set( args.cache );
     loginUser = Sign.getUser();
 
+    $scope.parentScope = args.parentScope;
     $scope.loginUserImage = loginUser.image;
 
     $rootScope.xpush.setSessionInfo( loginUser.userId, loginUser.deviceId, function(){
@@ -736,11 +741,11 @@ angular.module('starter.controllers', [])
       channelId = args.stateParams.channelId;
       if( channelId != undefined ){
         $rootScope.xpush._getChannelAsync( channelId, function(){
-          init( args.stateParams, args.parentScope );
+          init( args.stateParams );
           Manager.addEvent();
         });
       } else {
-        init( args.stateParams, args.parentScope );
+        init( args.stateParams );
         Manager.addEvent();
       }
     });
@@ -764,7 +769,7 @@ angular.module('starter.controllers', [])
    * @param {jsonObject}
    * @param {String} Invite Message
    */
-  var initChat = function( inviteMsg, parentScope ){
+  var initChat = function( inviteMsg ){
 
     $rootScope.currentScope = $scope;
 
@@ -776,7 +781,6 @@ angular.module('starter.controllers', [])
 
     channelUsers.forEach( function( user ){
       $scope.channelUserDatas.push( angular.extend({}, { "NM" : Cache.get( user ).NM, "I" : Cache.get( user ).I } ) );
-      console.log( $scope.channelUserDatas );
     });
 
     // Channel Init
@@ -790,11 +794,11 @@ angular.module('starter.controllers', [])
           $ionicFrostedDelegate.update();
           $ionicScrollDelegate.scrollBottom(true);
 
-          if( parentScope != undefined ){
+          if( $scope.parentScope != undefined ){
             var args = {"channelId":channelId};
 
             // Broadcast ON_POPUP_OPEN event for
-            parentScope.$broadcast("ON_POPUP_OPEN", args);
+            $scope.parentScope.$broadcast("ON_POPUP_OPEN", args);
           }
         }, 300 );
       }
@@ -827,7 +831,7 @@ angular.module('starter.controllers', [])
    * @description Initialize current controller
    * @param {jsonObject} channelId, channelName, channelUsers
    */
-  var init = function( stateParams, parentScope ){
+  var init = function( stateParams ){
 
     // If channelId is exist, use the channel
     if( stateParams.channelId !== undefined ) {
@@ -837,7 +841,7 @@ angular.module('starter.controllers', [])
       channelUsers.sort();
       channelName = stateParams.channelName;
 
-      initChat( '', parentScope );
+      initChat( '' );
     } else {
       // make friend string to array
       var friendIds = stateParams.friendIds.split("$");
@@ -868,7 +872,7 @@ angular.module('starter.controllers', [])
           inviteMsg = UTIL.getInviteMessage( channelUsers );
         }
 
-        initChat( inviteMsg, parentScope );
+        initChat( inviteMsg );
       });
     }
 
@@ -1495,6 +1499,25 @@ angular.module('starter.controllers', [])
     } else {
       $scope.toggleNotice( true );
     }
+  };
+
+  $scope.exitChannel = function(){
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.confirm({
+      title: 'Do you want exit channel?'
+    });
+    myPopup.then(function(res) {
+      if( res === true ){
+        Chat.exitChannel( channelId, function(){
+          if( $rootScope.usePopupFlag && $scope.parentScope && $scope.parentScope.refreshChannel ){
+            $scope.parentScope.refreshChannel();
+            setTimeout( function(){
+              window.close();
+            }, 100 );
+          }
+        });
+      }
+    });
   };
 
 

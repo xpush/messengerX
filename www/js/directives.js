@@ -224,7 +224,7 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
         '</div>' +
         '<ion-footer-bar class="bar-stable">' +
           '<div class="buttons">' +
-            '<button class="button icon-left button-clear ion-log-out">Exit</button>' +
+            '<button class="button icon-left button-clear ion-log-out" ng-click="exitChannel()" >Exit</button>' +
           '</div>' +
         '</ion-footer-bar>' +
       '</div>';

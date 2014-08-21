@@ -37565,10 +37565,7 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
       //(eg an input in case of prompt)
       var body = jqLite(self.element[0].querySelector('.popup-body'));
 
-      console.log( body );
-
       if (content) {
-        console.log( content );
         body.html(content);
         $compile(body.contents())(self.scope);
       } else {

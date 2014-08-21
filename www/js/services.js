@@ -280,13 +280,9 @@ angular.module('starter.services', [])
     addEvent : function(){
 
       $rootScope.$on("ON_POPUP_OPEN", function (data, args) {
-        // get unread message count form local DB
-        ChannelDao.getAllCount().then( function ( result ){
-          // Set unread message count into rootScope
-          $rootScope.totalUnreadCount = result.total_count;
-
-          ChannelDao.resetCount( args.channelId );
-        });
+        if( $rootScope.refreshChannel ){
+          $rootScope.refreshChannel();
+        }
       });
 
       var loginUser = Sign.getUser();
@@ -567,6 +563,8 @@ angular.module('starter.services', [])
             channel.image = data.UO.I;
           }
 
+          channel.updated = data.TS;
+
           if( data.type != 'J' ){
             ChannelDao.add( channel );
           }
@@ -813,6 +811,22 @@ angular.module('starter.services', [])
      */
     updateMessage : function( param ){
       MessageDao.update( param );
+    },
+    /**
+     * @ngdoc function
+     * @name send
+     * @module starter.services
+     * @kind function
+     *
+     * @description Send System Message
+     * @param {string} message
+     */
+    exitChannel : function( channel, callback){
+      MessageDao.removeAll( channel ).then( function(){
+        ChannelDao.remove( channel ).then( function(){
+          callback();
+        });
+      });
     }
   };
 })
