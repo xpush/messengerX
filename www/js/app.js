@@ -250,7 +250,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       if(type === 'LOGOUT'){
         if( !$sessionStorage.reloading ){
           $rootScope.logout(true, function(){
-            window.location = $rootScope.rootPath + 'err.html?LOGOUT';
+            $state.go( "error" );
           });
         }
       }
@@ -258,22 +258,23 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
     // tootScope function
     $rootScope.logout = function( skipLoginPageFlag, callback ){
-      Sign.logout();
-      $rootScope.xpush.logout();
+      Sign.logout(function(){
+        $rootScope.xpush.logout();
 
-      var popups = NAVI.getPopups();
-      for( var key in popups ){
-        popups[key].close();
-      }
+        var popups = NAVI.getPopups();
+        for( var key in popups ){
+          popups[key].close();
+        }
 
-      if( !skipLoginPageFlag ){
-        $templateCache.removeAll();
-        $state.transitionTo('signin', {}, { reload: true, notify: true });
-      }
+        if( !skipLoginPageFlag ){
+          $templateCache.removeAll();
+          $state.transitionTo('signin', {}, { reload: true, notify: true });
+        }
 
-      if ( callback && typeof callback === 'function') {
-        callback();
-      }
+        if ( callback && typeof callback === 'function') {
+          callback();
+        }
+      });
     };
 
     $rootScope.totalUnreadCount = 0;
@@ -290,8 +291,9 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   });
 
   $rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams) {
+    var ignoreStats = ["signin","signup","splash","error"];
 
-    if ( toState.name.indexOf( "sign" ) < 0 && toState.name !== 'splash' && Sign.getUser() === undefined ) {
+    if ( ignoreStats.indexOf( toState.name ) < 0 && Sign.getUser() === undefined ) {
       event.preventDefault();      
       $rootScope.error = null;
       $state.go('splash');
@@ -329,6 +331,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       url: '/chat',
       templateUrl: "templates/chat.html",
       controller: 'ChatCtrl'
+    })
+
+    .state('error', {
+      url: "/error",
+      templateUrl: "templates/error.html",
+      controller: 'ErrorCtrl'
     })
 
     // setup an abstract state for the tabs directive
@@ -377,7 +385,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           controller: 'EmoticonCtrl'
         }
       }
-    });
+    });   
 
   $urlRouterProvider.otherwise('/splash');
 });

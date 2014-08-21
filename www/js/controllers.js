@@ -571,11 +571,12 @@ angular.module('starter.controllers', [])
     });
   });
 })
-.controller('SplashCtrl', function($state, $scope, $rootScope, Sign, Cache, Friends ) {
+.controller('SplashCtrl', function($state, $scope, $rootScope, $localStorage, Sign, Cache, Friends ) {
 
   var delay = 1500;
   setTimeout( function (){
-    var storedUser = Sign.restoreUser();
+    var storedUser = $localStorage.loginUser;
+
     if( storedUser != undefined ){
 
       $rootScope.xpush.login( storedUser.userId, storedUser.password, storedUser.deviceId, 'ADD_DEVICE', function(err, result){
@@ -605,6 +606,11 @@ angular.module('starter.controllers', [])
       $state.go('signin');
     }
   }, delay);
+})
+.controller('ErrorCtrl', function($scope, $state){
+  $scope.goToSignIn = function(){ 
+    $state.go('signin');   
+  };
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $ionicPopup, Friends, Sign, Cache) {
 

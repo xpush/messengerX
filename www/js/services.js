@@ -593,16 +593,21 @@ angular.module('starter.services', [])
      *
      * @description Clear login info and go to login page
      */
-    logout : function(){
+    logout : function( callback ){
       loginUser = undefined;
       delete $localStorage.loginUser;
       $rootScope.loginUser = {};
       $rootScope.currentChannel = '';
       $rootScope.totalUnreadCount = 0;
       $rootScope.firstFlag = true;
+
+      if ( callback && typeof callback === 'function') {
+        console.log( $localStorage.loginUser );
+        callback();
+      }
     },
     /**
-     * @ngdoc function
+     * @ngdoc functionf
      * @name register
      * @module starter.services
      * @kind function
@@ -661,18 +666,6 @@ angular.module('starter.services', [])
      */
     getUser : function(){
       return loginUser;
-    },
-    /**
-     * @ngdoc function
-     * @name getUser
-     * @module starter.services
-     * @kind function
-     *
-     * @description return stored user
-     * @return {Object} userInfo
-     */
-    restoreUser : function(){
-      return $localStorage.loginUser;
     }
   }
 })
