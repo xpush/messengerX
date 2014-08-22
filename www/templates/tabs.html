@@ -21,12 +21,12 @@
   </ion-tab>
 
   <!-- Emoticon Tab -->
-  <ion-tab title="Emoticon" icon="icon ion-information-circled" href="#/tab/emoticon">
+  <ion-tab title="Emoticon" icon="icon ion-information-circled" href="#/tab/emoticon" ng-if=" usePopupFlag ">
     <ion-nav-view name="tab-emoticon"></ion-nav-view>
   </ion-tab>
 
   <!-- Messages Tab -->
-  <ion-tab title="Messages" icon="icon ion-android-forums" href="#/tab/messages">
+  <ion-tab title="Messages" icon="icon ion-android-forums" href="#/tab/messages" ng-if=" usePopupFlag ">
     <ion-nav-view name="tab-messages"></ion-nav-view>
   </ion-tab>
 </ion-tabs>
