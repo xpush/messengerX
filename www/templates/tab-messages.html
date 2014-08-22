@@ -1,20 +1,20 @@
 <ion-view title="Messages">
   <ion-nav-buttons side="right">
-    <div class="no-drag" >
-      <button class="button button-dark no-drag" ng-if=" nodeWebkit " ng-click="close()">
-        <img ng-src="{{rootImgPath}}/button_close.png">
-      </button>
-    </div>
+    <button class="button" ng-click="logout()" ng-if=" !nodeWebkit ">
+      LogOut
+    </button>
+    <div class="close-button" ng-if=" nodeWebkit ">
+      <img id="close-button" ng-src="{{rootImgPath}}/button_close.png" ng-click="close()">
+    </div>    
   </ion-nav-buttons>
-  <ion-content padding="true" class="has-header" start-y="120" has-bouncing="true">
-    <div class="item item-input">
-      <i class="icon ion-search placeholder-icon"></i>
-      <input type="text" placeholder="Search" ng-model="data.searchKey" >
-      <button class="button button-positive button-search" ng-click='scan()'>
-        <i class="icon ion-search"></i>
-      </button>
-    </div>
-    <br />
+  <div class="item item-input" style="margin-top:44px">
+    <i class="icon ion-search placeholder-icon"></i>
+    <input type="text" placeholder="Search Messages" ng-model="data.searchKey" ng-enter="scan()">
+    <button class="button button-positive button-search" ng-click='scan()'>
+      <i class="icon ion-search"></i>
+    </button>
+  </div>
+  <ion-content padding="true" class="has-header" style="top:110px;" has-bouncing="true">
     <ol class="messages">
       <li ng-repeat="message in messages" class="R">
         <div ng-if="message.type=='R' || message.type=='S' ">
@@ -35,6 +35,9 @@
           </div>
         </div>
       </li>
+      <div style="text-align:center;" ng-if="messages.length == 0 ">
+        There is no messages in condition.
+      </div>
     </ol>
   </ion-content>
 </ion-view>
