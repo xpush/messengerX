@@ -81,6 +81,23 @@ angular.module('starter.services', [])
      */
     set : function( map ){
       cache = map;
+    },
+
+    /**
+     * @ngdoc function
+     * @name has
+     * @module starter.services
+     * @kind function
+     *
+     * @description set entire cache object
+     * @param {boolean}
+     */
+    has : function( key ){
+      if( cache[key] ){
+        return true;
+      } else {
+        return false;
+      }
     }
   };
 })
@@ -224,11 +241,13 @@ angular.module('starter.services', [])
         column: { U: 1, DT: 1, _id: 0 },
         options: {
           skipCount : true,
-          sortBy : { 'DT.NM': 1},
-          pageNum : 1,
-          pageSize: 50
+          sortBy : { 'DT.NM': 1}
         }
       };
+
+      if( pageNumber > -1 ){
+        angular.extend( params.options, { pageNum : 1,pageSize: 50 } );      
+      }
 
       if(pageNumber > 0) {
         params.options['pageNum'] = pageNumber;
@@ -488,6 +507,7 @@ angular.module('starter.services', [])
             } else {
               channel.name = data.DT.F;
             }
+
           } else {
             channel.users = "";
             channel.name = "";

@@ -353,6 +353,7 @@ angular.module('starter.controllers', [])
     var channelId = $scope.modal.channelId;
     var channelName = $scope.modal.channelName;
     var channelUsers = $scope.modal.channelUsers;
+    var loginUser = Sign.getUser();
 
     // Selected Friends array
     if(res.length > 0){
@@ -733,7 +734,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $xpushSlide, $ionicBackdrop, $ionicFrostedDelegate, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons) {
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $xpushSlide, $ionicBackdrop, $ionicFrostedDelegate, Users, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons) {
 
   var loginUser = Sign.getUser();
 
@@ -814,9 +815,23 @@ angular.module('starter.controllers', [])
     param.userId = loginUser.userId;
     param.deviceId = loginUser.deviceId;
 
-    channelUsers.forEach( function( user ){
-      $scope.channelUserDatas.push( angular.extend({}, { "NM" : Cache.get( user ).NM, "I" : Cache.get( user ).I } ) );
+    Users.search( { 'U' : { $in: channelUsers } }, -1, function( users ){
+      console.log( users );
+      users.forEach( function( user ){
+        var data = { "NM" : user.DT.NM, "I" : user.DT.I };
+        $scope.channelUserDatas.push( data );
+
+        if( !Cache.has( user.U ) ){
+          Cache.add( user.U, data );
+        }
+      });
     });
+
+    /**
+    $rootScope.xpush.queryUser( params, function( err, users, userCnt ){
+
+    });
+    */
 
     // Channel Init
     Chat.init( param, inviteMsg, $scope, function( messages ){
