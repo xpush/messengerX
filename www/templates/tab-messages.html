@@ -1,0 +1,40 @@
+<ion-view title="Messages">
+  <ion-nav-buttons side="right">
+    <div class="no-drag" >
+      <button class="button button-dark no-drag" ng-if=" nodeWebkit " ng-click="close()">
+        <img ng-src="{{rootImgPath}}/button_close.png">
+      </button>
+    </div>
+  </ion-nav-buttons>
+  <ion-content padding="true" class="has-header" start-y="120" has-bouncing="true">
+    <div class="item item-input">
+      <i class="icon ion-search placeholder-icon"></i>
+      <input type="text" placeholder="Search" ng-model="data.searchKey" >
+      <button class="button button-positive button-search" ng-click='scan()'>
+        <i class="icon ion-search"></i>
+      </button>
+    </div>
+    <br />
+    <ol class="messages">
+      <li ng-repeat="message in messages" class="R">
+        <div ng-if="message.type=='R' || message.type=='S' ">
+          <div class="small inline">{{message.name}}</div>
+          <div class="time inline">{{message.date}}</div>
+          <div class="from">
+            <img ng-src="{{message.image}}" class="profile" />
+            <span class="from">{{message.message}}</span>
+          </div>
+        </div>
+        <div ng-if="message.type=='RI' || message.type=='SI' ">
+          <div class="small">{{message.name}}</div>
+          <div class="from">
+            <img ng-src="{{message.image}}" class="profile" />
+            <span
+              <img ng-src="{{message.message}}" popup-link class="from" type="{{message.type}}"/>
+            </span>
+          </div>
+        </div>
+      </li>
+    </ol>
+  </ion-content>
+</ion-view>

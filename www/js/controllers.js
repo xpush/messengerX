@@ -608,9 +608,38 @@ angular.module('starter.controllers', [])
   }, delay);
 })
 .controller('ErrorCtrl', function($scope, $state){
-  $scope.goToSignIn = function(){ 
-    $state.go('signin');   
+  $scope.gotoSignIn = function(){ 
+    $state.go('signin');
   };
+})
+.controller('MessageCtrl', function($scope, $state, MessageDao, UTIL, Cache, $ionicFrostedDelegate, $ionicScrollDelegate){
+
+  $scope.messages = [];
+  $scope.data = { 'searchKey' : '' };
+
+  $scope.scan = function(){
+
+    MessageDao.scan( $scope.data.searchKey ).then(function(messageArray) {
+      var messages = [];
+      for( var inx = 0 ; inx < messageArray.length ; inx++ ){
+        var data = messageArray[inx];
+        var dateStrs = UTIL.timeToString( data.time );
+        var dateMessage = dateStrs[1]+" "+dateStrs[2];
+
+        messages.push( { type : data.type, date : dateMessage, message : data.message, name : data.sender_name, image : Cache.get( data.sender_id ).I } );
+      }
+
+      // Message in local database
+      $scope.messages = [];
+      $scope.messages = $scope.messages.concat(messages);
+      $scope.data.searchKey = '';
+
+      setTimeout( function(){
+        $ionicFrostedDelegate.update();
+        $ionicScrollDelegate.scrollBottom(true);
+      }, 300 );
+    });
+  }
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $ionicPopup, Friends, Sign, Cache) {
 

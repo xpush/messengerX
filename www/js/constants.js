@@ -26,6 +26,21 @@ angular.module('starter.constants', [])
         table_index : [{ type : '', name : 'IDX_TB_MESSAGE', columns : [ 'channel_id', 'owner_id' ] }]
       },
       {
+        name: 'TB_SCAN',
+        virtual: true,
+        columns: [
+          {name: 'channel_id',   type: 'text'},
+          {name: 'sender_id',  type: 'text'},
+          {name: 'sender_name',  type: 'text'},
+          {name: 'sender_image',  type: 'text'},
+          {name: 'message',    type: 'text'},
+          {name: 'type', type: 'text'},
+          {name: 'time', type: 'integer'},
+          {name: 'bookmark_flag', type: 'text DEFAULT "N" '},
+          {name: 'owner_id', type: 'text'}
+        ]
+      },
+      {
         name: 'TB_CHANNEL',
         columns: [
           {name: 'channel_id',   type: 'text'},

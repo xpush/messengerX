@@ -385,7 +385,17 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           controller: 'EmoticonCtrl'
         }
       }
-    });   
+    })
+
+    .state('tab.messages', {
+      url: '/messages',
+      views: {
+        'tab-messages': {
+          templateUrl: 'templates/tab-messages.html',
+          controller: 'MessageCtrl'
+        }
+      }
+    });
 
   $urlRouterProvider.otherwise('/splash');
 });

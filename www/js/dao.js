@@ -471,8 +471,10 @@ angular.module('starter.dao', [])
         query += 'AND bookmark_flag = "' + params.bookmarkFlag + '" ';
       }
 
+      var cond = [params.channel,loginUserId];
+
       return DB.query(
-        query, [params.channel,loginUserId]
+        query, cond
       ).then(function(result) {
         return DB.fetchAll(result);
       });
@@ -497,6 +499,8 @@ angular.module('starter.dao', [])
 
       // Add to Cache
       Cache.add( jsonObj.S, {'NM':jsonObj.UO.NM, 'I':jsonObj.UO.I} );
+
+      this.addScan( jsonObj );
 
       return DB.query(query, cond).then(function(result) {
         return result;
@@ -535,7 +539,42 @@ angular.module('starter.dao', [])
       return DB.query(query, cond).then(function(result) {
         return result;
       });
-    }
+    },
+    addScan : function(jsonObj){
+      var loginUserId = Sign.getUser().userId;
+      var query =
+        "INSERT INTO TB_SCAN "+
+        "(channel_id, sender_id, sender_name, sender_image, message, type, time, owner_id) VALUES "+
+        "(?, ?, ?, ?, ?, ?, ?, ?)";
+
+      var cond = [
+        jsonObj.C,
+        jsonObj.S,
+        jsonObj.UO.NM,
+        jsonObj.UO.I,
+        jsonObj.MG,
+        jsonObj.type,
+        jsonObj.TS,
+        loginUserId
+      ];
+
+      return DB.query(query, cond).then(function(result) {
+        return result;
+      });     
+    },
+    scan : function( search ){
+      var loginUserId = Sign.getUser().userId;
+      var query = 'SELECT sender_id, sender_name, sender_image, message, time, type, bookmark_flag FROM TB_SCAN '+
+      'WHERE message MATCH ? AND owner_id = ? ';
+
+      var cond = ["message:*"+search+"*", loginUserId];
+
+      return DB.query(
+        query, cond
+      ).then(function(result) {
+        return DB.fetchAll(result);
+      });
+    },
   }
 })
 .factory('NoticeDao', function(DB, Sign) {
@@ -670,14 +709,19 @@ angular.module('starter.dao', [])
         self.query(query);
       }
 
-      var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
-      self.query(query);
+      var query1;
+      if( table.virtual ){
+        query1 = 'CREATE VIRTUAL TABLE ' + table.name + ' USING fts3(' + columns.join(',') + ')';
+      } else {
+        query1 = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
+      }
+      self.query(query1);
 
       if( table.table_index != undefined ){
         for( var key in table.table_index ){
           var tableInx = table.table_index[key];
-          var query = 'CREATE '+ tableInx.type +' INDEX IF NOT EXISTS ' + tableInx.name +' ON ' +table.name + ' (' + tableInx.columns.join(',') + ')';
-          self.query(query);
+          var query2 = 'CREATE '+ tableInx.type +' INDEX IF NOT EXISTS ' + tableInx.name +' ON ' +table.name + ' (' + tableInx.columns.join(',') + ')';
+          self.query(query2);
         }
       }
     });
