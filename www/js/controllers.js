@@ -815,24 +815,6 @@ angular.module('starter.controllers', [])
     param.userId = loginUser.userId;
     param.deviceId = loginUser.deviceId;
 
-    Users.search( { 'U' : { $in: channelUsers } }, -1, function( users ){
-      console.log( users );
-      users.forEach( function( user ){
-        var data = { "NM" : user.DT.NM, "I" : user.DT.I };
-        $scope.channelUserDatas.push( data );
-
-        if( !Cache.has( user.U ) ){
-          Cache.add( user.U, data );
-        }
-      });
-    });
-
-    /**
-    $rootScope.xpush.queryUser( params, function( err, users, userCnt ){
-
-    });
-    */
-
     // Channel Init
     Chat.init( param, inviteMsg, $scope, function( messages ){
       if( messages != undefined ){
@@ -850,6 +832,7 @@ angular.module('starter.controllers', [])
             // Broadcast ON_POPUP_OPEN event for
             $scope.parentScope.$broadcast("ON_POPUP_OPEN", args);
           }
+          Chat.sendSys( 'on' );
         }, 300 );
       }
 
@@ -865,6 +848,17 @@ angular.module('starter.controllers', [])
                                 image : Cache.get( data.sender_id ).I , useFlag : data.use_flag, foldFlag : data.fold_flag };
           $scope.setNotice( noticeMessage );
         }
+      });
+
+      Users.search( { 'U' : { $in: channelUsers } }, -1, function( users ){
+        users.forEach( function( user ){
+          var data = { "NM" : user.DT.NM, "I" : user.DT.I };
+          $scope.channelUserDatas.push( data );
+
+          if( !Cache.has( user.U ) ){
+            Cache.add( user.U, data );
+          }
+        });
       });
     });
   };

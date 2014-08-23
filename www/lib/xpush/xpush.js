@@ -488,7 +488,7 @@
     console.log("xpush : getUsertList ",params);
     self.sEmit('user-list' , params, function(err, result){
       console.log( err );
-      console.log( result );
+      console.log( result )
         if(cb) cb(err, result.users, result.count);
     });
   };
