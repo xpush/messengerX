@@ -193,8 +193,6 @@ angular.module('starter.services', [])
       var loginUserId = Sign.getUser().userId;
       $rootScope.xpush.getGroupUsers( loginUserId, function( err, users ){
 
-        console.log( users );
-
         // Users : JSONArray from server
         UserDao.addAll( users, function( result ){
           UserDao.updateRefreshHistory();
@@ -369,8 +367,8 @@ angular.module('starter.services', [])
             if( $rootScope.currentScope ){
               var dateStrs = UTIL.timeToString( data.TS );
               var dateMessage = dateStrs[1]+" "+dateStrs[2];
-
-              var noticeMessage = { date : dateMessage, message : data.MG, name : data.UO.NM, image : data.UO.I, useFlag : 'Y', foldFlag : 'N' };
+              var noticeMessage = { date : dateMessage, message : data.MG, name : data.UO.NM, image : data.UO.I, useFlag : 'Y', foldFlag : 'N',
+              voteFlag : '', Y : 0, N : 0 };
               $rootScope.currentScope.setNotice( noticeMessage );
             }
             return;

@@ -850,9 +850,12 @@ angular.module('starter.controllers', [])
           // YYYYMMDD min:ss
           var dateMessage = dateStrs[1]+" "+dateStrs[2];
 
-          var noticeMessage = { date : dateMessage, message : data.message, name : Cache.get( data.sender_id ).NM,
-                                image : Cache.get( data.sender_id ).I , useFlag : data.use_flag, foldFlag : data.fold_flag };
-          $scope.setNotice( noticeMessage );
+          $rootScope.xpush.getChannelData( channelId, function( err, channelInfo ){
+            var noticeMessage = { date : dateMessage, message : data.message, name : Cache.get( data.sender_id ).NM,
+                                  image : Cache.get( data.sender_id ).I , useFlag : data.use_flag, foldFlag : data.fold_flag,
+                                  voteFlag : data.vote_flag, Y : channelInfo.DT.NT.Y, N : channelInfo.DT.NT.N };
+            $scope.setNotice( noticeMessage );
+          });
         }
       });
 
@@ -971,7 +974,7 @@ angular.module('starter.controllers', [])
 
   /**
    * @ngdoc function
-   * @name addNotice
+   * @name setNotice
    * @module starter.controllers
    * @kind function
    *
@@ -1516,6 +1519,10 @@ angular.module('starter.controllers', [])
     myPopup.then(function(noticeMessage) {
       if( noticeMessage !== undefined ){
         Chat.send( noticeMessage, 'N' );
+
+        var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'Y':0, 'N':0 } } };
+        $rootScope.xpush.updateChannel( channelId, query, function( data ){
+        });
       }
     });
   };
@@ -1544,6 +1551,41 @@ angular.module('starter.controllers', [])
     } else {
       $scope.toggleNotice( true );
     }
+  };
+  
+  $scope.voteNotice = function( flag ){
+    var param = {'channelId': channelId, 'useFlag' : $scope.notice.useFlag, 'foldFlag' : $scope.notice.foldFlag  };
+    param.voteFlag = flag ? 'Y':'N';
+
+    if( param.voteFlag == $scope.notice.voteFlag ){
+      return;
+    }
+
+    // Update notice at local DB;
+    NoticeDao.update( param );
+
+    var query;
+    if( $scope.notice.voteFlag !== undefined ){
+      if( flag ){
+        query = { $inc:{ 'DT.NT.Y': 1, 'DT.NT.N': -1} };
+      } else {
+        query = { $inc:{ 'DT.NT.Y': -1, 'DT.NT.N': 1} };     
+      }
+    } else {
+      if( flag ){
+        query = { $inc:{ 'DT.NT.Y': 1} };
+      } else {
+        query = { $inc:{ 'DT.NT.N': 1} };
+      }
+    }
+
+    $rootScope.xpush.updateChannel( channelId, query, function( err, result ){
+      $scope.notice.voteFlag = param.voteFlag;
+
+      $scope.notice.N = result.DT.NT.N;
+      $scope.notice.Y = result.DT.NT.Y;
+      $scope.$apply();
+    });
   };
 
   $scope.exitChannel = function(){

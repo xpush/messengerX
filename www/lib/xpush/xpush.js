@@ -245,6 +245,16 @@
     });
   };
 
+  XPush.prototype.updateChannel = function(channel, query, cb){
+    var self = this;
+    var param = { 'A': self.appId, 'C': channel, 'Q' : query };
+    self.sEmit('channel-update', param, function(err, result){
+      //app(A), channel(C), created(CD) , users(US)
+      console.log("xpush : channel-update end ",result);
+      cb(err,result);
+    });
+  };
+
   XPush.prototype.getChannelsActive = function(data, cb){ //data.key(option)
     var self = this;
     self.sEmit('channel-list-active',data, function(err, result){

@@ -643,8 +643,13 @@ angular.module('starter.dao', [])
 
       var query =  
         "UPDATE TB_NOTICE "+
-        "SET use_flag = ? , fold_flag = ? "+
-        "WHERE channel_id = ? AND owner_id = ? ; ";
+        "SET use_flag = ? , fold_flag = ? ";
+
+      if( jsonObj.voteFlag ){
+        query += ", vote_flag = '" +jsonObj.voteFlag+ "' ";
+      }
+
+      query += "WHERE channel_id = ? AND owner_id = ? ; ";
 
       var cond = [
         jsonObj.useFlag,
@@ -731,7 +736,7 @@ angular.module('starter.dao', [])
     binding = typeof binding !== 'undefined' ? binding : [];
     var deferred = $q.defer();
     self.db.transaction(function(transaction) {
-      transaction.executeSql(query, binding, function(transaction, result) {
+      transaction.executeSql(query, binding, function(transaction, result) {;
         deferred.resolve(result);
       }, function(transaction, error) {
         deferred.reject(error);
