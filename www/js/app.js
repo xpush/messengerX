@@ -278,7 +278,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     };
 
     $rootScope.totalUnreadCount = 0;
-    $rootScope.firstFlag = true;
   });
 
   // Add Auth Interceptor
@@ -482,6 +481,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       if( $rootScope.nodeWebkit ){
         popups[popupKey] = popupWin.window;
         popupWin.on('close', function() {
+          scope.$broadcast("$windowClose" );
           
           // Hide the window to give user the feeling of closing immediately
           this.hide();
@@ -493,11 +493,13 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           }
 
           // After closing the new window, close the main window.
+
           this.close(true);
-        });   
+        }); 
       } else {
         popups[popupKey] = popupWin;
         popupWin.onbeforeunload = function(){
+          scope.$broadcast("$windowClose" );
           popupCount--;
           delete popups[popupKey];
         };

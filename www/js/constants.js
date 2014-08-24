@@ -8,7 +8,7 @@ angular.module('starter.constants', [])
   .constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
   .constant('DB_CONFIG', {
     name: 'stalk.db',
-    version: '0.3',
+    version: '0.5',
     tables: [
       {
         name: 'TB_MESSAGE',

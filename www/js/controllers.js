@@ -793,6 +793,10 @@ angular.module('starter.controllers', [])
     $rootScope.$on('$windowFocus', function (){
       Chat.sendSys( 'on' );
     });
+
+    $rootScope.$on('$windowClose', function (data){
+      Chat.sendSys( 'off' );
+    });
   });
 
   /**
@@ -817,6 +821,7 @@ angular.module('starter.controllers', [])
 
     // Channel Init
     Chat.init( param, inviteMsg, $scope, function( messages ){
+
       if( messages != undefined ){
 
         // Message in local database
@@ -832,9 +837,10 @@ angular.module('starter.controllers', [])
             // Broadcast ON_POPUP_OPEN event for
             $scope.parentScope.$broadcast("ON_POPUP_OPEN", args);
           }
-          Chat.sendSys( 'on' );
         }, 300 );
       }
+
+      Chat.sendSys( 'on' );
 
       // Retreive notice from DB
       NoticeDao.get( channelId ).then(function(data) {
@@ -1050,7 +1056,7 @@ angular.module('starter.controllers', [])
   });
 
   $scope.$on('$destroy', function() {
-     window.onbeforeunload = undefined;
+    window.onbeforeunload = undefined;
   });
 
   /**
@@ -1070,6 +1076,7 @@ angular.module('starter.controllers', [])
     // called when chat screen out
     if( current.indexOf('/chat') > -1 ){
       $rootScope.currentChannel = '';
+      Chat.sendSys( 'off' );
     }
   });
 

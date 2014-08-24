@@ -619,7 +619,6 @@ angular.module('starter.services', [])
       $rootScope.loginUser = {};
       $rootScope.currentChannel = '';
       $rootScope.totalUnreadCount = 0;
-      $rootScope.firstFlag = true;
 
       if ( callback && typeof callback === 'function') {
         console.log( $localStorage.loginUser );
@@ -732,6 +731,7 @@ angular.module('starter.services', [])
 
       } else {
         self.send( inviteMessage, 'J' );
+        callback();
       }
     },
 
