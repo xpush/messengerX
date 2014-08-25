@@ -13,9 +13,10 @@
     <div class="item item-icon-left transparent" ng-click="openFriendModal();">
       <i class="icon ion-plus"></i>Invite
     </div>
-    <div class="item transparent" ng-repeat="user in channelUserDatas">
+    <div class="item item-icon-right transparent" ng-repeat="user in channelUserDatas">
       <img class="img-friend" ng-src="{{user.I}}" />
-      <h2 style="margin: 14px 0 0 0;">{{user.NM}}</h2>
+      <h2>{{user.NM}}</h2>
+      <i ng-class="{'icon ion-thumbsup' : user.agree, 'icon ion-thumbsdown' : !user.agree }"></i>
     </div>
   </div>
 </ion-content>

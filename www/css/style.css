@@ -345,6 +345,10 @@ paper-input {
 	cursor : pointer;	
 }
 
+.chat-extends-buttons .col .on{
+	color : #ef4e3a;
+}
+
 .chat-extends p{
 	margin:0px;
 }
@@ -365,6 +369,10 @@ paper-input {
 
 .chat-extends-menu .item{
 	margin:-1px -1px 0px 0px;
+}
+
+.chat-extends-menu .item h2{
+	margin: 14px 0 0 0;
 }
 
 .chat-extends-menu p{

@@ -151,12 +151,12 @@
 
     <div class="chat-extends-buttons flex" >
       <div class="col" ng-click="voteNotice(true)">
-        <i class="icon ion-thumbsup"></i>
-        <span>{{notice.Y}}</span>
+        <i ng-class="{'icon ion-thumbsup on': notice.voteFlag == 'Y', 'icon ion-thumbsup' : notice.voteFlag != 'Y'}"></i>
+        <span>{{notice.Y_US.length}}</span>
       </div>
       <div class="col" ng-click="voteNotice(false)">
-        <i class="icon ion-thumbsdown"></i>
-        <span>{{notice.N}}</span>
+        <i ng-class="{'icon ion-thumbsdown on': notice.voteFlag == 'N', 'icon ion-thumbsdown' : notice.voteFlag != 'N' }"></i>
+        <span>{{notice.N_US.length}}</span>
       </div>
     </div>
 
@@ -169,7 +169,7 @@
       </div>
     </div>
   </div>
-  
+
   <button class="button ion-arrow-expand btn-expand hidden icon-large" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>
   <img ng-src="{{loginUserImage}}" class="floating-image" />
 

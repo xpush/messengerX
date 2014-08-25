@@ -840,6 +840,7 @@ angular.module('starter.controllers', [])
         }, 300 );
       }
 
+      // Send On Event
       Chat.sendSys( 'on' );
 
       // Retreive notice from DB
@@ -851,29 +852,45 @@ angular.module('starter.controllers', [])
           var dateMessage = dateStrs[1]+" "+dateStrs[2];
 
           $rootScope.xpush.getChannelData( channelId, function( err, channelInfo ){
+            var noticeData = channelInfo.DT.NT;
             var noticeMessage = { date : dateMessage, message : data.message, name : Cache.get( data.sender_id ).NM,
                                   image : Cache.get( data.sender_id ).I , useFlag : data.use_flag, foldFlag : data.fold_flag,
-                                  voteFlag : data.vote_flag, Y : channelInfo.DT.NT.Y.UC, N : channelInfo.DT.NT.N.UC };
+                                  voteFlag : data.vote_flag, Y_US : noticeData.Y.US, N_US: noticeData.N.US };
             $scope.setNotice( noticeMessage );
+            setChannelUsers( noticeData );
           });
+        } else {
+          setChannelUsers();
         }
-      });
-
-      Users.search( { 'U' : { $in: channelUsers } }, -1, function( users ){
-        users.forEach( function( user ){
-          var data = { "NM" : user.DT.NM, "I" : user.DT.I };
-          $scope.channelUserDatas.push( data );
-
-          if( !Cache.has( user.U ) ){
-            Cache.add( user.U, data );
-          }
-        });
       });
     });
   };
 
   $scope.messages = [];
   var stateParams = $rootScope.$stateParams;
+
+  var setChannelUsers = function( noticeData ){
+    Users.search( { 'U' : { $in: channelUsers } }, -1, function( users ){
+      users.forEach( function( user ){
+        var data = { "NM" : user.DT.NM, "I" : user.DT.I };
+
+        if( !Cache.has( user.U ) ){
+          Cache.add( user.U, data );
+        }
+
+        data.U = user.U;
+        if( noticeData !== undefined ){
+          if( noticeData.Y.US.indexOf( user.U ) > -1 ){
+            data.agree = true;
+          } else if( noticeData.N.US.indexOf( user.U ) > -1  ){
+            data.agree = false;
+          }
+        }
+
+        $scope.channelUserDatas.push( data );
+      });
+    });
+  };
 
   /**
    * @ngdoc function
@@ -1520,7 +1537,7 @@ angular.module('starter.controllers', [])
       if( noticeMessage !== undefined ){
         Chat.send( noticeMessage, 'N' );
 
-        var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'Y': { 'UC':0, 'US':[] }, 'N': {'UC':0, 'US':[] } } } };
+        var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'Y': { 'US':[] }, 'N': { 'US':[] } } } };
         $rootScope.xpush.updateChannel( channelId, query, function( data ){
         });
       }
@@ -1557,7 +1574,7 @@ angular.module('starter.controllers', [])
     var param = {'channelId': channelId, 'useFlag' : $scope.notice.useFlag, 'foldFlag' : $scope.notice.foldFlag  };
     param.voteFlag = flag ? 'Y':'N';
 
-    if( param.voteFlag == $scope.notice.voteFlag ){
+    if( param.voteFlag === $scope.notice.voteFlag ){
       return;
     }
 
@@ -1565,26 +1582,28 @@ angular.module('starter.controllers', [])
     NoticeDao.update( param );
 
     var query;
-    var loginUserId = Sign.getUser().userId;    
-    if( $scope.notice.voteFlag !== undefined ){
-      if( flag ){
-        query = { $inc:{ 'DT.NT.Y.UC': 1, 'DT.NT.N.UC': -1}, $addToSet:{ 'DT.NT.Y.US' : loginUserId }, $pull:{ 'DT.NT.N.US' : loginUserId } };
-      } else {
-        query = { $inc:{ 'DT.NT.Y.UC': -1, 'DT.NT.N.UC': 1}, $pull:{ 'DT.NT.Y.US' : loginUserId }, $addToSet:{ 'DT.NT.N.US' : loginUserId } };
-      }
+
+    if( flag ){
+      query = { $addToSet:{ 'DT.NT.Y.US' : loginUser.userId }, $pull:{ 'DT.NT.N.US' : loginUser.userId } };
     } else {
-      if( flag ){
-        query = { $inc:{ 'DT.NT.Y.UC': 1}, $addToSet:{ 'DT.NT.Y.US' : loginUserId } };
-      } else {
-        query = { $inc:{ 'DT.NT.N.UC': 1}, $addToSet:{ 'DT.NT.Y.US' : loginUserId } };
-      }
+      query = { $pull:{ 'DT.NT.Y.US' : loginUser.userId }, $addToSet:{ 'DT.NT.N.US' : loginUser.userId } };
     }
 
     $rootScope.xpush.updateChannel( channelId, query, function( err, result ){
       $scope.notice.voteFlag = param.voteFlag;
 
-      $scope.notice.N = result.DT.NT.N.UC;
-      $scope.notice.Y = result.DT.NT.Y.UC;
+      $scope.notice.N_US = result.DT.NT.N.US;
+      $scope.notice.Y_US = result.DT.NT.Y.US;
+
+      var searchInx = -1;
+      for( var inx = 0, until = $scope.channelUserDatas.length; searchInx < 0 && inx < until ; inx++){
+        if( $scope.channelUserDatas[inx].U === loginUser.userId ){
+          searchInx = inx;
+        }
+      }
+      var channelUserData = $scope.channelUserDatas[searchInx];
+      channelUserData.agree = flag;
+      $scope.channelUserDatas.splice( searchInx, 1, channelUserData );
       $scope.$apply();
     });
   };
