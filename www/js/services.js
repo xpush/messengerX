@@ -368,7 +368,7 @@ angular.module('starter.services', [])
               var dateStrs = UTIL.timeToString( data.TS );
               var dateMessage = dateStrs[1]+" "+dateStrs[2];
               var noticeMessage = { date : dateMessage, message : data.MG, name : data.UO.NM, image : data.UO.I, useFlag : 'Y', foldFlag : 'N',
-              voteFlag : '', Y : 0, N : 0 };
+                Y : 0, N : 0 };
               $rootScope.currentScope.setNotice( noticeMessage );
             }
             return;

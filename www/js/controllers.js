@@ -853,7 +853,7 @@ angular.module('starter.controllers', [])
           $rootScope.xpush.getChannelData( channelId, function( err, channelInfo ){
             var noticeMessage = { date : dateMessage, message : data.message, name : Cache.get( data.sender_id ).NM,
                                   image : Cache.get( data.sender_id ).I , useFlag : data.use_flag, foldFlag : data.fold_flag,
-                                  voteFlag : data.vote_flag, Y : channelInfo.DT.NT.Y, N : channelInfo.DT.NT.N };
+                                  voteFlag : data.vote_flag, Y : channelInfo.DT.NT.Y.UC, N : channelInfo.DT.NT.N.UC };
             $scope.setNotice( noticeMessage );
           });
         }
@@ -1520,7 +1520,7 @@ angular.module('starter.controllers', [])
       if( noticeMessage !== undefined ){
         Chat.send( noticeMessage, 'N' );
 
-        var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'Y':0, 'N':0 } } };
+        var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'Y': { 'UC':0, 'US':[] }, 'N': {'UC':0, 'US':[] } } } };
         $rootScope.xpush.updateChannel( channelId, query, function( data ){
         });
       }
@@ -1565,25 +1565,26 @@ angular.module('starter.controllers', [])
     NoticeDao.update( param );
 
     var query;
+    var loginUserId = Sign.getUser().userId;    
     if( $scope.notice.voteFlag !== undefined ){
       if( flag ){
-        query = { $inc:{ 'DT.NT.Y': 1, 'DT.NT.N': -1} };
+        query = { $inc:{ 'DT.NT.Y.UC': 1, 'DT.NT.N.UC': -1}, $addToSet:{ 'DT.NT.Y.US' : loginUserId }, $pull:{ 'DT.NT.N.US' : loginUserId } };
       } else {
-        query = { $inc:{ 'DT.NT.Y': -1, 'DT.NT.N': 1} };     
+        query = { $inc:{ 'DT.NT.Y.UC': -1, 'DT.NT.N.UC': 1}, $pull:{ 'DT.NT.Y.US' : loginUserId }, $addToSet:{ 'DT.NT.N.US' : loginUserId } };
       }
     } else {
       if( flag ){
-        query = { $inc:{ 'DT.NT.Y': 1} };
+        query = { $inc:{ 'DT.NT.Y.UC': 1}, $addToSet:{ 'DT.NT.Y.US' : loginUserId } };
       } else {
-        query = { $inc:{ 'DT.NT.N': 1} };
+        query = { $inc:{ 'DT.NT.N.UC': 1}, $addToSet:{ 'DT.NT.Y.US' : loginUserId } };
       }
     }
 
     $rootScope.xpush.updateChannel( channelId, query, function( err, result ){
       $scope.notice.voteFlag = param.voteFlag;
 
-      $scope.notice.N = result.DT.NT.N;
-      $scope.notice.Y = result.DT.NT.Y;
+      $scope.notice.N = result.DT.NT.N.UC;
+      $scope.notice.Y = result.DT.NT.Y.UC;
       $scope.$apply();
     });
   };
