@@ -881,9 +881,9 @@ angular.module('starter.controllers', [])
         data.U = user.U;
         if( noticeData !== undefined ){
           if( noticeData.Y.US.indexOf( user.U ) > -1 ){
-            data.agree = true;
+            data.agree = 'Y';
           } else if( noticeData.N.US.indexOf( user.U ) > -1  ){
-            data.agree = false;
+            data.agree = 'N';
           }
         }
 
@@ -1602,7 +1602,7 @@ angular.module('starter.controllers', [])
         }
       }
       var channelUserData = $scope.channelUserDatas[searchInx];
-      channelUserData.agree = flag;
+      channelUserData.agree = param.voteFlag;
       $scope.channelUserDatas.splice( searchInx, 1, channelUserData );
       $scope.$apply();
     });

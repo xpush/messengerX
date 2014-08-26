@@ -16,7 +16,7 @@
     <div class="item item-icon-right transparent" ng-repeat="user in channelUserDatas">
       <img class="img-friend" ng-src="{{user.I}}" />
       <h2>{{user.NM}}</h2>
-      <i ng-class="{'icon ion-thumbsup' : user.agree, 'icon ion-thumbsdown' : !user.agree }"></i>
+      <i ng-class="{'icon ion-thumbsup' : user.agree === 'Y', 'icon ion-thumbsdown' : user.agree === 'N'}"></i>
     </div>
   </div>
 </ion-content>
