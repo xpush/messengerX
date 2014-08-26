@@ -1,8 +1,8 @@
 <ion-view title="{{channelName}}">
   <ion-nav-buttons side="left">
     <div>
-      <i class="icon icon-large ion-ios7-eye icon-nav-bar " ng-if=" toggles.watching == true " ></i>
-      <i class="icon icon-large ion-android-timer icon-nav-bar " ng-if=" toggles.watching == false " ></i>
+      <i class="icon icon-large ion-ios7-eye icon-nav-bar" id="status_on" style="display:none;"></i>
+      <i class="icon icon-large ion-android-timer icon-nav-bar" id="status_off" ></i>
     </div>
   </ion-nav-buttons>
 

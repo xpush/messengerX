@@ -1145,7 +1145,7 @@ angular.module('starter.controllers', [])
   $scope.emoticons = [];
 
   $scope.curEmoTabId = "0";
-  $scope.toggles = { 'showEmo' : false, 'showExt' : false, 'showMenu' : false, 'watching' : false, 'useTTS' : false, 'bookmarkOnly' : false };
+  $scope.toggles = { 'showEmo' : false, 'showExt' : false, 'showMenu' : false, 'useTTS' : false, 'bookmarkOnly' : false };
   /**
    * @ngdoc function
    * @name toggleEmoticons
@@ -1646,11 +1646,12 @@ angular.module('starter.controllers', [])
    */
   $scope.setOnlineStatus = function( msg ){
     if( msg === "on" ){
-      $scope.toggles.watching = true;
+      document.getElementById( "status_on" ).style.display = "block";
+      document.getElementById( "status_off" ).style.display = "none";
     } else {
-      $scope.toggles.watching = false;
+      document.getElementById( "status_on" ).style.display = "none";
+      document.getElementById( "status_off" ).style.display = "block";
     }
-    $scope.$apply();
   };
 
   $scope.setBookmark = function( message, inx ){
