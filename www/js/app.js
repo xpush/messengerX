@@ -157,6 +157,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
 
     $rootScope.webNoti = function( message ) {
+          
       // Let's check if the browser supports notifications
       if (!("Notification" in window)) {
         console.log("This browser does not support desktop notification");

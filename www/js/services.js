@@ -408,6 +408,14 @@ angular.module('starter.services', [])
             param.message = "@video@";
           } else {
             param.message = data.MG;
+
+            // Use TTS
+            if( $rootScope.currentScope && $rootScope.currentScope.toggles.useTTS ){
+              var u = new SpeechSynthesisUtterance();
+              u.text = data.MG;
+              u.lang = 'ko-KR';    
+              window.speechSynthesis.speak(u);
+            }            
           }
 
           // 1:1 Channel, update image

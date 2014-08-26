@@ -4,10 +4,14 @@
       <button class="button ion-alert-circled"></button>
       <p>Notice</p>
     </div>
-    <div class="col" ng-click="viewBookmarkOnly();" >
-      <button ng-class="favoriteButtonClass"></button>
+    <div class="col" ng-click="toggleBookmarkOnly();" >
+      <button ng-class="{'button ion-ios7-star': toggles.bookmarkOnly, 'button ion-ios7-star-outline': !toggles.bookmarkOnly }"></button>
       <p>Bookmark</p>
-    </div>    
+    </div>
+    <div class="col" ng-click="toggleTTS();" >
+      <button ng-class="{'button ion-volume-medium': toggles.useTTS, 'button ion-volume-mute': !toggles.useTTS }"></button>
+      <p>TTS</p>
+    </div>        
   </div>
   <div class="list">
     <div class="item item-icon-left transparent" ng-click="openFriendModal();">

@@ -1145,7 +1145,7 @@ angular.module('starter.controllers', [])
   $scope.emoticons = [];
 
   $scope.curEmoTabId = "0";
-  $scope.toggles = { 'showEmo' : false, 'showExt' : false, 'showMenu' : false, 'watching' : false};
+  $scope.toggles = { 'showEmo' : false, 'showExt' : false, 'showMenu' : false, 'watching' : false, 'useTTS' : false, 'bookmarkOnly' : false };
   /**
    * @ngdoc function
    * @name toggleEmoticons
@@ -1675,20 +1675,16 @@ angular.module('starter.controllers', [])
    * @description show or hide Notice div
    * @param {boolean}
    */
-  $scope.viewBookmarkOnlyFlag = false;
-  $scope.favoriteButtonClass = "button ion-ios7-star-outline"
-  $scope.viewBookmarkOnly = function() {
-    if( $scope.viewBookmarkOnlyFlag ){
-      $scope.favoriteButtonClass = "button ion-ios7-star-outline";
-      $scope.viewBookmarkOnlyFlag = false;
+  $scope.toggleBookmarkOnly = function() {
+    if( $scope.toggles.bookmarkOnly ){
+      $scope.toggles.bookmarkOnly = false;
     } else {
-      $scope.favoriteButtonClass = "button ion-ios7-star";
-      $scope.viewBookmarkOnlyFlag = true;
+      $scope.toggles.bookmarkOnly = true;
     }
 
     $scope.toggleMenu( false );
     var param = { 'channel' : channelId } ;
-    if( $scope.viewBookmarkOnlyFlag ){
+    if( $scope.toggles.bookmarkOnly ){
       param.bookmarkFlag = 'Y';
     }
 
@@ -1702,6 +1698,19 @@ angular.module('starter.controllers', [])
         $ionicScrollDelegate.scrollBottom(true);
       }, 100 );
     });
+  };
+
+  $scope.toggleTTS = function() {
+    if( $scope.toggles.useTTS ){
+      $scope.toggles.useTTS = false;
+    } else {
+      $scope.toggles.useTTS = true;
+
+      var u = new SpeechSynthesisUtterance();
+      u.text = '수지 is ready.';
+      u.lang = 'ko-KR';    
+      window.speechSynthesis.speak(u);      
+    }
   };  
 })
 .controller('ViewCtrl', function($scope, $rootScope) {
