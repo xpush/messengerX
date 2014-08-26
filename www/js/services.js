@@ -410,7 +410,7 @@ angular.module('starter.services', [])
             param.message = data.MG;
 
             // Use TTS
-            if( $rootScope.currentScope && $rootScope.currentScope.toggles.useTTS ){
+            if( $rootScope.currentScope && $rootScope.currentScope.toggles.useTTS && SpeechSynthesisUtterance ){
               var u = new SpeechSynthesisUtterance();
               u.text = data.MG;
               u.lang = 'ko-KR';    

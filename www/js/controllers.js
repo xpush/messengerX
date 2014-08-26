@@ -1707,10 +1707,12 @@ angular.module('starter.controllers', [])
     } else {
       $scope.toggles.useTTS = true;
 
-      var u = new SpeechSynthesisUtterance();
-      u.text = '수지 is ready.';
-      u.lang = 'ko-KR';    
-      window.speechSynthesis.speak(u);      
+      if( SpeechSynthesisUtterance ){
+        var u = new SpeechSynthesisUtterance();
+        u.text = '수지 is ready.';
+        u.lang = 'ko-KR';    
+        window.speechSynthesis.speak(u);
+      }      
     }
   };  
 })
