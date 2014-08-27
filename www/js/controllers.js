@@ -998,8 +998,13 @@ angular.module('starter.controllers', [])
    * @description Display noticeMsg
    * @param {string} noticeMsg
    */
-  $scope.setNotice = function( noticeMsg ) {
+  $scope.setNotice = function( noticeMsg, resetFlag ) {
     $scope.notice = noticeMsg;
+    if( resetFlag ){
+      $scope.channelUserDatas.forEach( function( channelUserData ){
+        channelUserData.agree = undefined;
+      });
+    }
     $scope.toggleNotice( true );
   };
 
@@ -1603,7 +1608,7 @@ angular.module('starter.controllers', [])
       }
       var channelUserData = $scope.channelUserDatas[searchInx];
       channelUserData.agree = param.voteFlag;
-      $scope.channelUserDatas.splice( searchInx, 1, channelUserData );
+      //$scope.channelUserDatas.splice( searchInx, 1, channelUserData );
       $scope.$apply();
     });
   };
