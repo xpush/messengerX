@@ -68,7 +68,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.rootImgPath = "img";
       $rootScope.rootPath = "../www/";
       $rootScope.deviceId = 'ionic';
-      $rootScope.usePopupFlag = true;
+      $rootScope.usePopupFlag = false;
       // web
     } else {
       $rootScope.rootImgPath = "../img";
