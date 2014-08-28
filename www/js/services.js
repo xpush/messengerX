@@ -274,9 +274,6 @@ angular.module('starter.services', [])
       var self = this;
 
       if( !initFlag ){
-
-        console.log( "init" );
-
         // Get channel list from server
         self.channelList(function( channels ){
 

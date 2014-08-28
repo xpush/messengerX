@@ -1,6 +1,5 @@
 /**
  * @version 0.1
- * @author Pulkit Goyal &amp;lt;pulkit110@gmail.com
  * @module xpush
  */
 (function() {
@@ -18,15 +17,15 @@
   };
 
   var RMKEY = 'message';
-
+  
   /**
    * Represents a Xpush.
    * @exports xpush
    * @constructor
    * @param {string} host - connect to host
    * @param {string} appId - application id
-   * @param {string} eventHandler - eventHandler
-   * @param {boolean} autoInitFlag - auto initilize flag
+   * @param {string} eventHandler - Optional function for eventHandler
+   * @param {boolean} autoInitFlag - Optional parameter for initilize channel automatically
    */
   var XPush = function(host, appId, eventHandler, autoInitFlag){
     if(!host){alert('params(1) must have hostname'); return;}
@@ -73,20 +72,18 @@
   };
 
   /**
-   * This callback type is called `requestCallback` and is displayed as a global symbol.
+   * This callback type is called `signupCallback` and is displayed as a global symbol.
    *
-   * @callback requestCallback
-   * @param {number} responseCode
-   * @param {string} responseMessage
+   * @callback signupCallback
    */
 
   /**
-   * Register User
+   * Register User with userId and password
    * @function
    * @param {string} userId - User Id
    * @param {string} password - Password
-   * @param {string} deviceId - Device Id
-   * @param {requestCallback}
+   * @param {string} deviceId - Device Id ( Optional. default `WEB` )
+   * @param {signupCallback}
    */
   XPush.prototype.signup = function(userId, password, deviceId, cb){
     var self = this;
@@ -100,16 +97,25 @@
     self.ajax( XPush.Context.SIGNUP , 'POST', sendData, cb);
   };
 
-  XPush.prototype.login = function(userId, password, deviceId, mode,cbLogin){
+  /**
+   * Login with userId and password
+   * @function
+   * @param {string} userId - User Id
+   * @param {string} password - Password
+   * @param {string} deviceId - Device Id ( Optional. default `WEB` )
+   * @param {string} mode - Mode ( Optional. CHANNLE_ONLY )
+   * @param {loginCallback}
+   */
+  XPush.prototype.login = function(userId, password, deviceId, mode, cb){
     var self = this;
 
-    if(typeof(deviceId) == 'function' && !mode && !cbLogin){
-      cbLogin = deviceId;
+    if(typeof(deviceId) == 'function' && !mode && !cb){
+      cb = deviceId;
       deviceId = 'WEB';
     }
 
     if(typeof(mode) == 'function' && !cb){
-      cbLogin = mode;
+      cb = mode;
     }
 
     self.userId = userId;
@@ -120,7 +126,7 @@
     self.ajax( XPush.Context.LOGIN , 'POST', sendData, function(err, result){
 
       if(err){
-        if(cbLogin) cbLogin(err, result);
+        if(cb) cb(err, result);
         return;
       }
 
@@ -131,39 +137,51 @@
         c.connect(function(){
           console.log("xpush : login end", self.userId);
           self.initSessionSocket(self._sessionConnection._socket, function(){
-            if(cbLogin) cbLogin(result.message, result.result); // @ TODO from yohan.
+            if(cb) cb(result.message, result.result); // @ TODO from yohan.
           });
         });
       }else{
-        if(cbLogin) cbLogin(result.message);
+        if(cb) cb(result.message);
         alert('xpush : login error'+ result.message);
       }
     });
   };
 
-  XPush.prototype.setSessionInfo = function(userId, deviceId, cbLogin){
+  /**
+   * Set userId and deviceId at scope
+   * @function
+   * @param {string} userId - User Id
+   * @param {string} deviceId - Device Id
+   * @param {setSessionInfoCallback}
+   */
+  XPush.prototype.setSessionInfo = function(userId, deviceId, cb){
     var self = this;
 
-    if(typeof(deviceId) == 'function' && !cbLogin){
-      cbLogin = deviceId;
+    if(typeof(deviceId) == 'function' && !cb){
+      cb = deviceId;
       deviceId = 'WEB';
     }
-
-
 
     self.userId = userId;
     self.deviceId = deviceId;
 
-    cbLogin();
+    cb();
   };
 
-  XPush.prototype.logout = function(userId, deviceId){
+  /**
+   * Disconnect session or channel connection
+   * @function
+   */
+  XPush.prototype.logout = function(){
     var self = this;
     if( self != undefined ) {
+
+      // Disconnect session connection
       if( self._sessionConnection != undefined  ){
         self._sessionConnection.disconnect();
       }
 
+      // Disconnect channel connections
       if( self._channels != undefined  ){
         for( var key in self._channels ){
           if( self._channels[key]._connected ){
@@ -174,7 +192,14 @@
     }      
   };
 
-  // params.channel(option), params.users
+  /**
+   * Create channel with users and datas
+   * @function
+   * @param {string} userId - User Array for channel create
+   * @param {string} channel - Channel Id
+   * @param {Object} datas - Optional Data for additional channel info
+   * @param {createChannelCallback}
+   */
   XPush.prototype.createChannel = function(users, channel, datas, cb){
     var self = this;
     var channels = self._channels;
@@ -186,6 +211,8 @@
     var newChannel;
     var channelNm = channel;
     //var oldChNm = channelNm;
+
+    //Add logined user if not in users
     if( users.indexOf(self.userId) < 0 ){
       users.push(self.userId);
     }
@@ -194,9 +221,7 @@
       //_id: "53b039e6a2f41316d7046732"
       //app: "stalk-io"
       //channel: "b14qQ6wI"
-      //created: "2014-06-29T16:08:06.684Z"i
-      console.log("xpush : createChannel end", err);
-      console.log("xpush : createChannel end", result);
+      //created: "2014-06-29T16:08:06.684Z"
       if(err && err != 'WARN-EXISTED') {
         if(cb){
           cb(err, result);
@@ -223,7 +248,13 @@
     return newChannel;
   };
 
-  // create new Channel ( *** CHANNEL_ONLY *** )
+  /**
+   * Create new channel mode `CHANNEL_ONLY`
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {Object} userObj - Optional. UserObject( U : userID, D : deviceId )
+   * @param {createSimpleChannelCallback}
+   */
   XPush.prototype.createSimpleChannel = function(channel, userObj, cb){
     var self = this;
 
@@ -527,8 +558,6 @@
     var self = this;
     console.log("xpush : getUsertList ",params);
     self.sEmit('user-list' , params, function(err, result){
-      console.log( err );
-      console.log( result )
         if(cb) cb(err, result.users, result.count);
     });
   };

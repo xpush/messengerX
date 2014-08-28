@@ -291,9 +291,9 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   });
 
   $rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams) {
-    var ignoreStats = ["signin","signup","splash","error"];
+    var ignoreStates = ["signin","signup","splash","error"];
 
-    if ( ignoreStats.indexOf( toState.name ) < 0 && Sign.getUser() === undefined ) {
+    if ( ignoreStates.indexOf( toState.name ) < 0 && Sign.getUser() === undefined ) {
       event.preventDefault();      
       $rootScope.error = null;
       $state.go('splash');

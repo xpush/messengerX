@@ -786,7 +786,7 @@ angular.module('starter.controllers', [])
       }
     });
 
-    $rootScope.$on('$windowBlur',  function (){
+    $rootScope.$on('$windowBlur', function (){
       Chat.sendSys( 'off' );
     });
 
@@ -794,7 +794,7 @@ angular.module('starter.controllers', [])
       Chat.sendSys( 'on' );
     });
 
-    $rootScope.$on('$windowClose', function (data){
+    $rootScope.$on('$windowClose', function (){
       Chat.sendSys( 'off' );
     });
   });
