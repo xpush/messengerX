@@ -1,4 +1,9 @@
-;(function() {
+/**
+ * @version 0.1
+ * @author Pulkit Goyal &amp;lt;pulkit110@gmail.com
+ * @module xpush
+ */
+(function() {
 
   var SESSION = 'session';
   var CHANNEL = 'channel';
@@ -14,6 +19,15 @@
 
   var RMKEY = 'message';
 
+  /**
+   * Represents a Xpush.
+   * @exports xpush
+   * @constructor
+   * @param {string} host - connect to host
+   * @param {string} appId - application id
+   * @param {string} eventHandler - eventHandler
+   * @param {boolean} autoInitFlag - auto initilize flag
+   */
   var XPush = function(host, appId, eventHandler, autoInitFlag){
     if(!host){alert('params(1) must have hostname'); return;}
     if(!appId){alert('params(2) must have appId'); return;}
@@ -58,6 +72,22 @@
     NODE : '/node'
   };
 
+  /**
+   * This callback type is called `requestCallback` and is displayed as a global symbol.
+   *
+   * @callback requestCallback
+   * @param {number} responseCode
+   * @param {string} responseMessage
+   */
+
+  /**
+   * Register User
+   * @function
+   * @param {string} userId - User Id
+   * @param {string} password - Password
+   * @param {string} deviceId - Device Id
+   * @param {requestCallback}
+   */
   XPush.prototype.signup = function(userId, password, deviceId, cb){
     var self = this;
 
