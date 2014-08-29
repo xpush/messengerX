@@ -1,6 +1,6 @@
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass', 'ngStorage'])
 
-.run(function($location, $ionicPlatform, $rootScope, DB, Sign, NAVI, $state, $window, $localStorage, $sessionStorage, $templateCache ) {
+.run(function($location, $ionicPlatform, $rootScope, APP_INFO, DB, BASE_URL, Sign, NAVI, $state, $window, $localStorage, $sessionStorage, $templateCache ) {
   $ionicPlatform.ready(function() {
 
     $ionicPlatform.registerBackButtonAction(function(e){
@@ -97,14 +97,14 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       menu.append(new gui.MenuItem({ label: 'Logout' }));
       menu.append(new gui.MenuItem({ label: 'Close' }));
 
-      menu.items[0].click = function() { 
+      menu.items[0].click = function() {
         $rootScope.logout();
       };
 
-      menu.items[1].click = function() { 
+      menu.items[1].click = function() {
         tray.remove();
         gui.App.quit();
-      };      
+      };
 
       tray.menu = menu;
 
@@ -123,11 +123,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         winmain.hide();
       };
 
-      winmain.show();  
+      winmain.show();
     }
 
-    $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";
-    $rootScope.app  = 'jmessenger';
+    $rootScope.host = BASE_URL;
+    $rootScope.app  = APP_INFO.appKey;
 
     // webrtc support ?
     if (
@@ -157,7 +157,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
 
     $rootScope.webNoti = function( message ) {
-          
+
       // Let's check if the browser supports notifications
       if (!("Notification" in window)) {
         console.log("This browser does not support desktop notification");
@@ -294,11 +294,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     var ignoreStates = ["signin","signup","splash","error"];
 
     if ( ignoreStates.indexOf( toState.name ) < 0 && Sign.getUser() === undefined ) {
-      event.preventDefault();      
+      event.preventDefault();
       $rootScope.error = null;
       $state.go('splash');
     }
-  }); 
+  });
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
@@ -313,7 +313,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       url: "/splash",
       templateUrl: "templates/splash.html",
       controller: 'SplashCtrl'
-    })  
+    })
 
     .state('signin', {
       url: "/sign-in",
@@ -483,7 +483,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
         popups[popupKey] = popupWin.window;
         popupWin.on('close', function() {
           scope.$broadcast("$windowClose" );
-          
+
           // Hide the window to give user the feeling of closing immediately
           this.hide();
           popupCount--;
@@ -496,7 +496,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           // After closing the new window, close the main window.
 
           this.close(true);
-        }); 
+        });
       } else {
         popups[popupKey] = popupWin;
         popupWin.onbeforeunload = function(){
