@@ -147,6 +147,8 @@
       <h2 class="mw90" id="notice-message">{{notice.message}}</h2>
       <p>{{notice.name}}&nbsp;{{notice.date}}</p>
       <i class="icon ion-more btn-more" ng-click="toggleNoticeMenu();"></i>
+      <i class="icon ion-ios7-location-outline btn-map" ng-click="toggleNoticeMap();"></i>
+      
     </div>
 
     <div class="chat-extends-buttons flex" >
@@ -159,7 +161,9 @@
         <span>{{notice.N_US.length}}</span>
       </div>
     </div>
-
+    <div class="chat-extends-buttons hidden" id="chat-notice-map">
+      <div ng-bind-html="notice.location"></div>
+    </div>
     <div class="chat-extends-buttons hidden" id="chat-notice-menu">
       <div class="col" ng-click="updateNotice('N','N')">
         <span>No more</span>
@@ -169,6 +173,11 @@
       </div>
     </div>
   </div>
+
+  <div class="chat-extends " id="chat-map" style="border:1px solid #000; ">
+   
+  </div>
+
 
   <button class="button ion-arrow-expand btn-expand hidden icon-large" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>
   <img ng-src="{{loginUserImage}}" class="floating-image" />

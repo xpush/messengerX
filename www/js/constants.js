@@ -59,6 +59,7 @@ angular.module('starter.constants', [])
         columns: [
           {name: 'channel_id',   type: 'text'},
           {name: 'message', type: 'text DEFAULT "" '},
+          {name: 'location', type: 'text DEFAULT "" '},
           {name: 'sender_id', type: 'text'},
           {name: 'use_flag', type: 'text'},
           {name: 'fold_flag', type: 'text'},

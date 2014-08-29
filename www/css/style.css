@@ -462,7 +462,16 @@ img.emoticon{
 	text-align: center;
 	-webkit-app-region: no-drag;
 }
-
+.btn-map {
+	position: absolute;
+	top: 40px;
+	right: 20px;
+	cursor: pointer;
+	width: 40px;
+	height: 30px;
+	text-align: center;
+	-webkit-app-region: no-drag;
+}
 .btn-expand	 {
 	position: absolute;
 	top: 48px;
