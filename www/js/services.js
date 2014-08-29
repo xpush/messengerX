@@ -564,9 +564,13 @@ angular.module('starter.services', [])
 
           // Save notice
           if( data.T == 'N' ){
+            var MG = data.MG.split('^')[0];
+            var LC = data.MG.split('^')[1];
+            data.MG = MG;
+            data.LC = LC;            
             NoticeDao.add( data );
             return;
-          }
+          }  
 
           var sr = data.UO.U == loginUser.userId ? 'S':'R';
 
