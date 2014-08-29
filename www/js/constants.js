@@ -5,7 +5,7 @@ angular.module('starter.constants', [])
     feedVersion: 'V1',
     appKey : 'jmessenger'
   })
-  .constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
+  .constant('BASE_URL', 'http://stalk-front-s01.cloudapp.net:8080')
   .constant('DB_CONFIG', {
     name: 'stalk.db',
     version: '0.56',

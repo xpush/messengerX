@@ -8,12 +8,22 @@ body {
 	color: #fff;
 }
 
+.bar-jmessenger {
+	border-color: #1aacc3;
+    background-color: #38C0B6;
+    background-image: linear-gradient(0deg, #1aacc3, #1aacc3 50%, transparent 50%);
+    color: #fff; 
+}
+
 .button-jmessenger-forgot {
 	border-color: #A21A24;
 	background-color: #CC695D;
 	color: #fff;
 }
 
+.button-yellow {
+	background-color: #FCEF59;
+}
 
 .messages {
 	margin:0;

@@ -1,5 +1,5 @@
 angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic.contrib.frostedGlass', 'ngStorage'])
-.run(function($location, $ionicPlatform, $window, $rootScope, DB, Sign ) {
+.run(function($location, $ionicPlatform, $window, $rootScope, APP_INFO, DB, BASE_URL, Sign ) {
   $ionicPlatform.ready(function() {
 
     if(window.cordova && window.cordova.plugins.Keyboard) {
@@ -32,7 +32,7 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
 
       $rootScope.nodeWebkit = true;
       var winmain = gui.Window.get();
- 
+
       $rootScope.close = function(){
         winmain.close();
       };
@@ -56,8 +56,8 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
       prevEvent = 'focus';
     });
 
-    $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";
-    $rootScope.app  = 'jmessenger';
+    $rootScope.host = BASE_URL;
+    $rootScope.app  = APP_INFO.appKey;
 
     // webrtc support ?
     if (

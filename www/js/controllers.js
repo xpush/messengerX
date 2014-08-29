@@ -454,7 +454,7 @@ angular.module('starter.controllers', [])
     }
 
     // A : applicationId
-    var params = { 'A' : 'jmessenger', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
+    var params = { 'A' : $rootScope.app, 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
                DT : { 'NM' : $scope.loginUser.userName, 'I': $scope.loginUser.image, 'MG' : $scope.loginUser.message } };
 
     // update userInfo in server
@@ -609,7 +609,7 @@ angular.module('starter.controllers', [])
   }, delay);
 })
 .controller('ErrorCtrl', function($scope, $state){
-  $scope.gotoSignIn = function(){ 
+  $scope.gotoSignIn = function(){
     $state.go('signin');
   };
 })
@@ -660,8 +660,8 @@ angular.module('starter.controllers', [])
    * @param {jsonObject} Json object that is mapped to the screen
    */
   $scope.signIn = function(user) {
-		var params = { 'A' : 'jmessenger', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
-    
+		var params = { 'A' : $rootScope.app, 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
+
     $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, 'ADD_DEVICE', function(err, result){
       if(err){
         var alertMessage = {title: 'Login Failed'};
@@ -727,7 +727,7 @@ angular.module('starter.controllers', [])
    * @param {jsonObject} Json object that is mapped to the screen
    */
   $scope.signUp = function(user) {
-    var params = { 'A' : 'jmessenger', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
+    var params = { 'A' : $rootScope.app, 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
      'DT' : {'NM' : user.userName, 'I':'http://messenger.stalk.io:8080/img/default_image.jpg', 'MG':'' } };
     Sign.register( params, function(data){
       $state.go('signin');
@@ -1217,7 +1217,7 @@ angular.module('starter.controllers', [])
     $scope.toggles.showMenu = flag;
 
     if( $scope.toggles.showMenu === true ){
-      
+
       document.getElementById( 'chat-emoticons' ).style.display = "none";
       document.getElementById( 'chat-extends' ).style.display = "none";
       //$scope.chatExtendsMenuClass = "chat-extends-menu slide-in-right";
@@ -1243,7 +1243,7 @@ angular.module('starter.controllers', [])
    * @description show or hide Notice div
    * @param {boolean}
    */
-  $scope.toggleNotice = function( flag ) { 
+  $scope.toggleNotice = function( flag ) {
 
     if( flag && $scope.notice && $scope.notice.useFlag === 'Y' && !$scope.toggles.showEmo && !$scope.toggles.showExt ){
       if( $scope.notice.foldFlag == 'N' ) {
@@ -1292,7 +1292,7 @@ angular.module('starter.controllers', [])
     }
   };
 
-  
+
   /**
    * @ngdoc function
    * @name sendEmoticon
@@ -1593,7 +1593,7 @@ angular.module('starter.controllers', [])
       $scope.toggleNotice( true );
     }
   };
-  
+
   $scope.voteNotice = function( flag ){
     var param = {'channelId': channelId, 'useFlag' : $scope.notice.useFlag, 'foldFlag' : $scope.notice.foldFlag  };
     param.voteFlag = flag ? 'Y':'N';
@@ -1736,12 +1736,12 @@ angular.module('starter.controllers', [])
         u.text = '수지 is ready.';
         u.lang = 'ko-KR';
         window.speechSynthesis.speak(u);
-      }      
+      }
     }
-  };  
+  };
 
-  
-  
+
+
 
 })
 .controller('ViewCtrl', function($scope, $rootScope) {
