@@ -360,14 +360,14 @@ angular.module('starter.services', [])
           || ( !$rootScope.usePopupFlag && ch === $rootScope.currentChannel ) ) {
 
           if( data.T == 'N' ){
-            console.log("SEVICESERVICESERVICE");
+
 
 
             var MG = data.MG.split('^')[0];
             var LC = data.MG.split('^')[1];
             data.MG = MG;
             data.LC = LC;
-            console.log(data);
+
 
             NoticeDao.add( data );
             if( $rootScope.currentScope ){
