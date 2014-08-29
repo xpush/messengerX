@@ -244,7 +244,7 @@ angular.module('starter.services', [])
       };
 
       if( pageNumber > -1 ){
-        angular.extend( params.options, { pageNum : 1,pageSize: 50 } );      
+        angular.extend( params.options, { pageNum : 1,pageSize: 50 } );
       }
 
       if(pageNumber > 0) {
@@ -310,13 +310,13 @@ angular.module('starter.services', [])
         // compare sender's userId to logined UserId. send or receive
         var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
 
-        // compare current channel id to received message's channel id 
+        // compare current channel id to received message's channel id
         var currentChannel = $rootScope.xpush.getChannel( ch );
         if( currentChannel != undefined && currentChannel._connected && sr == 'R') {
-          
+
           if( $rootScope.currentScope ){
             $rootScope.currentScope.setOnlineStatus( data.MG );
-          }          
+          }
         }
       });
 
@@ -338,7 +338,7 @@ angular.module('starter.services', [])
         if( sr == 'R' ){
           try {
             var element = angular.element( window.document.getElementById( 'navBar' ) );
-            
+
             element.addClass( "blink_me" );
             startTime = Date.now();
 
@@ -354,14 +354,14 @@ angular.module('starter.services', [])
           }
         }
 
-        // compare current channel id to received message's channel id 
+        // compare current channel id to received message's channel id
         var currentChannel = $rootScope.xpush.getChannel( ch );
         if( ( $rootScope.usePopupFlag && currentChannel != undefined && currentChannel._connected )
           || ( !$rootScope.usePopupFlag && ch === $rootScope.currentChannel ) ) {
 
           if( data.T == 'N' ){
             console.log("SEVICESERVICESERVICE");
-            
+
 
             var MG = data.MG.split('^')[0];
             var LC = data.MG.split('^')[1];
@@ -419,9 +419,9 @@ angular.module('starter.services', [])
             if( $rootScope.currentScope && $rootScope.currentScope.toggles.useTTS && window.speechSynthesis ){
               var u = new SpeechSynthesisUtterance();
               u.text = data.MG;
-              u.lang = 'ko-KR';    
+              u.lang = 'ko-KR';
               window.speechSynthesis.speak(u);
-            }            
+            }
           }
 
           // 1:1 Channel, update image
@@ -648,7 +648,7 @@ angular.module('starter.services', [])
      * @param {function} callback function that be called after success
      */
     register : function( params, callback ){
-      $http.post("http://"+BASE_URL+":8000/user/register", params)
+      $http.post(BASE_URL+"/user/register", params)
       .success(function(data) {
         callback( data );
       })
@@ -666,7 +666,7 @@ angular.module('starter.services', [])
      * @param {function} callback function that be called after success
      */
     update : function( params, callback ){
-      $http.post("http://"+BASE_URL+":8000/user/update", params)
+      $http.post(BASE_URL+"/user/update", params)
       .success(function(data) {
         callback( data );
       })

@@ -27,7 +27,7 @@
 
     if(data.event == 'CONNECTION' && userId == data.U){
 
-      maybeRequestTurn();
+      //maybeRequestTurn();
 
       if(!channel){
         channel = xpush.getChannel(channelNm);
