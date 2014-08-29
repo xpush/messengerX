@@ -76,7 +76,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
 
-      var mobileAgents = ["android","iphone","bb","symbian","nokia"];
+      var mobileAgents = ["android","iphone","bb","symbian","nokia", "ipad"];
       var agent = window.navigator.userAgent.toLowerCase();
 
       for( var inx = 0, until = mobileAgents.length ; $rootScope.usePopupFlag && inx < until ; inx++ ){
