@@ -2,6 +2,19 @@ body {
   cursor: url('http://ionicframework.com/img/finger.png'), auto;
 }
 
+.button-jmessenger-signin {
+	border-color: #3AEFE1;
+	background-color: #38C0B6;
+	color: #fff;
+}
+
+.button-jmessenger-forgot {
+	border-color: #A21A24;
+	background-color: #CC695D;
+	color: #fff;
+}
+
+
 .messages {
 	margin:0;
 	padding:0;
@@ -44,18 +57,17 @@ body {
 	font-size:1rem;
 }
 
+.messages img {
+	display:block;
+	border-radius:.75rem;
+}
+
 .messages .from span {
 	float: left;
 	margin: 0 5px;
 	text-overflow: ellipsis;
 	overflow-x: hidden;
 	word-wrap: break-word;
-	max-width:75%;
-}
-
-.messages img {
-	display:block;
-	border-radius:.75rem;
 }
 
 .messages .from img {
@@ -463,7 +475,16 @@ img.emoticon{
 	text-align: center;
 	-webkit-app-region: no-drag;
 }
-
+.btn-map {
+	position: absolute;
+	top: 40px;
+	right: 20px;
+	cursor: pointer;
+	width: 40px;
+	height: 30px;
+	text-align: center;
+	-webkit-app-region: no-drag;
+}
 .btn-expand	 {
 	position: absolute;
 	top: 48px;

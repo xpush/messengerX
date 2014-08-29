@@ -91,7 +91,11 @@ angular.module('starter.directives', [])
           }
 
           var url = xpush.getFileUrl( scope.channelId, fileNm );
-          var encodedUrl = encodeURIComponent(  url );
+          if( attrs.src.indexOf( "data" ) === 0 ){
+            url = attrs.src;
+          }
+          
+          var encodedUrl = encodeURIComponent( url );
 
           var left = screen.width/2 - 400
             , top = screen.height/2 - 300;

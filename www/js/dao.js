@@ -592,7 +592,7 @@ angular.module('starter.dao', [])
     get : function( channelId ){
       var loginUserId = Sign.getUser().userId;
       return DB.query(
-        'SELECT message, sender_id, updated, use_flag, fold_flag, vote_flag FROM TB_NOTICE WHERE channel_id = ? and owner_id = ? and use_flag = ? ;', [channelId,loginUserId,'Y']
+        'SELECT message,location , sender_id, updated, use_flag, fold_flag, vote_flag FROM TB_NOTICE WHERE channel_id = ? and owner_id = ? and use_flag = ? ;', [channelId,loginUserId,'Y']
       ).then(function(result) {
         return DB.fetch(result);
       });
@@ -611,11 +611,12 @@ angular.module('starter.dao', [])
 
       var query =  
         "INSERT OR REPLACE INTO TB_NOTICE "+
-        "(message, sender_id, channel_id, updated, use_flag, fold_flag, owner_id ) VALUES "+
-        "(?, ?, ?, ?, ?, ?, ?) ;";
+        "(message,location, sender_id, channel_id, updated, use_flag, fold_flag, owner_id ) VALUES "+
+        "(?, ?, ?, ?, ?, ?, ?, ?) ;";
 
       var cond = [
         jsonObj.MG,
+        jsonObj.LC,
         jsonObj.S,
         jsonObj.C,
         jsonObj.TS,

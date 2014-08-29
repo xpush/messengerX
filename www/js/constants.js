@@ -3,7 +3,7 @@ angular.module('starter.constants', [])
   .constant('APP_INFO', {
     version: '1.0 BETA',
     feedVersion: 'V1',
-    appKey : 'messengerx'
+    appKey : 'jmessenger'
   })
   .constant('BASE_URL', 'stalk-front-s01.cloudapp.net')
   .constant('DB_CONFIG', {
@@ -59,6 +59,7 @@ angular.module('starter.constants', [])
         columns: [
           {name: 'channel_id',   type: 'text'},
           {name: 'message', type: 'text DEFAULT "" '},
+          {name: 'location', type: 'text DEFAULT "" '},
           {name: 'sender_id', type: 'text'},
           {name: 'use_flag', type: 'text'},
           {name: 'fold_flag', type: 'text'},
