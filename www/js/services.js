@@ -487,7 +487,7 @@ angular.module('starter.services', [])
               console.log( '========= local noti callback =========');
             });
 
-            $rootScope.webNoti( data.MG );
+            $rootScope.webNoti( channel.message );
           });
         }
       });

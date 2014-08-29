@@ -517,7 +517,7 @@ angular.module('starter.controllers', [])
       param.deviceId = loginUser.deviceId;
 
       // Channel Init
-      Chat.init( param, $scope, function( messages ){
+      Chat.init( param, '', $scope, function( messages ){
       });
     });
   };
@@ -845,9 +845,6 @@ angular.module('starter.controllers', [])
 
       // Retreive notice from DB
       NoticeDao.get( channelId ).then(function(data) {
-
-        console.log(12312312312312312312312312);
-        console.log(data.location);
         if( data !== undefined ){
           var dateStrs = UTIL.timeToString( data.updated );
 
