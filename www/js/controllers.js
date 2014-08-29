@@ -1536,7 +1536,7 @@ angular.module('starter.controllers', [])
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
       template: '<input type="text" ng-model="data.notice"><br/><input type="text" ng-model="data.location">',
-      title: 'Input Notice',
+      title: 'Bung gae',
       scope: $scope,
       buttons: [
         { text: 'Cancel' },
