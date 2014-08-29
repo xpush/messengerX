@@ -57,7 +57,7 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
     });
 
     $rootScope.host = "http://stalk-front-s01.cloudapp.net:8000";
-    $rootScope.app  = 'messengerx';
+    $rootScope.app  = 'jmessenger';
 
     // webrtc support ?
     if (

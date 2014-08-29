@@ -454,7 +454,7 @@ angular.module('starter.controllers', [])
     }
 
     // A : applicationId
-    var params = { 'A' : 'messengerx', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
+    var params = { 'A' : 'jmessenger', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
                DT : { 'NM' : $scope.loginUser.userName, 'I': $scope.loginUser.image, 'MG' : $scope.loginUser.message } };
 
     // update userInfo in server
@@ -660,9 +660,12 @@ angular.module('starter.controllers', [])
    * @param {jsonObject} Json object that is mapped to the screen
    */
   $scope.signIn = function(user) {
-		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
-    $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, 'ADD_DEVICE', function(err, result){
+		var params = { 'A' : 'jmessenger', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
 
+    
+    $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, 'ADD_DEVICE', function(err, result){
+      console.log(err);
+      console.log(result);
       if(err){
         var alertMessage = {title: 'Login Failed'};
         if(err == 'ERR-NOTEXIST'){
@@ -727,7 +730,7 @@ angular.module('starter.controllers', [])
    * @param {jsonObject} Json object that is mapped to the screen
    */
   $scope.signUp = function(user) {
-    var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
+    var params = { 'A' : 'jmessenger', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
      'DT' : {'NM' : user.userName, 'I':'http://messenger.stalk.io:8080/img/default_image.jpg', 'MG':'' } };
     Sign.register( params, function(data){
       $state.go('signin');
@@ -845,6 +848,9 @@ angular.module('starter.controllers', [])
 
       // Retreive notice from DB
       NoticeDao.get( channelId ).then(function(data) {
+
+        console.log(12312312312312312312312312);
+        console.log(data.location);
         if( data !== undefined ){
           var dateStrs = UTIL.timeToString( data.updated );
 
@@ -853,7 +859,7 @@ angular.module('starter.controllers', [])
 
           $rootScope.xpush.getChannelData( channelId, function( err, channelInfo ){
             var noticeData = channelInfo.DT.NT;
-            var noticeMessage = { date : dateMessage, message : data.message, name : Cache.get( data.sender_id ).NM,
+            var noticeMessage = { date : dateMessage, message : data.message,location:data.location, name : Cache.get( data.sender_id ).NM,
                                   image : Cache.get( data.sender_id ).I , useFlag : data.use_flag, foldFlag : data.fold_flag,
                                   voteFlag : data.vote_flag, Y_US : noticeData.Y.US, N_US: noticeData.N.US };
             $scope.setNotice( noticeMessage );
@@ -1280,6 +1286,19 @@ angular.module('starter.controllers', [])
     }
   };
 
+  $scope.toggleNoticeMap = function(){
+    if( $scope.showNoticeMap ){
+      document.getElementById( "chat-notice-map" ).style.display = "none";
+      document.getElementById( "notice-message" ).style.whiteSpace =  "nowrap";
+      $scope.showNoticeMap = false;
+    } else {
+      document.getElementById( "notice-message" ).style.whiteSpace = "normal";
+      document.getElementById( "chat-notice-map" ).style.display = "flex";
+      $scope.showNoticeMap = true;
+    }
+  };
+
+  
   /**
    * @ngdoc function
    * @name sendEmoticon
@@ -1519,7 +1538,7 @@ angular.module('starter.controllers', [])
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
-      template: '<input type="type" ng-model="data.notice">',
+      template: '<input type="text" ng-model="data.notice"><br/><input type="text" ng-model="data.location">',
       title: 'Input Notice',
       scope: $scope,
       buttons: [
@@ -1532,17 +1551,23 @@ angular.module('starter.controllers', [])
               //don't allow the user to close unless he enters wifi password
               e.preventDefault();
             } else {
-              return $scope.data.notice;
+              return $scope.data;
             }
           }
         },
       ]
     });
-    myPopup.then(function(noticeMessage) {
+    myPopup.then(function(data) {
+      console.log(data);
+
+      var noticeMessage = data.notice;
+      var location = data.location;
+      noticeMessage +='^'+location;
+
       if( noticeMessage !== undefined ){
         Chat.send( noticeMessage, 'N' );
 
-        var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'Y': { 'US':[] }, 'N': { 'US':[] } } } };
+        var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'LC':location, 'Y': { 'US':[] }, 'N': { 'US':[] } } } };
         $rootScope.xpush.updateChannel( channelId, query, function( data ){
         });
       }
@@ -1720,6 +1745,10 @@ angular.module('starter.controllers', [])
       }      
     }
   };  
+
+  
+  
+
 })
 .controller('ViewCtrl', function($scope, $rootScope) {
 

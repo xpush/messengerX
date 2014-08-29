@@ -360,11 +360,20 @@ angular.module('starter.services', [])
           || ( !$rootScope.usePopupFlag && ch === $rootScope.currentChannel ) ) {
 
           if( data.T == 'N' ){
+            console.log("SEVICESERVICESERVICE");
+            
+
+            var MG = data.MG.split('^')[0];
+            var LC = data.MG.split('^')[1];
+            data.MG = MG;
+            data.LC = LC;
+            console.log(data);
+
             NoticeDao.add( data );
             if( $rootScope.currentScope ){
               var dateStrs = UTIL.timeToString( data.TS );
               var dateMessage = dateStrs[1]+" "+dateStrs[2];
-              var noticeMessage = { date : dateMessage, message : data.MG, name : data.UO.NM, image : data.UO.I, useFlag : 'Y', foldFlag : 'N',
+              var noticeMessage = { date : dateMessage, message : data.MG, location : data.LC, name : data.UO.NM, image : data.UO.I, useFlag : 'Y', foldFlag : 'N',
                 Y_US : [], N_US : [] };
               $rootScope.currentScope.setNotice( noticeMessage, true );
             }
@@ -781,7 +790,7 @@ angular.module('starter.services', [])
      * @param {string} messageType
      */
     send : function(msg, type){
-      var DT = { UO : CONF._user, MG : encodeURIComponent(msg), S : CONF._user.U };
+      var DT = { UO : CONF._user, MG : encodeURIComponent(msg),  S : CONF._user.U };
 
       if( type !== undefined ){
         DT.T = type;
