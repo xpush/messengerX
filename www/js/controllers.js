@@ -454,7 +454,7 @@ angular.module('starter.controllers', [])
     }
 
     // A : applicationId
-    var params = { 'A' : 'messengerx', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
+    var params = { 'A' : 'jmessenger', 'U' : $scope.loginUser.userId, 'PW' : $scope.loginUser.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
                DT : { 'NM' : $scope.loginUser.userName, 'I': $scope.loginUser.image, 'MG' : $scope.loginUser.message } };
 
     // update userInfo in server
@@ -660,7 +660,7 @@ angular.module('starter.controllers', [])
    * @param {jsonObject} Json object that is mapped to the screen
    */
   $scope.signIn = function(user) {
-		var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
+		var params = { 'A' : 'jmessenger', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId };
     $rootScope.xpush.login( user.userId, user.password, $rootScope.deviceId, 'ADD_DEVICE', function(err, result){
 
       if(err){
@@ -727,7 +727,7 @@ angular.module('starter.controllers', [])
    * @param {jsonObject} Json object that is mapped to the screen
    */
   $scope.signUp = function(user) {
-    var params = { 'A' : 'messengerx', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
+    var params = { 'A' : 'jmessenger', 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
      'DT' : {'NM' : user.userName, 'I':'http://messenger.stalk.io:8080/img/default_image.jpg', 'MG':'' } };
     Sign.register( params, function(data){
       $state.go('signin');

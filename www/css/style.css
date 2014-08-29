@@ -44,18 +44,17 @@ body {
 	font-size:1rem;
 }
 
+.messages img {
+	display:block;
+	border-radius:.75rem;
+}
+
 .messages .from span {
 	float: left;
 	margin: 0 5px;
 	text-overflow: ellipsis;
 	overflow-x: hidden;
 	word-wrap: break-word;
-	max-width:75%;
-}
-
-.messages img {
-	display:block;
-	border-radius:.75rem;
 }
 
 .messages .from img {

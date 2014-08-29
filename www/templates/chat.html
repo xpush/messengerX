@@ -21,7 +21,7 @@
           <div class="small">{{message.name}}</div>
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
-            <span class="from">{{message.message}}</span>
+            <span class="mw70">{{message.message}}</span>
             <img ng-src="{{rootImgPath}}/star_{{message.bookmarkFlag}}.png" class="star"  ng-click="setBookmark( message, $index );"/>
           </div>
         </div>
@@ -29,7 +29,7 @@
           <div class="small">{{message.name}}</div>
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
-            <span>
+            <span class="mw90">
               <img ng-src="{{message.message}}" popup-link="{{message.active}}" class="from" type="{{message.type}}"/>
             </span>
           </div>
