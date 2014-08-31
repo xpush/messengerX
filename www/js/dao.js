@@ -737,7 +737,7 @@ angular.module('starter.dao', [])
     binding = typeof binding !== 'undefined' ? binding : [];
     var deferred = $q.defer();
     self.db.transaction(function(transaction) {
-      transaction.executeSql(query, binding, function(transaction, result) {;
+      transaction.executeSql(query, binding, function(transaction, result) {
         deferred.resolve(result);
       }, function(transaction, error) {
         deferred.reject(error);

@@ -564,12 +564,14 @@ angular.module('starter.services', [])
 
           // Save notice
           if( data.T == 'N' ){
-            var MG = data.MG.split('^')[0];
-            var LC = data.MG.split('^')[1];
-            data.MG = MG;
-            data.LC = LC;            
+            if( data.MG.indexOf( "^" ) > -1 ){
+              var MG = data.MG.split('^')[0];
+              var LC = data.MG.split('^')[1];
+              data.MG = MG;
+              data.LC = LC;
+            }          
             NoticeDao.add( data );
-            return;
+            continue;
           }  
 
           var sr = data.UO.U == loginUser.userId ? 'S':'R';
@@ -637,7 +639,6 @@ angular.module('starter.services', [])
       $rootScope.totalUnreadCount = 0;
 
       if ( callback && typeof callback === 'function') {
-        console.log( $localStorage.loginUser );
         callback();
       }
     },
