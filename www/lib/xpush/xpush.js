@@ -72,12 +72,6 @@
   };
 
   /**
-   * This callback type is called `signupCallback` and is displayed as a global symbol.
-   *
-   * @callback signupCallback
-   */
-
-  /**
    * Register User with userId and password
    * @function
    * @param {string} userId - User Id
@@ -286,6 +280,11 @@
 
   };
 
+  /**
+   * Get channel list at xpush server with xpush API `channel-list`
+   * @function
+   * @param {getChannlesCallback}
+   */
   XPush.prototype.getChannels = function(cb){
     var self = this;
     console.log("xpush : getChannels ",self.userId);
@@ -306,6 +305,13 @@
     });
   };
 
+  /**
+   * Update channel info at xpush server with xpush API `channel-update`
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {Object} query - JSON Object for update. query is mongo DB style
+   * @param {updateChannelCallback}
+   */
   XPush.prototype.updateChannel = function(channel, query, cb){
     var self = this;
     var param = { 'A': self.appId, 'C': channel, 'Q' : query };
@@ -316,6 +322,12 @@
     });
   };
 
+  /**
+   * Get channel list in redis with key
+   * @function
+   * @param {Object} data - ( 'key': '' )
+   * @param {getChannelsActiveCallback}
+   */
   XPush.prototype.getChannelsActive = function(data, cb){ //data.key(option)
     var self = this;
     self.sEmit('channel-list-active',data, function(err, result){
@@ -324,39 +336,70 @@
     });
   };
 
-  XPush.prototype.getChannel = function(chNm){
+  /**
+   * Get channel info in xpush object
+   * @function
+   * @param {string} channel - Channel Id
+   * @return {object} return Channel Object
+   */
+  XPush.prototype.getChannel = function(channel){
     var self = this;
     var channels = self._channels;
     for(var k in channels){
-      if(k == chNm) return channels[k];
+      if(k == channel) return channels[k];
     }
 
     return undefined;
   };
 
-  XPush.prototype.getChannelData = function(chNm, cb){
+  /**
+   * Get channel info at xpush server with xpush API `channel-get`
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {getChannelDataCallback}
+   */
+  XPush.prototype.getChannelData = function(channel, cb){
     var self = this;
-    self.sEmit('channel-get', {C: chNm, U: /*userId*/{} }, function(err, result){
+    self.sEmit('channel-get', {C: channel, U: /*userId*/{} }, function(err, result){
       if(cb) cb(err,result);
     });
   };
 
-  XPush.prototype.joinChannel = function(channel, param, fnCallback){
+  /**
+   * Join channel
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {Object} param - Channel Id
+   * @param {joinChannelCallback}
+   */
+  XPush.prototype.joinChannel = function(channel, param, cb){
     var self = this;
     self._getChannelAsync(channel, function (err, ch){
       ch.joinChannel( param, function( data ){
-        fnCallback( data );
+        cb( data );
       });
     });
   };
 
-  XPush.prototype.exitChannel = function(chNm, cb){
+  /**
+   * Exit channel
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {exitChannelCallback}
+   */
+  XPush.prototype.exitChannel = function(channel, cb){
     var self = this;
-    self.sEmit('channel-exit', {C: chNm}, function(err, result){
-        if(cb) cb(err,result);
+    self.sEmit('channel-exit', {C: channel}, function(err, result){
+      if(cb) cb(err,result);
     });
   };
 
+  /**
+   * Get channel info asynchronous. If channel is not exist in channel, call serverAPI
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {_getChannelAsyncCallback}
+   */
   XPush.prototype._getChannelAsync = function(channel, cb){
     var self = this;
     var ch = self.getChannel(channel);
@@ -378,6 +421,14 @@
     }
   };
 
+  /**
+   * Upload file DOM Object with socket stream
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {object} inputObj - JSON Objec( 'file' : file DOM Oject for upload, 'type' : '' )
+   * @param {function} fnPrg - callback function for progressing status
+   * @param {uploadStreamCallback} fnCallback
+   */
   XPush.prototype.uploadStream = function(channel, inputObj, fnPrg, fnCallback){
     var self = this;
 
@@ -418,11 +469,18 @@
       }
 
     });
-
-
   };
 
-  XPush.prototype.uploadFile = function(channel, img, inputObj, fnPrg, fnCallback){
+  /**
+   * Upload file with JSON Object for mobile user
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {string} fileUri - FileUri for update
+   * @param {object} inputObj - JSON Objec( 'type' : '', 'name' : Original File name )
+   * @param {function} fnPrg - callback function for progressing status
+   * @param {uploadFileCallback} fnCallback
+   */
+  XPush.prototype.uploadFile = function(channel, fileUri, inputObj, fnPrg, fnCallback){
     var self = this;
 
     self._getChannelAsync(channel, function(err, ch){
@@ -430,7 +488,6 @@
       if(window.FileTransfer && window.FileUploadOptions){
 
         var url = ch._server.serverUrl+'/upload';
-        console.log(url);
 
         var options = new FileUploadOptions();
         options.fileKey="post";
@@ -461,9 +518,7 @@
           };
         }
 
-        ft.upload(img, encodeURI(url), function(data){
-
-          console.log(data);
+        ft.upload(fileUri, encodeURI(url), function(data){
           fnCallback(data);
           //$scope.picData = FILE_URI;
           //$scope.$apply();
@@ -476,6 +531,13 @@
     });
   };
 
+  /**
+   * Get uploaded file url
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {string} fileName - File name
+   * @return {string} file download url
+   */
   XPush.prototype.getFileUrl = function(channel, fileName){
 
     var self = this;
@@ -492,19 +554,26 @@
     return result;
   };
 
-  XPush.prototype._makeChannel = function(chNm){
+  /**
+   * Get channel object if channle is connected. Or create new `Connect` Object
+   * @private
+   * @function
+   * @param {string} channel - Channel Id
+   * @return {Object} Connect Object
+   */
+  XPush.prototype._makeChannel = function(channel){
     var self = this;
-    console.log('xpush : connection _makeChannel ',chNm);
+    console.log('xpush : connection _makeChannel ',channel);
     for( var key in self._channels ){
-      if( key == chNm && self._channels[key] != undefined && self._channels[key]._connected ){
+      if( key == channel && self._channels[key] != undefined && self._channels[key]._connected ){
         return self._channels[key];
       }
     }
 
     var ch = new Connection(self,CHANNEL);
-    if(chNm) {
-      ch.chNm = chNm;
-      self._channels[chNm] = ch;
+    if(channel) {
+      ch.channel = channel;
+      self._channels[channel] = ch;
     }
     return ch;
   };
@@ -527,10 +596,16 @@
     */
   };
 
-  XPush.prototype._deleteChannel = function(chO){
+  /**
+   * Disconnect channel connection and delete channel in Connection Object
+   * @private
+   * @function
+   * @param {Object} channel - Channel Id
+   */
+  XPush.prototype._deleteChannel = function(channelObject){
     var self = this;
     for(var k in self._channels){
-      if(self._channels[k] == chO){
+      if(self._channels[k] == channelObject){
         self._channels[k].disconnect();
         delete self._channels[k];
         break;
@@ -538,17 +613,28 @@
     }
   };
 
-  XPush.prototype.isExistChannel = function(chNm){
+  /**
+   * If channels is exist return true or false
+   * @function
+   * @param {string} channel - Channel Id
+   * @return {boolean}
+   */
+  XPush.prototype.isExistChannel = function(channel){
     var self = this;
     for(var i = 0 ; i < self.channelNameList.length ; i++){
-      if(self.channelNameList[i] == chNm){
+      if(self.channelNameList[i] == channel){
         return true;
       }
     }
     return false;
   };
 
-  //params.key, value
+  /**
+   * Get user list at xpush server with xpush API `user-list`
+   * @function
+   * @param {object} params - Optional param for search user.
+   * @param {getUserListCallback}
+   */
   XPush.prototype.getUserList = function(params,  cb){
     if(typeof(params) == 'function'){
       cb = params;
@@ -558,7 +644,7 @@
     var self = this;
     console.log("xpush : getUsertList ",params);
     self.sEmit('user-list' , params, function(err, result){
-        if(cb) cb(err, result.users, result.count);
+      if(cb) cb(err, result.users, result.count);
     });
   };
 
