@@ -1,6 +1,5 @@
 /**
  * @version 0.1
- * @module xpush
  */
 (function() {
 
@@ -20,7 +19,7 @@
   
   /**
    * Represents a Xpush.
-   * @exports xpush
+   * @module Xpush
    * @constructor
    * @param {string} host - connect to host
    * @param {string} appId - application id
@@ -58,6 +57,7 @@
       self._isEventHandler = true;
       self.on('___session_event', eventHandler);
     }
+    return self;
   };
 
   XPush.Context = {
@@ -72,14 +72,15 @@
   };
 
   /**
-   * Register User with userId and pssword
+   * Register user with userId and pssword
+   * @name signup
+   * @memberof Xpush
    * @function
    * @param {string} userId - User Id
    * @param {string} password - Password
    * @param {string} deviceId - Device Id ( Optional. default `WEB` )
-   * @param {signupCallback}
+   * @param {callback} cb - signupCallback
    */
-
   XPush.prototype.signup = function(userId, password, deviceId, cb){
     var self = this;
 
@@ -94,12 +95,14 @@
 
   /**
    * Login with userId and password
+   * @name login
+   * @memberof Xpush
    * @function
    * @param {string} userId - User Id
    * @param {string} password - Password
    * @param {string} deviceId - Device Id ( Optional. default `WEB` )
    * @param {string} mode - Mode ( Optional. CHANNLE_ONLY )
-   * @param {loginCallback}
+   * @param {callback} cb - loginCallback
    * @example
    * 
    * xpush.login( 'james', '1234', function(){
@@ -154,10 +157,12 @@
 
   /**
    * Set userId and deviceId at scope
+   * @name setSessionInfo
+   * @memberof Xpush
    * @function
    * @param {string} userId - User Id
    * @param {string} deviceId - Device Id
-   * @param {setSessionInfoCallback}
+   * @param {callback} cb - setSessionInfoCallback
    */
   XPush.prototype.setSessionInfo = function(userId, deviceId, cb){
     var self = this;
@@ -175,6 +180,8 @@
 
   /**
    * Disconnect session or channel connection
+   * @name logout
+   * @memberof Xpush
    * @function
    */
   XPush.prototype.logout = function(){
@@ -199,11 +206,13 @@
 
   /**
    * Create channel with users and datas
+   * @name createChannel
+   * @memberof Xpush
    * @function
    * @param {string} userId - User Array for channel create
    * @param {string} channel - Channel Id
    * @param {Object} datas - Optional Data for additional channel info
-   * @param {createChannelCallback}
+   * @param {callback} cb - createChannelCallback
    */
   XPush.prototype.createChannel = function(users, channel, datas, cb){
     var self = this;
@@ -255,10 +264,12 @@
 
   /**
    * Create new channel mode `CHANNEL_ONLY`
+   * @name createSimpleChannel
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
    * @param {Object} userObj - Optional. UserObject( U : userID, D : deviceId )
-   * @param {createSimpleChannelCallback}
+   * @param {callback} cb - createSimpleChannelCallback
    */
   XPush.prototype.createSimpleChannel = function(channel, userObj, cb){
     var self = this;
@@ -293,8 +304,10 @@
 
   /**
    * Get channel list at server with xpush API `channel-list`
+   * @name getChannels
+   * @memberof Xpush
    * @function
-   * @param {getChannlesCallback}
+   * @param {callback} cb - getChannlesCallback
    */
   XPush.prototype.getChannels = function(cb){
     var self = this;
@@ -318,10 +331,12 @@
 
   /**
    * Update channel info at server with xpush API `channel-update`
+   * @name updateChannel
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
    * @param {Object} query - JSON Object for update. query is mongo DB style
-   * @param {updateChannelCallback}
+   * @param {callback} cb - updateChannelCallback
    */
   XPush.prototype.updateChannel = function(channel, query, cb){
     var self = this;
@@ -335,9 +350,11 @@
 
   /**
    * Get channel list in redis with key
+   * @name getChannelsActive
+   * @memberof Xpush
    * @function
    * @param {Object} data - ( 'key': '' )
-   * @param {getChannelsActiveCallback}
+   * @param {callback} cb - getChannelsActiveCallback
    */
   XPush.prototype.getChannelsActive = function(data, cb){ //data.key(option)
     var self = this;
@@ -349,6 +366,8 @@
 
   /**
    * Get channel info in xpush object
+   * @name getChannel
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
    * @return {Object} return Channel Object
@@ -365,9 +384,11 @@
 
   /**
    * Get channel info at server with xpush API `channel-get`
+   * @name getChannelData
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
-   * @param {getChannelDataCallback}
+   * @param {callback} cb - getChannelDataCallback
    */
   XPush.prototype.getChannelData = function(channel, cb){
     var self = this;
@@ -378,10 +399,12 @@
 
   /**
    * Join channel
+   * @name joinChannel
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
    * @param {Object} param - Channel Id
-   * @param {joinChannelCallback}
+   * @param {callback} cb - joinChannelCallback
    */
   XPush.prototype.joinChannel = function(channel, param, cb){
     var self = this;
@@ -394,9 +417,11 @@
 
   /**
    * Exit channel
+   * @name exitChannel
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
-   * @param {exitChannelCallback}
+   * @param {callback} cb - exitChannelCallback
    */
   XPush.prototype.exitChannel = function(channel, cb){
     var self = this;
@@ -406,10 +431,11 @@
   };
 
   /**
-   * Get channel info asynchronous. If channel is not exist in channel, call serverAPI
+   * Get channel info asynchronous. If channel is not exist in channel, call server API
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
-   * @param {_getChannelAsyncCallback}
+   * @param {callback} cb - _getChannelAsyncCallback
    */
   XPush.prototype._getChannelAsync = function(channel, cb){
     var self = this;
@@ -434,11 +460,13 @@
 
   /**
    * Upload file DOM Object with socket stream
+   * @name uploadStream
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
    * @param {Object} inputObj - JSON Objec( 'file' : file DOM Oject for upload, 'type' : '' )
    * @param {function} fnPrg - callback function for progressing status
-   * @param {uploadStreamCallback} fnCallback
+   * @param {callback} fnCallback - uploadStreamCallback
    */
   XPush.prototype.uploadStream = function(channel, inputObj, fnPrg, fnCallback){
     var self = this;
@@ -484,12 +512,14 @@
 
   /**
    * Upload file with JSON Object for mobile user
+   * @name uploadFile
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
    * @param {string} fileUri - FileUri for update
    * @param {Object} inputObj - JSON Objec( 'type' : '', 'name' : Original File name )
    * @param {function} fnPrg - callback function for progressing status
-   * @param {uploadFileCallback} fnCallback
+   * @param {callback} fnCallback - uploadFileCallback 
    */
   XPush.prototype.uploadFile = function(channel, fileUri, inputObj, fnPrg, fnCallback){
     var self = this;
@@ -544,6 +574,8 @@
 
   /**
    * Get uploaded file url
+   * @name getFileUrl
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
    * @param {string} fileName - File name
@@ -570,7 +602,7 @@
    * @private
    * @function
    * @param {string} channel - Channel Id
-   * @return {Object} Connect Object
+   * @return {Connection} Connect Object
    */
   XPush.prototype._makeChannel = function(channel){
     var self = this;
@@ -626,6 +658,8 @@
 
   /**
    * If channels is exist return true or false
+   * @name isExistChannel
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
    * @return {boolean}
@@ -642,9 +676,11 @@
 
   /**
    * Get user list at server with xpush API `user-list`
+   * @name getUserList
+   * @memberof Xpush
    * @function
    * @param {Object} params - Optional param for search user.
-   * @param {getUserListCallback}
+   * @param {function} cb - {getUserListCallback}
    */
   XPush.prototype.getUserList = function(params,  cb){
     if(typeof(params) == 'function'){
@@ -661,9 +697,11 @@
 
   /**
    * Get user list at server with xpush API `user-query`
+   * @name queryUser
+   * @memberof Xpush
    * @function
    * @param {Object} _params - ( query, column )
-   * @param {queryUserCallback}
+   * @param {callback} cb - queryUserCallback
    * @example
    * var param = {query : {'DT.NM':'james'}, column: { U: 1, DT: 1, _id: 0 } };
    * xpush.queryUser( param, function( err, userArray, count ){
@@ -697,6 +735,8 @@
 
   /**
    * Send message
+   * @name send
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
    * @param {string} name - EventName
@@ -715,9 +755,10 @@
   /**
    * Get unread message list at server with xpush API `message-unread`.
    * Then, call API `message-received` to delete unread message.
-   *
+   * @name getUnreadMessage
+   * @memberof Xpush
    * @function
-   * @param {callback}
+   * @param {callback} cb - getUnreadMessageCallback
    * @example
    * xpush.getUnreadMessage( function(err, result){
    *   console.log( result );
@@ -743,7 +784,7 @@
    * @private
    * @function
    * @param {string} channel - Channel Id
-   * @param {callback}
+   * @param {callback} cb - _getChannelInfoCallback
    */
   XPush.prototype._getChannelInfo = function(channel, cb){
     var self = this;
@@ -753,9 +794,11 @@
 
   /**
    * Get user's friend list at server with xpush API `group-list`.
+   * @name getGroupUsers
+   * @memberof Xpush
    * @function
    * @param {string} groupId - userId to search
-   * @param {callback}
+   * @param {callback} cb - getGroupUsersCallback
    * @example
    * xpush.getGroupUsers( 'james', function( err, users ){
    *   console.log( users );
@@ -772,10 +815,12 @@
 
   /**
    * Add user with xpush API `group-add`.
+   * @name addUserToGroup
+   * @memberof Xpush
    * @function
    * @param {string} groupId - userId
    * @param {array} userIds - Array of users to add
-   * @param {callback}
+   * @param {callback} cb - addUserToGroupCallback
    * @example
    * xpush.addUserToGroup( 'james', ['notdol','john'], function( err, result ){
    *   console.log( result );
@@ -794,10 +839,12 @@
 
   /**
    * Remove user with xpush API `group-remove`.
+   * @name removeUserFromGroup
+   * @memberof Xpush
    * @function
    * @param {string} groupId - userId
    * @param {string} userId - userId to remove
-   * @param {callback}
+   * @param {callback} cb - removeUserFromGroupGroupCallback
    * @example
    * xpush.removeUserFromGroup( 'james', ['notdol'], function( err, result ){
    *   console.log( result );
@@ -829,7 +876,7 @@
    * @private
    * @function
    * @param {Object} socket.io
-   * @param {callback}
+   * @param {callback} cb - _initSessionSocketCallback
    */
   XPush.prototype._initSessionSocket = function(socket,cb){
     var self = this;
@@ -1017,7 +1064,7 @@
    * @function
    * @param {string} socket's event key
    * @param {Object} params - Optional object to send
-   * @param {callback}
+   * @param {callback} cb - sEmitCallback
    */
   XPush.prototype.sEmit = function(key, params, cb){
     var self = this;
@@ -1047,9 +1094,11 @@
 
   /**
    * Stack the function into event array. The function will excute when an event occur.
+   * @name on
+   * @memberof Xpush
    * @function
    * @param {string} event key
-   * @param {function}
+   * @param {function} function
    */
   XPush.prototype.on = function(event, fct){
     var self = this;
@@ -1099,9 +1148,11 @@
 
   /**
    * Remove the function at event array
+   * @name off
+   * @memberof Xpush
    * @function
    * @param {string} event key
-   * @param {function}
+   * @param {function} function
    */
   XPush.prototype.off = function(event, fct){
     var self = this;
@@ -1112,6 +1163,9 @@
 
   /**
    * If unread message is exist, stack the message. If not apply the event
+   * @name emit
+   * @memberof Xpush
+   * @function
    * @param {string} event key
    */
   XPush.prototype.emit = function(event){
@@ -1128,6 +1182,14 @@
     }
   };
 
+  /**
+   * Represents a Connection
+   * @module Connection
+   * @constructor
+   * @param {Xpush} Object - Xpush obejct
+   * @param {string} type - 'session' or channel'
+   * @param {string} server - Server Url to connect
+   */
   var Connection = function(xpush , type, server){
 
     this._xpush = xpush;
@@ -1148,8 +1210,16 @@
     //self.on('received', function(data){
       //self._xpush.calcChannel(self);
     //});
+    return this;
   };
 
+  /**
+   * Check connectionTimeout
+   * @name checkConnectionTimeout
+   * @memberof Connection
+   * @function
+   * @param {string} b - Server Url to connect
+   */
   Connection.prototype.checkConnectionTimeout = function(b){
     var self = this;
     if(self.checkTimer) clearTimeout(self.checkTimer);
