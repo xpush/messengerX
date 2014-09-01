@@ -1231,6 +1231,14 @@
     }
   };
 
+  /**
+   * Set server url and connect to the server.
+   * @name setServerInfo
+   * @memberof Connection
+   * @function
+   * @param {Object} info - Server Url to connect
+   * @param {callback} cb - setServerInfoCallback
+   */
   Connection.prototype.setServerInfo = function(info,cb){
     console.log("xpush : setServerInfo ", info);
     var self = this;
@@ -1244,7 +1252,15 @@
     });
   };
 
-  Connection.prototype.connect = function(cbConnect, mode){
+  /**
+   * Connect to the server.
+   * @name setServerInfo
+   * @memberof Connection
+   * @function
+   * @param {callback} cb - connectCallback
+   * @param {string} mode - Optional. `CHANANEL_ONLY`
+   */
+  Connection.prototype.connect = function(cb, mode){
     var self = this;
       var query =
         'A='+self._xpush.appId+'&'+
@@ -1282,7 +1298,7 @@
       self._connected = true;
       if(!self.isFirtConnect) return;
       self.isFirtConnect = false;
-      self.connectionCallback(cbConnect);
+      self.connectionCallback(cb);
     });
 
     self._socket.on('disconnect',function(){
@@ -1290,6 +1306,13 @@
     });
   };
 
+  /**
+   * The function is occured when socket is connected.
+   * @name connectionCallback
+   * @memberof Connection
+   * @function
+   * @param {callback} cb - connectionCallback
+   */
   Connection.prototype.connectionCallback = function(cb){
     var self = this;
     console.log("xpush : connection ",'connectionCallback',self._type, self._xpush.userId,self.chNm);
@@ -1323,13 +1346,28 @@
     if(cb)cb();
   };
 
+  /**
+   * Close the socket connection.
+   * @name disconnect
+   * @memberof Connection
+   * @function
+   */
   Connection.prototype.disconnect = function(){
     console.log("xpush : socketdisconnect ", this.chNm, this._xpush.userId);
     this._socket.disconnect();
     //delete this._socket;
   };
 
-  Connection.prototype.send = function(name, data,cb){
+  /**
+   * If socket is connected, send data right away,
+   * @name send
+   * @memberof Connection
+   * @param {string} name - Event name
+   * @param {object} data - JSON data
+   * @param {callback} cb - sendCallback
+   * @function
+   */
+  Connection.prototype.send = function(name, data, cb){
     var self = this;
     if(self._connected){
       self._socket.emit('send', {NM: name , DT: data});
@@ -1338,6 +1376,14 @@
     }
   };
 
+  /**
+   * If socket is connected, join the channel
+   * @name joinChannel
+   * @memberof Connection
+   * @param {object} data - JSON data
+   * @param {callback} cb - joinChannelCallback
+   * @function
+   */
   Connection.prototype.joinChannel = function(param, cb){
     var self = this;
     if(self._socket.connected){
@@ -1347,6 +1393,15 @@
     }
   };
 
+  /**
+   * Upload the stream
+   * @name upload
+   * @memberof Connection
+   * @param {object} stream - stream object
+   * @param {object} data - file info data ( 'orgName', 'name', 'type')
+   * @param {callback} cb - uploadCallback
+   * @function
+   */
   Connection.prototype.upload = function(stream, data, cb){
     var self = this;
     if(self._socket.connected){
@@ -1354,18 +1409,43 @@
     }
   };
 
+  /**
+   * Stack the function into event array. The function will excute when an event occur.
+   * @name on
+   * @memberof Connection
+   * @function
+   * @param {string} event key
+   * @param {function} function
+   */
   Connection.prototype.on = function(event, fct){
    var self = this;
     self._events = self._events || {};
     self._events[event] = self._events[event] || [];
     self._events[event].push(fct);
   };
+
+  /**
+   * Remove the function at event array
+   * @name off
+   * @memberof Connection
+   * @function
+   * @param {string} event key
+   * @param {function} function
+   */
   Connection.prototype.off = function(event, fct){
     var self = this;
     self._events = self._events || {};
     if( event in self._events === false  )  return;
     self._events[event].splice(self._events[event].indexOf(fct), 1);
   };
+
+  /**
+   * Apply the event
+   * @name emit
+   * @memberof Connection
+   * @function
+   * @param {string} event key
+   */  
   Connection.prototype.emit = function(event /* , args... */){
     var self = this;
     self._events = self._events || {};
