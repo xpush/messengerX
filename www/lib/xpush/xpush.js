@@ -773,7 +773,7 @@
       if(result && result.length > 0){
         result.sort(UTILS.messageTimeSort);
       }
-
+      self.isExistUnread = false;
       self.sEmit('message-received');
       cb(err, result);
     });
@@ -1159,6 +1159,19 @@
     self._events = self._events || {};
     if( event in self._events === false  )  return;
     self._events[event].splice(self._events[event].indexOf(fct), 1);
+  };
+
+  /**
+   * Remove all function at event array
+   * @name off
+   * @memberof Xpush
+   * @function
+   * @param {string} event key
+   * @param {function} function
+   */
+  XPush.prototype.clearEvent = function(){
+    var self = this;
+    self._events = {};
   };
 
   /**

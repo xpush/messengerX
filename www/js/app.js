@@ -68,7 +68,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.rootImgPath = "img";
       $rootScope.rootPath = "../www/";
       $rootScope.deviceId = 'ionic';
-      $rootScope.usePopupFlag = true;
+      $rootScope.usePopupFlag = false;
       // web
     } else {
       $rootScope.rootImgPath = "../img";
@@ -250,7 +250,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
       if(type === 'LOGOUT'){
         if( !$sessionStorage.reloading ){
-          $rootScope.logout(true, function(){
+          $rootScope.logout( function(){
             $state.go( "error" );
           });
         }
@@ -258,7 +258,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }, autoInitFlag );
 
     // tootScope function
-    $rootScope.logout = function( skipLoginPageFlag, callback ){
+    $rootScope.logout = function( callback ){
       Sign.logout(function(){
         $rootScope.xpush.logout();
 
@@ -267,13 +267,13 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           popups[key].close();
         }
 
-        if( !skipLoginPageFlag ){
-          $templateCache.removeAll();
-          $state.transitionTo('signin', {}, { reload: true, notify: true });
-        }
+        $rootScope.$broadcast( "ON_LOGOUT" );
 
         if ( callback && typeof callback === 'function') {
           callback();
+        } else {
+          $templateCache.removeAll();
+          $state.transitionTo('signin', {}, { reload: true, notify: true });          
         }
       });
     };

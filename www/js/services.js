@@ -12,7 +12,7 @@ angular.module('starter.services', [])
   var cache = {};
 
   return {
-    /**
+    /**update
      * @ngdoc function
      * @name all
      * @module starter.services
@@ -258,7 +258,7 @@ angular.module('starter.services', [])
   };
 })
 .factory('Manager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, NoticeDao, UTIL ) {
-  var initFlag = false;
+  var _initFlag = false;
   return {
 
     /**
@@ -272,8 +272,7 @@ angular.module('starter.services', [])
      */
     init : function(callback){
       var self = this;
-
-      if( !initFlag ){
+      if( !_initFlag ){
         // Get channel list from server
         self.channelList(function( channels ){
 
@@ -287,18 +286,24 @@ angular.module('starter.services', [])
 
               //Add Event
               self.addEvent();
-              initFlag = true;
+              _initFlag = true;
             });
           });
         });
       }
     },
     addEvent : function(){
+      var self = this;
 
       $rootScope.$on("ON_POPUP_OPEN", function (data, args) {
         if( $rootScope.refreshChannel ){
           $rootScope.refreshChannel();
         }
+      });
+
+      $rootScope.$on("ON_LOGOUT", function (data, args) {
+        _initFlag = false;
+        $rootScope.xpush.clearEvent();
       });
 
       var loginUser = Sign.getUser();
@@ -612,8 +617,6 @@ angular.module('starter.services', [])
           MessageDao.add( data );
         }
 
-        // Update isExistUnread flag
-        $rootScope.xpush.isExistUnread = false;
         callback({'status':'ok'});
       });
     }
