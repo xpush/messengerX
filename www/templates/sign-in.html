@@ -7,32 +7,41 @@
   <ion-content>
     <div class="list signin-content">
 
-      <div class="item item-image padding" style="border:none;margin-top:50px;margin-bottom:50px;">
-          <img src="img/logo.png" style="max-width: 463px;" />
+      <div class="center" style="border:none;margin-top:20px;">
+        <h2><span>messenger</span><span class="positive">X</span></h2>
       </div>
 
-      <label class="item item-input">
-        <!--
-        <paper-input floatingLabel label="User Id" ng-model="user.userid"></paper-input>
-        -->
-        <span class="input-label">Id</span>
-        <input type="text" ng-model="user.userId" id="userId" />
-      </label>
-      <label class="item item-input">
-        <!--
-        <paper-input type="password" floatingLabel label="Password" ng-model="user.password"></paper-input>
-        -->
-        <span class="input-label">Password</span>
-        <input type="password" ng-model="user.password" />
-      </label>
+      <div class="item item-image padding" style="border:none;margin-top:20px;margin-bottom:40px;">
+          <img src="img/logo.jpg" style="max-width: 128px;" />
+      </div>
+
+      <div class="list list-inset">
+        <label class="item-bottom item-input-icon">
+          <i class="icon ion-key placeholder-icon"></i>
+          <input type="text" placeholder="ID" ng-model="user.userId" id="userId">
+        </label>
+        <label class="item-bottom item-input-icon">
+          <i class="icon ion-locked placeholder-icon"></i>
+          <input type="password" placeholder="Password" ng-model="user.password">
+        </label>
+      </div>
     </div>
     <div class="padding">
       <button class="button button-block button-positive" ng-click="signIn(user)">
-        Sign-In
+        Sign In
       </button>
+      <!--
       <div class="button-bar">
+
         <a href="#/forgot-password" class="button button-small button-assertive">Forgot password</a>
         <a href="#/sign-up" class="button button-small button-dark">Sign-Up</a>
+      </div>
+      -->
+      <div class="center" style="color:#aaa">
+        <span>Don't have an account?</span>
+        <span class="positive" style="cursor:pointer;" ng-click="gotoSignUp()">Sign up here!
+          <i class="icon ion-arrow-right-c"></i>
+        </span>
       </div>
     </div>
   </ion-content>

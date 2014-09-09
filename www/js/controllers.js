@@ -712,6 +712,10 @@ angular.module('starter.controllers', [])
     });
   };
 
+  $scope.gotoSignUp = function(){
+    $state.go('signup');
+  };
+
   $scope.$watch('$viewContentLoaded', function() {
     document.getElementById( "userId" ).focus();
   });
