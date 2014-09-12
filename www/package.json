@@ -2,6 +2,7 @@
   "name": "messengerX",
   "main": "index.html",
   "description": "messengerX",
+  "version" : "0.0.1",
   "window": {
     "frame" : true,
     "toolbar" : true,
