@@ -801,6 +801,17 @@ angular.module('starter.controllers', [])
     $rootScope.$on('$windowClose', function (){
       Chat.sendSys( 'off' );
     });
+
+    if( window.root ){
+      var popupWin = require('nw.gui').Window.get();
+      popupWin.on('close', function() {
+        $scope.parentScope.$broadcast( "$popupClose", channelId );
+
+        // Hide the window to give user the feeling of closing immediately
+        this.hide();
+        this.close(true);
+      });
+    }
   });
 
   /**

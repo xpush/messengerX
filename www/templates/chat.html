@@ -102,9 +102,9 @@
         </div>
       </li>
     </ol>
-    <input type="file" id="file"/>
   </ion-content>
   <ion-footer-bar class="bar-frosted" >
+    <input type="file" id="file" style="display:none"/>
     <button ng-if=" toggles.showExt == true " class="button icon ion-close-round" ng-click="toggleExt(false)"></button>
     <button ng-if=" toggles.showExt == false " class="button icon ion-plus-round" ng-click="toggleExt(true)"></button>
     <button ng-if=" toggles.showEmo == true " class="button icon ion-sad" ng-click="toggleEmoticons(false)"></button>

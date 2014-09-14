@@ -93,34 +93,57 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.rootPath = "file://"+window.root+"/";
 
       var tray = new gui.Tray({ title: 'Tray', icon: 'icon.png' });
-      var menu = new gui.Menu();
-      menu.append(new gui.MenuItem({ label: 'Logout' }));
-      menu.append(new gui.MenuItem({ label: 'Close' }));
 
-      menu.items[0].click = function() {
-        $rootScope.logout();
-      };
+      if( process.platform == 'window' ){
+        var menu = new gui.Menu();
+        menu.append(new gui.MenuItem({ label: 'Logout' }));
+        menu.append(new gui.MenuItem({ label: 'Close' }));
+        tray.menu = menu;
 
-      menu.items[1].click = function() {
-        tray.remove();
-        gui.App.quit();
-      };
+        menu.items[0].click = function() {
+          $rootScope.logout();
+        };
 
-      tray.menu = menu;
+        menu.items[1].click = function() {
+          tray.remove();
+          gui.App.quit();
+        };
+      } else {
+        var menu = new gui.Menu();
+        menu.append(new gui.MenuItem({ label: 'Logout' }));
+        menu.append(new gui.MenuItem({ label: 'Close' }));
+        tray.menu = menu;
 
-      tray.click = function(){
-        winmain.show();
+        menu.items[0].click = function() {
+          $rootScope.logout();
+        };
+
+        menu.items[1].click = function() {
+          tray.remove();
+          gui.App.quit();
+        };
       }
 
       var winmain = gui.Window.get();
+
+      tray.click = function(){
+        winmain.show();
+        winmain.focus();
+      }
+  
       winmain.on('close', function(){
-         winmain.minimize();
-         winmain.setShowInTaskbar(false);
+        winmain.minimize();
+
+        if( process.platform == 'window' ){
+          winmain.setShowInTaskbar(false);
+        }
       });
 
       $rootScope.close = function(){
         winmain.minimize();
-        winmain.hide();
+        if( process.platform == 'window' ){
+          winmain.hide();
+        }
       };
 
       winmain.show();
@@ -422,21 +445,22 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       self = this;
 
       if( $rootScope.usePopupFlag ){
+        console.log( popups[popupKey] );
         if( popups[popupKey] !== undefined ){
           popups[popupKey].focus();
         } else {
 
           var popup;
 
-          var left = screen.width - 520 + ( popupCount * 25 );
-          var top = 0 + ( popupCount * 25 ) ;
+          var left = screen.width - 520 + ( popupCount * 50 );
+          var top = 0 + ( popupCount * 50 ) ;
           popupCount++;
 
-          if( $rootScope.nodeWebkit ){
+          if( $rootScope.nodeWebkit && process.platform == 'window' ){
             var gui = require('nw.gui');
             popup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
-              "frame" : true,
-              "toolbar" : true,
+              "frame" : false,
+              "toolbar" : false,
               "width": 400,
               "height": 600,
               "x":left,
@@ -446,6 +470,10 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
               "title":"Chat" + popupKey,
               "icon": "icon.png"
             } );
+
+          } else if( $rootScope.nodeWebkit && process.platform == 'linux' ){
+            popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
+            popup.moveTo(left,top);
           } else {
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
@@ -479,7 +507,12 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     },
     openPopup : function( popupWin, popupKey, scope, stateParams ){
 
-      if( $rootScope.nodeWebkit ){
+      if( $rootScope.nodeWebkit && process.platform == 'linux' ) {
+        popups[popupKey] = popupWin.window;
+        $rootScope.$on("$popupClose", function ( data, key ){
+          delete popups[key];
+        });
+      } else if( $rootScope.nodeWebkit && process.platform == 'window' ){
         popups[popupKey] = popupWin.window;
         popupWin.on('close', function() {
           scope.$broadcast("$windowClose" );
@@ -498,7 +531,12 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           this.close(true);
         });
       } else {
-        popups[popupKey] = popupWin;
+        if( $rootScope.nodeWebkit && process.platform == 'linux' ){
+          popups[popupKey] = popupWin.window;
+        } else {
+          popups[popupKey] = popupWin;
+        }
+
         popupWin.onbeforeunload = function(){
           scope.$broadcast("$windowClose" );
           popupCount--;

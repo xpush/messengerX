@@ -1172,7 +1172,9 @@
    */
   XPush.prototype.clearEvent = function(){
     var self = this;
-    self._events = {};
+    setTimeout( function(){
+      self._events = {};
+    }, 2000 );
   };
 
   /**

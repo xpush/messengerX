@@ -5069,6 +5069,7 @@ function($timeout, $controller, $ionicBind) {
     scope: true,
     priority: 800,
     compile: function(element, attr) {
+      console.log( '123123' );
       var innerElement;
 
       element.addClass('scroll-content ionic-scroll');
@@ -5129,6 +5130,7 @@ function($timeout, $controller, $ionicBind) {
           $element.addClass('overflow-scroll');
         } else {
           $controller('$ionicScroll', {
+            console.log( );
             $scope: $scope,
             scrollViewOptions: {
               el: $element[0],
