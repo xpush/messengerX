@@ -437,6 +437,11 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
   var popups = {};
   var self;
 
+  $rootScope.$on("$popupClose", function ( data, key ){
+    delete popups[key];
+    popupCount--;
+  });  
+
   return {
     getPopups : function(){
       return popups;
@@ -447,33 +452,22 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       if( $rootScope.usePopupFlag ){
         console.log( popups[popupKey] );
         if( popups[popupKey] !== undefined ){
-          popups[popupKey].focus();
+          if( popups[popupKey].window ){
+            popups[popupKey].window.focus();
+          } else {
+            popups[popupKey].focus();
+          }            
         } else {
 
           var popup;
 
-          var left = screen.width - 520 + ( popupCount * 50 );
+          var left = screen.width - 620 + ( popupCount * 50 );
           var top = 0 + ( popupCount * 50 ) ;
           popupCount++;
 
-          if( $rootScope.nodeWebkit && process.platform == 'window' ){
-            var gui = require('nw.gui');
-            popup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
-              "frame" : false,
-              "toolbar" : false,
-              "width": 400,
-              "height": 600,
-              "x":left,
-              "y":top,
-              "min_width": 100,
-              "min_height": 100,
-              "title":"Chat" + popupKey,
-              "icon": "icon.png"
-            } );
-
-          } else if( $rootScope.nodeWebkit && process.platform == 'linux' ){
+          if( $rootScope.nodeWebkit ){
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
-            popup.moveTo(left,top);
+            //popup.moveTo(left,top);
           } else {
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
@@ -497,7 +491,6 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
                 }
               }
             }
-
           }, 200 );
         }
       } else {
@@ -507,35 +500,10 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     },
     openPopup : function( popupWin, popupKey, scope, stateParams ){
 
-      if( $rootScope.nodeWebkit && process.platform == 'linux' ) {
-        popups[popupKey] = popupWin.window;
-        $rootScope.$on("$popupClose", function ( data, key ){
-          delete popups[key];
-        });
-      } else if( $rootScope.nodeWebkit && process.platform == 'window' ){
-        popups[popupKey] = popupWin.window;
-        popupWin.on('close', function() {
-          scope.$broadcast("$windowClose" );
-
-          // Hide the window to give user the feeling of closing immediately
-          this.hide();
-          popupCount--;
-          // If the new window is still open then close it.
-          if (popupWin != null){
-            popupWin.close(true);
-            delete popups[popupKey];
-          }
-
-          // After closing the new window, close the main window.
-
-          this.close(true);
-        });
+      if( $rootScope.nodeWebkit ) {
+        popups[popupKey] = popupWin;
       } else {
-        if( $rootScope.nodeWebkit && process.platform == 'linux' ){
-          popups[popupKey] = popupWin.window;
-        } else {
-          popups[popupKey] = popupWin;
-        }
+        popups[popupKey] = popupWin;
 
         popupWin.onbeforeunload = function(){
           scope.$broadcast("$windowClose" );

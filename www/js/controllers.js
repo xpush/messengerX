@@ -806,7 +806,7 @@ angular.module('starter.controllers', [])
       var popupWin = require('nw.gui').Window.get();
       popupWin.on('close', function() {
         $scope.parentScope.$broadcast( "$popupClose", channelId );
-
+        Chat.sendSys( 'off' );
         // Hide the window to give user the feeling of closing immediately
         this.hide();
         this.close(true);
