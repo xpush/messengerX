@@ -12,7 +12,7 @@ angular.module('starter.services', [])
   var cache = {};
 
   return {
-    /**
+    /**update
      * @ngdoc function
      * @name all
      * @module starter.services
@@ -258,7 +258,7 @@ angular.module('starter.services', [])
   };
 })
 .factory('Manager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, NoticeDao, UTIL ) {
-  var initFlag = false;
+  var _initFlag = false;
   return {
 
     /**
@@ -272,8 +272,7 @@ angular.module('starter.services', [])
      */
     init : function(callback){
       var self = this;
-
-      if( !initFlag ){
+      if( !_initFlag ){
         // Get channel list from server
         self.channelList(function( channels ){
 
@@ -287,18 +286,24 @@ angular.module('starter.services', [])
 
               //Add Event
               self.addEvent();
-              initFlag = true;
+              _initFlag = true;
             });
           });
         });
       }
     },
     addEvent : function(){
+      var self = this;
 
       $rootScope.$on("ON_POPUP_OPEN", function (data, args) {
         if( $rootScope.refreshChannel ){
           $rootScope.refreshChannel();
         }
+      });
+
+      $rootScope.$on("ON_LOGOUT", function (data, args) {
+        _initFlag = false;
+        $rootScope.xpush.clearEvent();
       });
 
       var loginUser = Sign.getUser();
@@ -564,9 +569,15 @@ angular.module('starter.services', [])
 
           // Save notice
           if( data.T == 'N' ){
+            if( data.MG.indexOf( "^" ) > -1 ){
+              var MG = data.MG.split('^')[0];
+              var LC = data.MG.split('^')[1];
+              data.MG = MG;
+              data.LC = LC;
+            }          
             NoticeDao.add( data );
-            return;
-          }
+            continue;
+          }  
 
           var sr = data.UO.U == loginUser.userId ? 'S':'R';
 
@@ -606,8 +617,6 @@ angular.module('starter.services', [])
           MessageDao.add( data );
         }
 
-        // Update isExistUnread flag
-        $rootScope.xpush.isExistUnread = false;
         callback({'status':'ok'});
       });
     }
@@ -633,7 +642,6 @@ angular.module('starter.services', [])
       $rootScope.totalUnreadCount = 0;
 
       if ( callback && typeof callback === 'function') {
-        console.log( $localStorage.loginUser );
         callback();
       }
     },

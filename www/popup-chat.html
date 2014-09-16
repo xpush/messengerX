@@ -19,10 +19,7 @@
     -->
 
     <!-- ionic/angularjs js -->
-    <script src="lib/ionic/js/ionic.bundle.js"></script>
-
-    <!-- cordova script (this will be a 404 during development) -->
-    <script src="cordova.js"></script>
+    <script src="lib/ionic/js/ionic.bundle.min.js"></script>
 
     <!-- your app's js -->
     <script src="js/popup-app.js"></script>
@@ -31,7 +28,6 @@
     <script src="js/services.js"></script>
     <script src="js/constants.js"></script>
     <script src="js/directives.js"></script>
-    <script type="text/javascript" src="http://openapi.map.naver.com/openapi/naverMap.naver?ver=2.0&key=7008593a2730a150c21c10b416835e84"></script>
     <!-- xpush -->
     <script src="lib/xpush/xpush.js"></script>
 
@@ -46,7 +42,7 @@
       The nav bar that will be updated as we navigate between views.
     -->
     <ion-nav-bar id="navBar" class="bar-dark nav-title-slide-ios7" style="-webkit-app-region: drag;">
-      <ion-nav-back-button class="button-icon icon ion-ios7-arrow-back">
+      <ion-nav-back-button class="button-icon icon ion-ios7-arrow-back no-drag">
         Back
       </ion-nav-back-button>
     </ion-nav-bar>

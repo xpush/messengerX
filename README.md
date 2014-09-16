@@ -93,3 +93,16 @@ Warning: the nightly version is not stable.
 
 ## Issues
 Issues have been disabled on this repo, if you do find an issue or have a question consider posting it on the [Ionic Forum](http://forum.ionicframework.com/).  Or else if there is truly an error, follow our guidelines for [submitting an issue](http://ionicframework.com/contribute/#issues) to the main Ionic repository. On the other hand, pull requests are welcome here!
+
+## Use With node-webkit
+
+#### In Ubuntu 13.04+ 32bit
+```sh
+sudo apt-get install libudev1 && cd /lib/i386-linux-gnu/ && sudo ln -s libudev.so.1 libudev.so.0
+```
+#### In Ubuntu 13.04+ 64bit
+```sh
+sudo apt-get install libudev1 && cd /lib/x86_64-linux-gnu/ && sudo ln -s libudev.so.1 libudev.so.0
+```
+
+[For detail] https://github.com/rogerwang/node-webkit/wiki/The-solution-of-lacking-libudev.so.0

@@ -102,9 +102,9 @@
         </div>
       </li>
     </ol>
-    <input type="file" id="file"/>
   </ion-content>
   <ion-footer-bar class="bar-frosted" >
+    <input type="file" id="file" style="display:none"/>
     <button ng-if=" toggles.showExt == true " class="button icon ion-close-round" ng-click="toggleExt(false)"></button>
     <button ng-if=" toggles.showExt == false " class="button icon ion-plus-round" ng-click="toggleExt(true)"></button>
     <button ng-if=" toggles.showEmo == true " class="button icon ion-sad" ng-click="toggleEmoticons(false)"></button>
@@ -147,8 +147,9 @@
       <h2 class="mw90" id="notice-message">{{notice.message}}</h2>
       <p>{{notice.name}}&nbsp;{{notice.date}}</p>
       <i class="icon ion-more btn-more" ng-click="toggleNoticeMenu();"></i>
+      <!--
       <i class="icon ion-ios7-location-outline btn-map" ng-click="toggleNoticeMap();"></i>
-      
+      -->
     </div>
 
     <div class="chat-extends-buttons flex" >
@@ -161,9 +162,11 @@
         <span>{{notice.N_US.length}}</span>
       </div>
     </div>
+    <!--
     <div class="chat-extends-buttons hidden" id="chat-notice-map">
       <div ng-bind-html="notice.location"></div>
     </div>
+    -->
     <div class="chat-extends-buttons hidden" id="chat-notice-menu">
       <div class="col" ng-click="updateNotice('N','N')">
         <span>No more</span>

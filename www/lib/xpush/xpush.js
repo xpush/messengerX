@@ -1,6 +1,5 @@
 /**
  * @version 0.1
- * @module xpush
  */
 (function() {
 
@@ -19,24 +18,24 @@
   var RMKEY = 'message';
   
   /**
-   * Represents a Xpush.
-   * @exports xpush
+   * Xpush의 생성자
+   * @module Xpush
    * @constructor
-   * @param {string} host - connect to host
+   * @param {string} host - 접속할 Session Server의 address
    * @param {string} appId - application id
-   * @param {string} eventHandler - Optional function for eventHandler
-   * @param {boolean} autoInitFlag - Optional parameter for initilize channel automatically
+   * @param {string} [eventHandler] - session event를 처리하기 위한 함수
+   * @param {boolean} [autoInitFlag] - 자동 초기화 여부에 대한 flag
    */
   var XPush = function(host, appId, eventHandler, autoInitFlag){
     if(!host){alert('params(1) must have hostname'); return;}
     if(!appId){alert('params(2) must have appId'); return;}
     var self = this;
-    self.appId = appId;             // applicationKey
+    self.appId = appId;       // applicationKey
     self._channels = {};      // channel List
 
-    self.initStatus;          // manage async problem
+    //self.initStatus;        // manage async problem
     self.headers = {};        // request header
-    self.liveSockets = {}; // ch : Connection
+    //self.liveSockets = {};  // ch : Connection
     self._sessionConnection;
     self.maxConnection = 5;
     self.maxTimeout = 30000;
@@ -58,11 +57,10 @@
       self._isEventHandler = true;
       self.on('___session_event', eventHandler);
     }
+    return self;
   };
 
   XPush.Context = {
-    SessionServer : '/session', //'/session',
-    ChannelServer : '/cs', // /cs/:channel ( header: appKey )
     SIGNUP : '/user/register',
     LOGIN : '/auth',
     Channel : '/channel',
@@ -72,18 +70,14 @@
   };
 
   /**
-   * This callback type is called `signupCallback` and is displayed as a global symbol.
-   *
-   * @callback signupCallback
-   */
-
-  /**
-   * Register User with userId and password
+   * userId와 password를 이용하여 회원가입을 한다.
+   * @name signup
+   * @memberof Xpush
    * @function
    * @param {string} userId - User Id
    * @param {string} password - Password
-   * @param {string} deviceId - Device Id ( Optional. default `WEB` )
-   * @param {signupCallback}
+   * @param {string} [deviceId=WEB] - Device Id
+   * @param {callback} cb - 회원가입 후 수행할 callback function
    */
   XPush.prototype.signup = function(userId, password, deviceId, cb){
     var self = this;
@@ -98,13 +92,25 @@
   };
 
   /**
-   * Login with userId and password
+   * userId와 password를 이용하여 Login을 한다.
+   * @name login
+   * @memberof Xpush
    * @function
    * @param {string} userId - User Id
    * @param {string} password - Password
-   * @param {string} deviceId - Device Id ( Optional. default `WEB` )
-   * @param {string} mode - Mode ( Optional. CHANNLE_ONLY )
-   * @param {loginCallback}
+   * @param {string} [deviceId=WEB] - Device Id
+   * @param {string} [mode] - mode
+   * @param {callback} cb - 로그인 후 수행할 callback function
+   * @example
+   * 
+   * xpush.login( 'james', '1234', function(){
+   *   console.log('login success');
+   * });
+   * @example
+   * // login with deviceId
+   * xpush.login( 'james', '1234', 'android', function(){
+   *   console.log('login success');
+   * });
    */
   XPush.prototype.login = function(userId, password, deviceId, mode, cb){
     var self = this;
@@ -136,7 +142,7 @@
 
         c.connect(function(){
           console.log("xpush : login end", self.userId);
-          self.initSessionSocket(self._sessionConnection._socket, function(){
+          self._initSessionSocket(self._sessionConnection._socket, function(){
             if(cb) cb(result.message, result.result); // @ TODO from yohan.
           });
         });
@@ -148,11 +154,13 @@
   };
 
   /**
-   * Set userId and deviceId at scope
+   * 현재 xpush 객체에 userId와 deviceId를 세팅한다.
+   * @name setSessionInfo
+   * @memberof Xpush
    * @function
    * @param {string} userId - User Id
    * @param {string} deviceId - Device Id
-   * @param {setSessionInfoCallback}
+   * @param {callback} cb - 세팅 후 수행할 callback function
    */
   XPush.prototype.setSessionInfo = function(userId, deviceId, cb){
     var self = this;
@@ -169,7 +177,9 @@
   };
 
   /**
-   * Disconnect session or channel connection
+   * session socket 과 channel socket의 연결을 끊는다.
+   * @name logout
+   * @memberof Xpush
    * @function
    */
   XPush.prototype.logout = function(){
@@ -193,19 +203,21 @@
   };
 
   /**
-   * Create channel with users and datas
+   * 새로운 channel을 생성한다.
+   * @name createChannel
+   * @memberof Xpush
    * @function
-   * @param {string} userId - User Array for channel create
-   * @param {string} channel - Channel Id
-   * @param {Object} datas - Optional Data for additional channel info
-   * @param {createChannelCallback}
+   * @param {string} users - channel에 포함될 userId의 배열
+   * @param {string} [channel] - Channel Id
+   * @param {Object} [datas] - 추가적인 channel 정보를 위한 JSON
+   * @param {callback} cb - 생성 후 수행할 callback function
    */
   XPush.prototype.createChannel = function(users, channel, datas, cb){
     var self = this;
     var channels = self._channels;
 
-    if(typeof(channel) == 'function' && !cb){
-      cb = channel; channel = undefined;
+    if(typeof(channel) == 'function' && !datas && !cb){
+      cb = channel; channel = undefined; datas = {};
     }
 
     var newChannel;
@@ -228,7 +240,7 @@
         }
       }
       channelNm = result.C || channelNm;
-      self.getChannelInfo(channelNm,function(err,data){
+      self._getChannelInfo(channelNm,function(err,data){
         //channel , seq, server.channel,name,url
 
         if(err){
@@ -249,17 +261,19 @@
   };
 
   /**
-   * Create new channel mode `CHANNEL_ONLY`
+   * 새로운 `CHANNEL_ONLY` 채널을 생성한다.
+   * @name createSimpleChannel
+   * @memberof Xpush
    * @function
    * @param {string} channel - Channel Id
-   * @param {Object} userObj - Optional. UserObject( U : userID, D : deviceId )
-   * @param {createSimpleChannelCallback}
+   * @param {Object} [userObj] - UserObject( U : userID, D : deviceId )
+   * @param {callback} cb - 생성 후 수행할 callback function
    */
   XPush.prototype.createSimpleChannel = function(channel, userObj, cb){
     var self = this;
 
     var ch = self._makeChannel(channel);
-    self.getChannelInfo(channel,function(err,data){
+    self._getChannelInfo(channel,function(err,data){
       if(err){
         console.log(" == node channel " ,err);
         if(cb) cb(err);
@@ -271,6 +285,7 @@
         }else{
           self.userId = 'someone';
           self.deviceId = 'WEB';
+          cb = userObj;
         }
 
         ch.info = data.result;
@@ -286,6 +301,13 @@
 
   };
 
+  /**
+   * server에서 channel list를 조회한다.
+   * @name getChannels
+   * @memberof Xpush
+   * @function
+   * @param {callback} cb - 조회 후 수행할 callback function
+   */
   XPush.prototype.getChannels = function(cb){
     var self = this;
     console.log("xpush : getChannels ",self.userId);
@@ -306,6 +328,15 @@
     });
   };
 
+  /**
+   * server의 channel 정보를 수정한다.
+   * @name updateChannel
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {Object} query - mongo DB query 형태로 된 JSON
+   * @param {callback} cb - 수정 후 수행할 callback function
+   */
   XPush.prototype.updateChannel = function(channel, query, cb){
     var self = this;
     var param = { 'A': self.appId, 'C': channel, 'Q' : query };
@@ -316,6 +347,14 @@
     });
   };
 
+  /**
+   * 현재 channel에 연결된 사용자가 있는 channel list를 redis에서 조회한다.
+   * @name getChannelsActive
+   * @memberof Xpush
+   * @function
+   * @param {Object} data - ( 'key': '' )
+   * @param {callback} cb - 조회 후 수행할 callback function
+   */
   XPush.prototype.getChannelsActive = function(data, cb){ //data.key(option)
     var self = this;
     self.sEmit('channel-list-active',data, function(err, result){
@@ -324,46 +363,86 @@
     });
   };
 
-  XPush.prototype.getChannel = function(chNm){
+  /**
+   * 현재 xpush object 안의 channel 정보를 가져온다.
+   * @name getChannel
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @return {Object} return Channel Object
+   */
+  XPush.prototype.getChannel = function(channel){
     var self = this;
     var channels = self._channels;
     for(var k in channels){
-      if(k == chNm) return channels[k];
+      if(k == channel) return channels[k];
     }
 
     return undefined;
   };
 
-  XPush.prototype.getChannelData = function(chNm, cb){
+  /**
+   * server의 channel 정보를 조회한다.
+   * @name getChannelData
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {callback} cb - 조회 후 수행할 callback function
+   */
+  XPush.prototype.getChannelData = function(channel, cb){
     var self = this;
-    self.sEmit('channel-get', {C: chNm, U: /*userId*/{} }, function(err, result){
+    self.sEmit('channel-get', {C: channel, U: /*userId*/{} }, function(err, result){
       if(cb) cb(err,result);
     });
   };
 
-  XPush.prototype.joinChannel = function(channel, param, fnCallback){
+  /**
+   * channel에 Join한다.
+   * @name joinChannel
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {Object} param - JSON Data ( U, DT )
+   * @param {callback} cb - 합류 후 수행할 callback function
+   */
+  XPush.prototype.joinChannel = function(channel, param, cb){
     var self = this;
     self._getChannelAsync(channel, function (err, ch){
       ch.joinChannel( param, function( data ){
-        fnCallback( data );
+        cb( data );
       });
     });
   };
 
-  XPush.prototype.exitChannel = function(chNm, cb){
+  /**
+   * channel에서 나간다.
+   * @name exitChannel
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {callback} cb - 나간 후 수행할 callback function
+   */
+  XPush.prototype.exitChannel = function(channel, cb){
     var self = this;
-    self.sEmit('channel-exit', {C: chNm}, function(err, result){
-        if(cb) cb(err,result);
+    self.sEmit('channel-exit', {C: channel}, function(err, result){
+      if(cb) cb(err,result);
     });
   };
 
+  /**
+   * 비동기로 channel 정보를 가져온다. channel 정보가 객체 안에 존재하지 않으면, channel 정보를 server에서 조회한다.
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {callback} cb - 조회 후 수행할 callback function
+   */
   XPush.prototype._getChannelAsync = function(channel, cb){
     var self = this;
     var ch = self.getChannel(channel);
     if(!ch){
       self._channels[channel] = ch;
       ch = self._makeChannel(channel);
-      self.getChannelInfo(channel,function(err,data){
+      self._getChannelInfo(channel,function(err,data){
         if(err){
           console.log(" == node channel " ,err);
           cb(err);
@@ -378,6 +457,16 @@
     }
   };
 
+  /**
+   * file DOM 객체를 이용하여 socket stream을 이용하여 file을 upload한다.
+   * @name uploadStream
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {Object} inputObj - JSON Objec( 'file' : file DOM Oject for upload, 'type' : '' )
+   * @param {function} fnPrg - 업로도 진행 상황을 보여주기 위한 function
+   * @param {callback} fnCallback - 업로드 완료 후 수행할 callback function
+   */
   XPush.prototype.uploadStream = function(channel, inputObj, fnPrg, fnCallback){
     var self = this;
 
@@ -418,11 +507,20 @@
       }
 
     });
-
-
   };
 
-  XPush.prototype.uploadFile = function(channel, img, inputObj, fnPrg, fnCallback){
+  /**
+   * file dom 객체가 지원되지 않는 mobile에서는 REST API를 이용하여 파일을 업로드한다.
+   * @name uploadFile
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {string} fileUri - 업로드할 fileUri
+   * @param {Object} inputObj - JSON Objec( 'type' : '', 'name' : Original File name )
+   * @param {function} fnPrg - 업로도 진행 상황을 보여주기 위한 function
+   * @param {callback} fnCallback - 업로드 완료 후 수행할 callback function 
+   */
+  XPush.prototype.uploadFile = function(channel, fileUri, inputObj, fnPrg, fnCallback){
     var self = this;
 
     self._getChannelAsync(channel, function(err, ch){
@@ -430,7 +528,6 @@
       if(window.FileTransfer && window.FileUploadOptions){
 
         var url = ch._server.serverUrl+'/upload';
-        console.log(url);
 
         var options = new FileUploadOptions();
         options.fileKey="post";
@@ -461,9 +558,7 @@
           };
         }
 
-        ft.upload(img, encodeURI(url), function(data){
-
-          console.log(data);
+        ft.upload(fileUri, encodeURI(url), function(data){
           fnCallback(data);
           //$scope.picData = FILE_URI;
           //$scope.$apply();
@@ -476,6 +571,15 @@
     });
   };
 
+  /**
+   * 업로드 완료된 file의 url을 가져온다.
+   * @name getFileUrl
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {string} fileName - 업로드후 return 받은 파일의 name
+   * @return {string} 파일을 다운로드 받을 수 있는 url
+   */
   XPush.prototype.getFileUrl = function(channel, fileName){
 
     var self = this;
@@ -492,19 +596,26 @@
     return result;
   };
 
-  XPush.prototype._makeChannel = function(chNm){
+  /**
+   * 채널이 연결이 되어 있으면 channel connection 객체를 반환하고, 그렇지 않으면 새로운 `Connection`을 만든다.
+   * @private
+   * @function
+   * @param {string} channel - Channel Id
+   * @return {Connection} Connect Object
+   */
+  XPush.prototype._makeChannel = function(channel){
     var self = this;
-    console.log('xpush : connection _makeChannel ',chNm);
+    console.log('xpush : connection _makeChannel ',channel);
     for( var key in self._channels ){
-      if( key == chNm && self._channels[key] != undefined && self._channels[key]._connected ){
+      if( key == channel && self._channels[key] != undefined && self._channels[key]._connected ){
         return self._channels[key];
       }
     }
 
     var ch = new Connection(self,CHANNEL);
-    if(chNm) {
-      ch.chNm = chNm;
-      self._channels[chNm] = ch;
+    if(channel) {
+      ch.channel = channel;
+      self._channels[channel] = ch;
     }
     return ch;
   };
@@ -527,10 +638,16 @@
     */
   };
 
-  XPush.prototype._deleteChannel = function(chO){
+  /**
+   * channel socket의 연결을 끊은 후, 관리 중인 connection 객체에서 삭제한다.
+   * @private
+   * @function
+   * @param {Object} channel - Channel Id
+   */
+  XPush.prototype._deleteChannel = function(channelObject){
     var self = this;
     for(var k in self._channels){
-      if(self._channels[k] == chO){
+      if(self._channels[k] == channelObject){
         self._channels[k].disconnect();
         delete self._channels[k];
         break;
@@ -538,17 +655,32 @@
     }
   };
 
-  XPush.prototype.isExistChannel = function(chNm){
+  /**
+   * channel이 존재하는지 확인 후, 결과를 반환한다.
+   * @name isExistChannel
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @return {boolean}
+   */
+  XPush.prototype.isExistChannel = function(channel){
     var self = this;
     for(var i = 0 ; i < self.channelNameList.length ; i++){
-      if(self.channelNameList[i] == chNm){
+      if(self.channelNameList[i] == channel){
         return true;
       }
     }
     return false;
   };
 
-  //params.key, value
+  /**
+   * server에서 사용자 list를 조회한다.
+   * @name getUserList
+   * @memberof Xpush
+   * @function
+   * @param {Object} params - Optional param for search user.
+   * @param {function} cb - 조회 후 수행할 callback function
+   */
   XPush.prototype.getUserList = function(params,  cb){
     if(typeof(params) == 'function'){
       cb = params;
@@ -558,11 +690,23 @@
     var self = this;
     console.log("xpush : getUsertList ",params);
     self.sEmit('user-list' , params, function(err, result){
-        if(cb) cb(err, result.users, result.count);
+      if(cb) cb(err, result.users, result.count);
     });
   };
 
-  //params.key, value
+  /**
+   * server에서 사용자 list를 조회한다. pageing 처리가 가능하다.
+   * @name queryUser
+   * @memberof Xpush
+   * @function
+   * @param {Object} _params - ( query, column )
+   * @param {callback} cb - 조회 후 수행할 callback function
+   * @example
+   * var param = {query : {'DT.NM':'james'}, column: { U: 1, DT: 1, _id: 0 } };
+   * xpush.queryUser( param, function( err, userArray, count ){
+   *   console.log( userArray );
+   * });
+   */
   XPush.prototype.queryUser = function(_params,  cb){
 
     var self = this;
@@ -584,11 +728,21 @@
     console.log("xpush : queryUser ",params);
 
     self.sEmit('user-query' , params, function(err, result){
-        if(cb) cb(err, result.users, result.count);
+      if(cb) cb(err, result.users, result.count);
     });
-
   };
 
+  /**
+   * data를 전송한다.
+   * @name send
+   * @memberof Xpush
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {string} name - EventName
+   * @param {Object} data - String or JSON object to Send
+   * @example
+   * xpush.send( 'ch01', 'ev01', {'MG':'Hello world'} );
+   */
   XPush.prototype.send = function(channel, name, data){
     var self = this;
 
@@ -597,6 +751,18 @@
     });
   };
 
+  /**
+   * server에서 읽지 않은 message를 조회한다.
+   * 조회 후, `message-received` API를 호출하여 조회한 message를 삭제한다.
+   * @name getUnreadMessage
+   * @memberof Xpush
+   * @function
+   * @param {callback} cb - 조회 후 수행할 callback function
+   * @example
+   * xpush.getUnreadMessage( function(err, result){
+   *   console.log( result );
+   * });
+   */
   XPush.prototype.getUnreadMessage = function(cb){
     var self = this;
     console.log("xpush : getUnreadMessage ",self.userId);
@@ -606,18 +772,37 @@
       if(result && result.length > 0){
         result.sort(UTILS.messageTimeSort);
       }
-
+      self.isExistUnread = false;
       self.sEmit('message-received');
       cb(err, result);
     });
   };
 
-  XPush.prototype.getChannelInfo = function(channel, cb){
+  /**
+   * 연결할 channel server 정보를 가져온다.
+   * @private
+   * @function
+   * @param {string} channel - Channel Id
+   * @param {callback} cb - 획득 후 수행할 callback function
+   */
+  XPush.prototype._getChannelInfo = function(channel, cb){
     var self = this;
-    console.log("xpush : getChannelInfo ",channel);
+    console.log("xpush : _getChannelInfo ",channel);
     self.ajax( XPush.Context.NODE+'/'+self.appId+'/'+channel , 'GET', {}, cb);
   };
 
+  /**
+   * 서버에서 group에 포함된 사용자 list를 조회한다.
+   * @name getGroupUsers
+   * @memberof Xpush
+   * @function
+   * @param {string} groupId - 찾을 groupId
+   * @param {callback} cb - 조회 후 수행할 callback function
+   * @example
+   * xpush.getGroupUsers( 'james', function( err, users ){
+   *   console.log( users );
+   * )};
+   */
   XPush.prototype.getGroupUsers = function(groupId,cb){
     var self = this;
   if(typeof(arguments[0]) == 'function') {cb = arguments[0]; groupId = undefined;}
@@ -627,7 +812,20 @@
     });
   };
 
-  XPush.prototype.addUserToGroup = function(groupId, userIds,cb){
+  /**
+   * 하나 또는 다수의 사용자에 group id를 추가한다.
+   * @name addUserToGroup
+   * @memberof Xpush
+   * @function
+   * @param {string} [groupId] - userId
+   * @param {array} userIds - 추가할 사용자들의 ID array
+   * @param {callback} cb - 추가 후 수행할 callback function
+   * @example
+   * xpush.addUserToGroup( 'james', ['notdol','john'], function( err, result ){
+   *   console.log( result );
+   * )};
+   */
+  XPush.prototype.addUserToGroup = function(groupId, userIds, cb){
     var self = this;
     if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userIds = groupId; groupId = undefined;}
     groupId = groupId ? groupId : self.userId;
@@ -638,16 +836,30 @@
     });
   };
 
+  /**
+   * user를 group에서 삭제한다.
+   * @name removeUserFromGroup
+   * @memberof Xpush
+   * @function
+   * @param {string} [groupId] - userId
+   * @param {string} userId - 삭제할 user의 ID
+   * @param {callback} cb - 삭제 후 수행할 callback function
+   * @example
+   * xpush.removeUserFromGroup( 'james', ['notdol'], function( err, result ){
+   *   console.log( result );
+   * )};
+   */
   XPush.prototype.removeUserFromGroup = function(groupId, userId, cb){
     var self = this;
-  if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userId = groupId; groupId = undefined;}
+    if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userId = groupId; groupId = undefined;}
     groupId = groupId ? groupId : self.userId;
 
     self.sEmit('group-remove',{'GR': groupId, 'U': userId}, function(err, result){
-        cb(err,result);
+      cb(err,result);
     });
   };
 
+  /**
   XPush.prototype.getGroups = function(){
     // not defined yet
   };
@@ -658,8 +870,16 @@
     var sendData = { };
     self.ajax( XPush.Context.Signout , 'POST', sendData, cb);
   };
+  */
 
-  XPush.prototype.initSessionSocket = function(socket,cb){
+  /**
+   * session socket을 초기화 후에 event를 추가한다. `autoInitFlag`가 true면 channel 정보 및 읽지 않은 message를 조회한다.
+   * @private
+   * @function
+   * @param {Object} socket.io
+   * @param {callback} cb - 초기화 후 수행할 callback function
+   */
+  XPush.prototype._initSessionSocket = function(socket,cb){
     var self = this;
     socket.on('_event',function(data){
       console.log('xpush : session receive ', data.event, data.C,data.NM,data.DT, self.userId);
@@ -669,11 +889,12 @@
         case 'NOTIFICATION':
           var ch = self.getChannel(data.C);
 
+          // if `autoInitFlag` is true, make channel automatically
           if( self.autoInitFlag ){
             if(!ch){
               ch = self._makeChannel(data.C);
 
-              self.getChannelInfo(data.C,function(err,data){
+              self._getChannelInfo(data.C,function(err,data){
 
                 if(err){
                   console.log(" == node channel " ,err);
@@ -700,13 +921,12 @@
         break;
 
         case 'LOGOUT' :
-          console.log('LOGOUT', data);
           self.emit('___session_event', 'LOGOUT', data);
         break;
-
       }
 
     });
+
     socket.on('channel',function(data){
       console.log('xpush : session receive ', 'channel', data, self.userId);
 
@@ -720,11 +940,12 @@
         break;
       }
     });
+
     socket.on('connected',function(){
       console.log('xpush : session receive ', CHANNEL, arguments, self.userId);
     });
 
-
+    // if `autoInitFlag` is true, get channels
     if( self.autoInitFlag ){
       self.getChannels(function(err,data){
         self.channelNameList = data;
@@ -734,6 +955,7 @@
       if(cb) cb();
     }
 
+    // if `autoInitFlag` is true, get unread messages
     if( self.autoInitFlag ){
       socket.on('connect',function(){
         self.getUnreadMessage(function(err, data){
@@ -837,6 +1059,14 @@
     return;
   };
 
+  /**
+   * session socket을 이용하여 event를 발생시킨다.
+   * @private
+   * @function
+   * @param {string} socket의 event key
+   * @param {Object} [params] - object to send
+   * @param {callback} cb - event 발생 후 수행할 callback function
+   */
   XPush.prototype.sEmit = function(key, params, cb){
     var self = this;
 
@@ -863,6 +1093,14 @@
     return;
   };
 
+  /**
+   * event stack에 event와 function을 등록한다. 해당 function은 event가 발생시 호출된다.
+   * @name on
+   * @memberof Xpush
+   * @function
+   * @param {string} event key
+   * @param {function} function
+   */
   XPush.prototype.on = function(event, fct){
     var self = this;
     self._events = self._events || {};
@@ -909,12 +1147,43 @@
     */
   };
 
+  /**
+   * event stack에서 event와 function을 제거한다.
+   * @name off
+   * @memberof Xpush
+   * @function
+   * @param {string} event key
+   * @param {function} function
+   */
   XPush.prototype.off = function(event, fct){
     var self = this;
     self._events = self._events || {};
     if( event in self._events === false  )  return;
     self._events[event].splice(self._events[event].indexOf(fct), 1);
   };
+
+  /**
+   * event stack의 모든 event를 제거한다.
+   * @name off
+   * @memberof Xpush
+   * @function
+   * @param {string} event key
+   * @param {function} function
+   */
+  XPush.prototype.clearEvent = function(){
+    var self = this;
+    setTimeout( function(){
+      self._events = {};
+    }, 2000 );
+  };
+
+  /**
+   * event stack에 등록되어 있는 함수를 호출한다.
+   * 읽지 않은 메세지가 존재하면, 초기화 중인 상태이므로 message가 오더라도 해당 event의 function을 즉시 발생시키지 않고 stack에 쌓는다.
+   * @memberof Xpush
+   * @function
+   * @param {string} event key
+   */
   XPush.prototype.emit = function(event){
     var self = this;
     if(self.isExistUnread) {
@@ -929,6 +1198,14 @@
     }
   };
 
+  /**
+   * Represents a Connection
+   * @module Connection
+   * @constructor
+   * @param {Xpush} Object - Xpush obejct
+   * @param {string} type - 'session' or channel'
+   * @param {string} server - Server Url to connect
+   */
   var Connection = function(xpush , type, server){
 
     this._xpush = xpush;
@@ -944,14 +1221,21 @@
     this.messageStack = [];
     this.isFirtConnect = true;
     this._connected = false;
+    this.timeout = 30000;
 
     //self.on('received', function(data){
       //self._xpush.calcChannel(self);
     //});
+    return this;
   };
 
-  Connection.timeout = 30000;
-
+  /**
+   * Check connectionTimeout
+   * @name checkConnectionTimeout
+   * @memberof Connection
+   * @function
+   * @param {string} b - Server Url to connect
+   */
   Connection.prototype.checkConnectionTimeout = function(b){
     var self = this;
     if(self.checkTimer) clearTimeout(self.checkTimer);
@@ -963,6 +1247,14 @@
     }
   };
 
+  /**
+   * Set server url and connect to the server.
+   * @name setServerInfo
+   * @memberof Connection
+   * @function
+   * @param {Object} info - Server Url to connect
+   * @param {callback} cb - setServerInfoCallback
+   */
   Connection.prototype.setServerInfo = function(info,cb){
     console.log("xpush : setServerInfo ", info);
     var self = this;
@@ -976,7 +1268,15 @@
     });
   };
 
-  Connection.prototype.connect = function(cbConnect, mode){
+  /**
+   * Connect to the server.
+   * @name setServerInfo
+   * @memberof Connection
+   * @function
+   * @param {callback} cb - connectCallback
+   * @param {string} mode - Optional. `CHANANEL_ONLY`
+   */
+  Connection.prototype.connect = function(cb, mode){
     var self = this;
       var query =
         'A='+self._xpush.appId+'&'+
@@ -1014,7 +1314,7 @@
       self._connected = true;
       if(!self.isFirtConnect) return;
       self.isFirtConnect = false;
-      self.connectionCallback(cbConnect);
+      self.connectionCallback(cb);
     });
 
     self._socket.on('disconnect',function(){
@@ -1022,6 +1322,13 @@
     });
   };
 
+  /**
+   * The function is occured when socket is connected.
+   * @name connectionCallback
+   * @memberof Connection
+   * @function
+   * @param {callback} cb - connectionCallback
+   */
   Connection.prototype.connectionCallback = function(cb){
     var self = this;
     console.log("xpush : connection ",'connectionCallback',self._type, self._xpush.userId,self.chNm);
@@ -1055,13 +1362,28 @@
     if(cb)cb();
   };
 
+  /**
+   * Close the socket connection.
+   * @name disconnect
+   * @memberof Connection
+   * @function
+   */
   Connection.prototype.disconnect = function(){
     console.log("xpush : socketdisconnect ", this.chNm, this._xpush.userId);
     this._socket.disconnect();
     //delete this._socket;
   };
 
-  Connection.prototype.send = function(name, data,cb){
+  /**
+   * If socket is connected, send data right away,
+   * @name send
+   * @memberof Connection
+   * @param {string} name - Event name
+   * @param {object} data - JSON data
+   * @param {callback} cb - sendCallback
+   * @function
+   */
+  Connection.prototype.send = function(name, data, cb){
     var self = this;
     if(self._connected){
       self._socket.emit('send', {NM: name , DT: data});
@@ -1070,6 +1392,14 @@
     }
   };
 
+  /**
+   * If socket is connected, join the channel
+   * @name joinChannel
+   * @memberof Connection
+   * @param {object} data - JSON data
+   * @param {callback} cb - joinChannelCallback
+   * @function
+   */
   Connection.prototype.joinChannel = function(param, cb){
     var self = this;
     if(self._socket.connected){
@@ -1079,6 +1409,15 @@
     }
   };
 
+  /**
+   * Upload the stream
+   * @name upload
+   * @memberof Connection
+   * @param {object} stream - stream object
+   * @param {object} data - file info data ( 'orgName', 'name', 'type')
+   * @param {callback} cb - uploadCallback
+   * @function
+   */
   Connection.prototype.upload = function(stream, data, cb){
     var self = this;
     if(self._socket.connected){
@@ -1086,18 +1425,43 @@
     }
   };
 
+  /**
+   * Stack the function into event array. The function will excute when an event occur.
+   * @name on
+   * @memberof Connection
+   * @function
+   * @param {string} event key
+   * @param {function} function
+   */
   Connection.prototype.on = function(event, fct){
    var self = this;
     self._events = self._events || {};
     self._events[event] = self._events[event] || [];
     self._events[event].push(fct);
   };
+
+  /**
+   * Remove the function at event array
+   * @name off
+   * @memberof Connection
+   * @function
+   * @param {string} event key
+   * @param {function} function
+   */
   Connection.prototype.off = function(event, fct){
     var self = this;
     self._events = self._events || {};
     if( event in self._events === false  )  return;
     self._events[event].splice(self._events[event].indexOf(fct), 1);
   };
+
+  /**
+   * Apply the event
+   * @name emit
+   * @memberof Connection
+   * @function
+   * @param {string} event key
+   */  
   Connection.prototype.emit = function(event /* , args... */){
     var self = this;
     self._events = self._events || {};

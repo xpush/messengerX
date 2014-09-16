@@ -712,6 +712,10 @@ angular.module('starter.controllers', [])
     });
   };
 
+  $scope.gotoSignUp = function(){
+    $state.go('signup');
+  };
+
   $scope.$watch('$viewContentLoaded', function() {
     document.getElementById( "userId" ).focus();
   });
@@ -797,6 +801,17 @@ angular.module('starter.controllers', [])
     $rootScope.$on('$windowClose', function (){
       Chat.sendSys( 'off' );
     });
+
+    if( window.root ){
+      var popupWin = require('nw.gui').Window.get();
+      popupWin.on('close', function() {
+        $scope.parentScope.$broadcast( "$popupClose", channelId );
+        Chat.sendSys( 'off' );
+        // Hide the window to give user the feeling of closing immediately
+        this.hide();
+        this.close(true);
+      });
+    }
   });
 
   /**
@@ -1532,8 +1547,8 @@ angular.module('starter.controllers', [])
 
     // An elaborate, custom popup
     var myPopup = $ionicPopup.show({
-      template: '<input type="text" ng-model="data.notice"><br/><input type="text" ng-model="data.location">',
-      title: 'Bung gae',
+      template: '<input type="text" ng-model="data.notice">',
+      title: 'Notice',
       scope: $scope,
       buttons: [
         { text: 'Cancel' },
@@ -1739,10 +1754,6 @@ angular.module('starter.controllers', [])
       }
     }
   };
-
-
-
-
 })
 .controller('ViewCtrl', function($scope, $rootScope) {
 

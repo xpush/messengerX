@@ -3,7 +3,7 @@ angular.module('starter.constants', [])
   .constant('APP_INFO', {
     version: '1.0 BETA',
     feedVersion: 'V1',
-    appKey : 'jmessenger'
+    appKey : 'messengerx'
   })
   .constant('BASE_URL', 'http://stalk-front-s01.cloudapp.net:8000')
   .constant('DB_CONFIG', {

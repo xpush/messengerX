@@ -93,34 +93,57 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.rootPath = "file://"+window.root+"/";
 
       var tray = new gui.Tray({ title: 'Tray', icon: 'icon.png' });
-      var menu = new gui.Menu();
-      menu.append(new gui.MenuItem({ label: 'Logout' }));
-      menu.append(new gui.MenuItem({ label: 'Close' }));
 
-      menu.items[0].click = function() {
-        $rootScope.logout();
-      };
+      if( process.platform == 'window' ){
+        var menu = new gui.Menu();
+        menu.append(new gui.MenuItem({ label: 'Logout' }));
+        menu.append(new gui.MenuItem({ label: 'Close' }));
+        tray.menu = menu;
 
-      menu.items[1].click = function() {
-        tray.remove();
-        gui.App.quit();
-      };
+        menu.items[0].click = function() {
+          $rootScope.logout();
+        };
 
-      tray.menu = menu;
+        menu.items[1].click = function() {
+          tray.remove();
+          gui.App.quit();
+        };
+      } else {
+        var menu = new gui.Menu();
+        menu.append(new gui.MenuItem({ label: 'Logout' }));
+        menu.append(new gui.MenuItem({ label: 'Close' }));
+        tray.menu = menu;
 
-      tray.click = function(){
-        winmain.show();
+        menu.items[0].click = function() {
+          $rootScope.logout();
+        };
+
+        menu.items[1].click = function() {
+          tray.remove();
+          gui.App.quit();
+        };
       }
 
       var winmain = gui.Window.get();
+
+      tray.click = function(){
+        winmain.show();
+        winmain.focus();
+      }
+  
       winmain.on('close', function(){
-         winmain.minimize();
-         winmain.setShowInTaskbar(false);
+        winmain.minimize();
+
+        if( process.platform == 'window' ){
+          winmain.setShowInTaskbar(false);
+        }
       });
 
       $rootScope.close = function(){
         winmain.minimize();
-        winmain.hide();
+        if( process.platform == 'window' ){
+          winmain.hide();
+        }
       };
 
       winmain.show();
@@ -250,7 +273,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
       if(type === 'LOGOUT'){
         if( !$sessionStorage.reloading ){
-          $rootScope.logout(true, function(){
+          $rootScope.logout( function(){
             $state.go( "error" );
           });
         }
@@ -258,7 +281,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }, autoInitFlag );
 
     // tootScope function
-    $rootScope.logout = function( skipLoginPageFlag, callback ){
+    $rootScope.logout = function( callback ){
       Sign.logout(function(){
         $rootScope.xpush.logout();
 
@@ -267,13 +290,13 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           popups[key].close();
         }
 
-        if( !skipLoginPageFlag ){
-          $templateCache.removeAll();
-          $state.transitionTo('signin', {}, { reload: true, notify: true });
-        }
+        $rootScope.$broadcast( "ON_LOGOUT" );
 
         if ( callback && typeof callback === 'function') {
           callback();
+        } else {
+          $templateCache.removeAll();
+          $state.transitionTo('signin', {}, { reload: true, notify: true });          
         }
       });
     };
@@ -414,6 +437,11 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
   var popups = {};
   var self;
 
+  $rootScope.$on("$popupClose", function ( data, key ){
+    delete popups[key];
+    popupCount--;
+  });  
+
   return {
     getPopups : function(){
       return popups;
@@ -422,30 +450,24 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       self = this;
 
       if( $rootScope.usePopupFlag ){
+        console.log( popups[popupKey] );
         if( popups[popupKey] !== undefined ){
-          popups[popupKey].focus();
+          if( popups[popupKey].window ){
+            popups[popupKey].window.focus();
+          } else {
+            popups[popupKey].focus();
+          }            
         } else {
 
           var popup;
 
-          var left = screen.width - 520 + ( popupCount * 25 );
-          var top = 0 + ( popupCount * 25 ) ;
+          var left = screen.width - 620 + ( popupCount * 50 );
+          var top = 0 + ( popupCount * 50 ) ;
           popupCount++;
 
           if( $rootScope.nodeWebkit ){
-            var gui = require('nw.gui');
-            popup = gui.Window.open( $rootScope.rootPath + 'popup-chat.html', {
-              "frame" : true,
-              "toolbar" : true,
-              "width": 400,
-              "height": 600,
-              "x":left,
-              "y":top,
-              "min_width": 100,
-              "min_height": 100,
-              "title":"Chat" + popupKey,
-              "icon": "icon.png"
-            } );
+            popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
+            //popup.moveTo(left,top);
           } else {
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
@@ -469,7 +491,6 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
                 }
               }
             }
-
           }, 200 );
         }
       } else {
@@ -479,26 +500,11 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     },
     openPopup : function( popupWin, popupKey, scope, stateParams ){
 
-      if( $rootScope.nodeWebkit ){
-        popups[popupKey] = popupWin.window;
-        popupWin.on('close', function() {
-          scope.$broadcast("$windowClose" );
-
-          // Hide the window to give user the feeling of closing immediately
-          this.hide();
-          popupCount--;
-          // If the new window is still open then close it.
-          if (popupWin != null){
-            popupWin.close(true);
-            delete popups[popupKey];
-          }
-
-          // After closing the new window, close the main window.
-
-          this.close(true);
-        });
+      if( $rootScope.nodeWebkit ) {
+        popups[popupKey] = popupWin;
       } else {
         popups[popupKey] = popupWin;
+
         popupWin.onbeforeunload = function(){
           scope.$broadcast("$windowClose" );
           popupCount--;
