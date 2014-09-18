@@ -833,8 +833,10 @@ angular.module('starter.services', [])
      * @param {string} message
      */
     sendSys : function(msg){
-      var DT = { UO : CONF._user, MG : msg, S : CONF._user.U, 'T' : 'S' };
-      $rootScope.xpush.send(CONF._channel, 'system', DT );
+      if( CONF._user ) {
+        var DT = { UO : CONF._user, MG : msg, S : CONF._user.U, 'T' : 'S' };
+        $rootScope.xpush.send(CONF._channel, 'system', DT );      
+      }
     },
     /**
      * @ngdoc function

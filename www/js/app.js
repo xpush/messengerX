@@ -450,7 +450,6 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       self = this;
 
       if( $rootScope.usePopupFlag ){
-        console.log( popups[popupKey] );
         if( popups[popupKey] !== undefined ){
           if( popups[popupKey].window ){
             popups[popupKey].window.focus();
@@ -467,7 +466,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
 
           if( $rootScope.nodeWebkit ){
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
-            //popup.moveTo(left,top);
+            popup.moveTo(left,top);
           } else {
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
           }
