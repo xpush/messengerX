@@ -486,13 +486,6 @@ angular.module('starter.services', [])
             if( data.T != 'J' && channelJson.DT.UC >= 2 ){
               ChannelDao.add( channel );
             }
-
-            // Local notification
-            $rootScope.localNoti( { id : data.TS, message : data.MG, title : channel.name}, function(){
-              console.log( '========= local noti callback =========');
-            });
-
-            $rootScope.webNoti( channel.message );
           });
         }
       });

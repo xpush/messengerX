@@ -162,6 +162,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.supportWebRTC = false;
     }
 
+    // Use in cordova
     $rootScope.localNoti = function(param, callback){
       if( window.plugin && window.plugin.notification.local ){
         window.plugin.notification.local.add({
@@ -179,6 +180,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     }
 
+    // Brower's notification
     $rootScope.webNoti = function( message ) {
 
       // Let's check if the browser supports notifications
@@ -290,13 +292,14 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           popups[key].close();
         }
 
+        // broadcast for clear event
         $rootScope.$broadcast( "ON_LOGOUT" );
 
         if ( callback && typeof callback === 'function') {
           callback();
         } else {
           $templateCache.removeAll();
-          $state.transitionTo('signin', {}, { reload: true, notify: true });          
+          $state.transitionTo('signin', {}, { reload: true, notify: true });
         }
       });
     };
@@ -420,6 +423,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     });
 
+  // splash screen start
   $urlRouterProvider.otherwise('/splash');
 });
 
