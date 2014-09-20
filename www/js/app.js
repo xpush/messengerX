@@ -109,7 +109,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           tray.remove();
           gui.App.quit();
         };
-      } else if( process.platform == 'linux' || process.platform == 'osx' ){
+      } else if( process.platform == 'linux' || process.platform == 'darwin' ){
         var menubar = new gui.Menu({ type: "menubar" });
         var submenu = new gui.Menu();
 
@@ -136,8 +136,9 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         submenu.append( closeMenuItem );
         menubar.append( fileMenuItem );
         fileMenuItem.submenu = submenu;
-        if( process.platform == 'osx' ){
-          menubar.createMacBuiltin("messengerX");
+        
+        if( process.platform == 'darwin' ){
+          //menubar.createMacBuiltin("messengerX");
         }
         winmain.menu = menubar;
       }
