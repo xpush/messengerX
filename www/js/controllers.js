@@ -134,12 +134,19 @@ angular.module('starter.controllers', [])
    * @description Navigate to Chat screen.
    * @param {string} Selected friend
    */
+  $scope.opening = false;
   $scope.gotoChat = function( friendIds ) {
+    if ($scope.opening) {
+      return;
+    }
+    $scope.opening = true;
     $stateParams.friendIds = friendIds;
     var jsonObject = {};
     jsonObject.U = [friendIds,Sign.getUser().userId];
     var channelId = ChannelDao.generateId( jsonObject );
-    NAVI.gotoChat( $scope, channelId, $stateParams );
+    NAVI.gotoChat( $scope, channelId, $stateParams, function(){
+      $scope.opening = false;
+    });
   };
 
   /**

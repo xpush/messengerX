@@ -26,6 +26,7 @@
   z-index: $z-index-popover;
   display: block;
   margin-left: -$popover-width / 2;
+  margin-top: 12px;
   height: $popover-height;
   width: $popover-width;
   background-color: $popover-bg-color;
@@ -38,13 +39,6 @@
 
   .item:last-child {
     border-bottom: 0;
-  }
-
-  &.popover-top {
-    margin-top: 12px;
-  }
-  &.popover-bottom {
-    margin-top: -12px;
   }
 }
 
@@ -77,7 +71,6 @@
   .popover {
     box-shadow: $popover-box-shadow-ios;
   }
-
   .popover,
   .popover .bar-header {
     border-radius: $popover-border-radius-ios;
@@ -91,6 +84,8 @@
   }
   .popover-arrow {
     position: absolute;
+    top: -17px;
+    left: 43%;
     display: block;
     width: 30px;
     height: 19px;
@@ -108,15 +103,6 @@
       @include rotate(-45deg);
     }
   }
-  .popover-top .popover-arrow {
-    top: -17px;
-  }
-  .popover-bottom .popover-arrow {
-    bottom: -10px;
-    &:after {
-      top: -6px;
-    }
-  }
 }
 
 
@@ -126,17 +112,12 @@
   .popover {
     background-color: $popover-bg-color-android;
     box-shadow: $popover-box-shadow-android;
+    margin-top: -32px;
 
     .item {
       border-color: $popover-bg-color-android;
       background-color: $popover-bg-color-android;
       color: #4d4d4d;
-    }
-    &.popover-top {
-      margin-top: -32px;
-    }
-    &.popover-bottom {
-      margin-top: 32px;
     }
   }
 

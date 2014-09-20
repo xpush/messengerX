@@ -89,6 +89,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     // node wekit ==  true
     if( window.root ){
       var gui = require('nw.gui');
+      var winmain = gui.Window.get();
       $rootScope.nodeWebkit = true;
       $rootScope.rootPath = "file://"+window.root+"/";
 
@@ -97,7 +98,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       if( process.platform == 'window' ){
         var menu = new gui.Menu();
         menu.append(new gui.MenuItem({ label: 'Logout' }));
-        menu.append(new gui.MenuItem({ label: 'Close' }));
+        menu.append(new gui.MenuItem({ label: 'Quit' }));
         tray.menu = menu;
 
         menu.items[0].click = function() {
@@ -108,23 +109,38 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           tray.remove();
           gui.App.quit();
         };
-      } else {
-        var menu = new gui.Menu();
-        menu.append(new gui.MenuItem({ label: 'Logout' }));
-        menu.append(new gui.MenuItem({ label: 'Close' }));
-        tray.menu = menu;
+      } else if( process.platform == 'linux' || process.platform == 'osx' ){
+        var menubar = new gui.Menu({ type: "menubar" });
+        var submenu = new gui.Menu();
 
-        menu.items[0].click = function() {
-          $rootScope.logout();
-        };
+        var fileMenuItem = new gui.MenuItem({
+          label: 'File'
+        });
 
-        menu.items[1].click = function() {
-          tray.remove();
-          gui.App.quit();
-        };
+        var logoutMenuItem = new gui.MenuItem({
+          label: 'Logout',
+          click: function() {
+            $rootScope.logout();
+          }
+        });
+
+        var closeMenuItem = new gui.MenuItem({
+          label: 'Quit',
+          click: function() {
+            tray.remove();
+            gui.App.quit();
+          }
+        });
+
+        submenu.append( logoutMenuItem );
+        submenu.append( closeMenuItem );
+        menubar.append( fileMenuItem );
+        fileMenuItem.submenu = submenu;
+        if( process.platform == 'osx' ){
+          menubar.createMacBuiltin("messengerX");
+        }
+        winmain.menu = menubar;
       }
-
-      var winmain = gui.Window.get();
 
       tray.click = function(){
         winmain.show();
@@ -450,7 +466,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     getPopups : function(){
       return popups;
     },
-    gotoChat : function( scope, popupKey, stateParams ){
+    gotoChat : function( scope, popupKey, stateParams, callback ){
       self = this;
 
       if( $rootScope.usePopupFlag ){
@@ -478,7 +494,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           var startTime = Date.now();
           var popupInterval = setInterval( function(){
             var endTime = Date.now();
-            if( endTime - startTime > 5000 ){
+            if( endTime - startTime > 10000 ){
               clearInterval( popupInterval );
             }
 
@@ -490,6 +506,9 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
                   if( newWindowRootScope.$$listeners.INTER_WINDOW_DATA_TRANSFER !== undefined ){
                     clearInterval( popupInterval );
                     self.openPopup( popup, popupKey, newWindowRootScope, stateParams );
+                    if ( callback && typeof callback === 'function') {
+                      callback();
+                    }
                   }
                 }
               }

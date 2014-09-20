@@ -27,7 +27,7 @@
         </button>
         -->
       </div>
-    	<ion-item ng-repeat="friend in friends" class="item item-avatar" ng-click='gotoChat("{{friend.user_id}}")'>
+    	<ion-item ng-repeat="friend in friends" class="item item-avatar" ng-click='gotoChat("{{friend.user_id}}")' >
         <img ng-src="{{friend.image}}" />
         <h2>{{friend.user_name}}</h2>
         <p>{{friend.message}}</p>

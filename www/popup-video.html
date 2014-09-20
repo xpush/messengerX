@@ -94,10 +94,21 @@ footer {
   color: #fff
 }
 
+.close {
+  z-index: 1;
+  color:white;
+  position: absolute;
+  right:20px;
+  top:20px;
+  font-size: 20px;
+}
+
   </style>
 </head>
 <body>
-
+    <div class="close" onclick="closeWindow()">
+      Close
+    </div>
     <div id="mini">
       <video id='localVideo' autoplay muted></video>
       <div id="localVolume" class="volumeBar"></div>
@@ -127,6 +138,10 @@ footer {
     var webrtc = new XWebRTC(
       obj.S, obj.A, obj.C, obj.U,
       localVideo, remoteVideo);
+
+    var closeWindow = function(){
+      window.close();
+    };
 
   </script>
 

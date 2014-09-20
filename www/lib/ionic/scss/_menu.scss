@@ -55,10 +55,6 @@
   right: 0;
 }
 
-.aside-open.aside-resizing .menu-right {
-  display: none;
-}
-
 .menu-animated {
   @include transition-transform($menu-animation-speed ease);
 }
