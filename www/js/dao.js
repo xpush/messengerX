@@ -733,6 +733,19 @@ angular.module('starter.dao', [])
     });
   };
 
+  self.clearAll = function( userId ){
+    var querys = [];
+    var conds = [];
+    angular.forEach(DB_CONFIG.tables, function(table) {
+      var columns = [];
+
+      var query = 'DELETE FROM ' + table.name + ' WHERE owner_id = ? ';
+      querys.push( query );
+      conds.push( [userId] );
+    });  
+    self.queryAll(querys, conds);
+  };
+
   self.query = function(query, binding) {
     binding = typeof binding !== 'undefined' ? binding : [];
     var deferred = $q.defer();

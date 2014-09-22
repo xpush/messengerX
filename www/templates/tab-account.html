@@ -10,7 +10,7 @@
   <ion-content class="has-header padding" has-bouncing="true">
 		<div class="list card">
 		  <div class="item item-divider">
-		    User Profiles.
+		    User Profiles
 		  </div>
 	    <a class="item item-thumbnail-left" >
 	    	<div class="account-profile">
@@ -32,5 +32,19 @@
 				</button>
 			</div>  	
 	  </div>
+
+		<div class="list card">
+		  <div class="item item-divider">
+		    Application Settings
+		  </div>
+			<div class="item item-icon-left " ng-click="clearData();">
+ 				<i class="icon ion-trash-b"></i>
+    			Delete data
+			</div>
+			<div class="item item-icon-left " ng-click="logout();">
+ 				<i class="icon ion-log-out"></i>
+    			Logout
+			</div>			
+	  </div>	  
   </ion-content>
 </ion-view>

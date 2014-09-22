@@ -441,7 +441,7 @@ angular.module('starter.controllers', [])
   };
 })
 
-.controller('AccountCtrl', function($scope, $rootScope, Sign) {
+.controller('AccountCtrl', function($scope, $rootScope, $ionicPopup, Sign, DB) {
   $scope.loginUser = Sign.getUser();
 
   $scope.newImage = '';
@@ -472,6 +472,20 @@ angular.module('starter.controllers', [])
       }
     });
   };
+
+  $scope.clearData = function(){
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.confirm({
+      title: 'Do you want clear data?',
+      subTitle:'This action will delete all stored datas in current device, not datas in server.'
+    });
+    myPopup.then(function(res) {
+      if( res === true ){
+        DB.clearAll( Sign.getUser().userId);
+        $rootScope.syncFlag = true;
+      }
+    });
+  };  
 })
 .controller('EmoticonCtrl', function($scope, $rootScope, $ionicPopup, Sign, ChannelDao, Chat, Emoticons) {
   var loginUser = Sign.getUser();
@@ -988,10 +1002,10 @@ angular.module('starter.controllers', [])
 
     // Retrieve emoticon list from local db.
     Emoticons.list( {}, function(emoticons){
-      var rootImgPath = $rootScope.rootImgPath;
+      var baseImgPath = $rootScope.host + $rootScope.rootImgPath;
       $scope.emoticons.push( { group : 's2', tag : 'ion-happy', 'CN' : 'tab-item tab-item-active', items : {
-          "01" : [rootImgPath+'/emo/s2/anger.PNG', rootImgPath+'/emo/s2/burn.PNG', rootImgPath+'/emo/s2/cool.PNG', rootImgPath+'/emo/s2/love.PNG'],
-          "02" : [rootImgPath+'/emo/s2/shout.PNG', rootImgPath+'/emo/s2/smile.PNG']}}
+          "01" : [baseImgPath+'/emo/s2/anger.PNG', baseImgPath+'/emo/s2/burn.PNG', baseImgPath+'/emo/s2/cool.PNG', baseImgPath+'/emo/s2/love.PNG'],
+          "02" : [baseImgPath+'/emo/s2/shout.PNG', baseImgPath+'/emo/s2/smile.PNG']}}
       );
       $scope.emoticons = $scope.emoticons.concat( emoticons );
       //$scope.emoticons['b2'] = [rootImgPath+'/emo/b2/anger.png', rootImgPath+'/emo/b2/cry.png',  rootImgPath+'/emo/b2/haha.png', rootImgPath+'/emo/b2/money.png'];
