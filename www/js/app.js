@@ -70,11 +70,17 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
       // web
-    } else {
-      $rootScope.rootImgPath = "../img";
-      $rootScope.rootPath = "/";
+    } else {      
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
+      $rootScope.rootImgPath = "../img";      
+
+      if( $location.absUrl().indexOf( 'github.io' ) > -1 ) {        
+        $rootScope.rootPath = "../www/";        
+      } else {
+        // messengerX
+        $rootScope.rootPath = "/";
+      }
 
       var mobileAgents = ["android","iphone","bb","symbian","nokia", "ipad"];
       var agent = window.navigator.userAgent.toLowerCase();
