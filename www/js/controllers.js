@@ -1709,6 +1709,18 @@ angular.module('starter.controllers', [])
 
   /**
    * @ngdoc function
+   * @name gotoBack
+   * @module starter.controllers
+   * @kind function
+   *
+   * @description history back for single application
+   */
+  $scope.gotoBack = function( ) {
+    $window.history.back();
+  };
+
+  /**
+   * @ngdoc function
    * @name setOnlineStatus
    * @module starter.controllers
    * @kind function
