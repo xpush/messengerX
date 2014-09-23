@@ -770,7 +770,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $xpushSlide, $ionicBackdrop, $ionicFrostedDelegate, Users, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons) {
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $xpushSlide, $ionicBackdrop, $ionicFrostedDelegate, Users, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons, STATIC_URL) {
 
   var loginUser = Sign.getUser();
 
@@ -1002,7 +1002,7 @@ angular.module('starter.controllers', [])
 
     // Retrieve emoticon list from local db.
     Emoticons.list( {}, function(emoticons){
-      var baseImgPath = $rootScope.host + $rootScope.rootImgPath;
+      var baseImgPath = STATIC_URL;
       $scope.emoticons.push( { group : 's2', tag : 'ion-happy', 'CN' : 'tab-item tab-item-active', items : {
           "01" : [baseImgPath+'/emo/s2/anger.PNG', baseImgPath+'/emo/s2/burn.PNG', baseImgPath+'/emo/s2/cool.PNG', baseImgPath+'/emo/s2/love.PNG'],
           "02" : [baseImgPath+'/emo/s2/shout.PNG', baseImgPath+'/emo/s2/smile.PNG']}}
