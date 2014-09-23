@@ -73,13 +73,15 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     } else {      
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
-      $rootScope.rootImgPath = "../img";      
+      
 
       if( $location.absUrl().indexOf( 'github.io' ) > -1 ) {        
-        $rootScope.rootPath = "../www/";        
+        $rootScope.rootPath = "../www/";
+        $rootScope.rootImgPath = "../www/img";
       } else {
         // messengerX
         $rootScope.rootPath = "/";
+        $rootScope.rootImgPath = "../img";
       }
 
       var mobileAgents = ["android","iphone","bb","symbian","nokia", "ipad"];
