@@ -300,7 +300,10 @@ angular.module('starter.controllers', [])
         GR: {'$ne': loginUserId}
       };
 
-      if($scope.modal.search) query['DT.NM'] = '%'+$scope.modal.search+'%';
+      if($scope.modal.search) {
+        var searchKey = '%'+$scope.modal.search+'%';
+        query['$or']= [{'DT.NM' : searchKey, 'U' : searchKey }]
+      }
 
       Users.search(query, $scope.modal.num, function(users){
 
@@ -829,6 +832,7 @@ angular.module('starter.controllers', [])
     });
 
     $rootScope.$on('$windowFocus', function (){
+      $rootScope.activeChannel = channelId;
       Chat.sendSys( 'on' );
     });
 
@@ -867,6 +871,8 @@ angular.module('starter.controllers', [])
     param.channel = channelId;
     param.userId = loginUser.userId;
     param.deviceId = loginUser.deviceId;
+
+    $rootScope.activeChannel = channelId;
 
     // Channel Init
     Chat.init( param, inviteMsg, $scope, function( messages ){
@@ -1731,11 +1737,11 @@ angular.module('starter.controllers', [])
    */
   $scope.setOnlineStatus = function( msg ){
     if( msg === "on" ){
-      document.getElementById( "status_on" ).style.display = "block";
+      document.getElementById( "status_on" ).style.display = "inline";
       document.getElementById( "status_off" ).style.display = "none";
     } else {
       document.getElementById( "status_on" ).style.display = "none";
-      document.getElementById( "status_off" ).style.display = "block";
+      document.getElementById( "status_off" ).style.display = "inline";
     }
   };
 

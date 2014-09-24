@@ -316,11 +316,12 @@ angular.module('starter.services', [])
         var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
 
         // compare current channel id to received message's channel id
-        var currentChannel = $rootScope.xpush.getChannel( ch );
-        if( currentChannel != undefined && currentChannel._connected && sr == 'R') {
-
-          if( $rootScope.currentScope ){
-            $rootScope.currentScope.setOnlineStatus( data.MG );
+        if( $rootScope.activeChannel === ch ){
+          var currentChannel = $rootScope.xpush.getChannel( ch );
+          if( currentChannel != undefined && currentChannel._connected && sr == 'R') {
+            if( $rootScope.currentScope ){
+              $rootScope.currentScope.setOnlineStatus( data.MG );
+            }
           }
         }
       });
