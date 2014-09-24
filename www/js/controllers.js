@@ -640,6 +640,8 @@ angular.module('starter.controllers', [])
     }
   }, delay);
 })
+
+
 .controller('ErrorCtrl', function($scope, $state){
   $scope.gotoSignIn = function(){
     $state.go('signin');

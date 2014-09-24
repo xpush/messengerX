@@ -33,11 +33,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
 
     $rootScope.cameraFlag = false;
+    
     if( window.device ){
       $rootScope.deviceId = device.uuid;
       $rootScope.rootImgPath = "img";
       $rootScope.rootPath = "";
-
+ 
       $rootScope.cameraFlag = true;
       $rootScope.usePopupFlag = false;
 
@@ -75,7 +76,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       $rootScope.usePopupFlag = true;
       
       // messengerX
-      if( $location.absUrl().indexOf( 'stalk' ) > -1 ) {        
+      if( $location.absUrl().indexOf( 'stalk' ) > -1 ||$location.absUrl().indexOf( 'localhost' ) > -1 ) {        
         $rootScope.rootPath = "/";
         $rootScope.rootImgPath = "../img";
       } else {      
@@ -83,7 +84,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         $rootScope.rootImgPath = "../www/img";        
       }
 
-      var mobileAgents = ["android","iphone","bb","symbian","nokia", "ipad"];
+      var mobileAgents = ["android","iphone","bb","symbian","nokia", "ipad","extension"];
       var agent = window.navigator.userAgent.toLowerCase();
 
       for( var inx = 0, until = mobileAgents.length ; $rootScope.usePopupFlag && inx < until ; inx++ ){
@@ -359,6 +360,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   // Each state's controller can be found in controllers.js
   $stateProvider
 
+   
     .state('splash', {
       url: "/splash",
       templateUrl: "templates/splash.html",
