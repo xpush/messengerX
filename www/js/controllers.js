@@ -302,13 +302,14 @@ angular.module('starter.controllers', [])
 
       if($scope.modal.search) {
         var searchKey = '%'+$scope.modal.search+'%';
-        query['$or']= [{'DT.NM' : searchKey, 'U' : searchKey }]
+        query['$or']= [{'DT.NM' : searchKey}, {'U' : searchKey }]
       }
 
       Users.search(query, $scope.modal.num, function(users){
 
         if( users !== undefined ){
           if($scope.modal.num > 1) {
+            $scope.modal.datas = [];
             $scope.modal.datas = $scope.modal.datas.concat(users);
           }else{
             $scope.modal.datas = [];

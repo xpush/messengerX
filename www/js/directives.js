@@ -101,13 +101,10 @@ angular.module('starter.directives', [])
             , top = screen.height/2 - 300;
 
           if( window.device ){
-            console.log( url );
-            //var popup = $window.open( $rootScope.rootPath + 'popup-view.html?type='+type+'&src='+encodedUrl, '', "top=" + top + ",left=" + left + ",width=80,height=60");
             var popup = window.open(url, '_blank', 'location=no');
           } else {
             var popup = $window.open( '#/view?type='+type+'&src='+encodedUrl, '_blank', "top=" + top + ",left=" + left + ",width=80,height=60");
           }
-          //var  popup = $window.open( $rootScope.rootPath + 'popup-view.html?type='+type+'&src='+encodedUrl, '', "top=" + top + ",left=" + left + ",width=80,height=60");
         });    
       });
     }
@@ -155,21 +152,30 @@ angular.module('starter.directives', [])
 
     var element = angular.element(elem)[0];
     var currentTimeout = null;
+    var beforeKeyLength = 0;
 
     var poster = $parse(attrs.post)(scope);
     var reseter = $parse(attrs.reset)(scope);
+    var beforenMatchIds = {};
 
     element.oninput = function() {
 
       if(currentTimeout) {
         $timeout.cancel(currentTimeout)
       }
-      currentTimeout = $timeout(function(){
-
-        var searchKey = angular.element(element).val();
+      currentTimeout = $timeout(function(){        
+        var searchKey = angular.element(element).val();        
 
         if( searchKey !== '' ){
-          matches = [];
+          // backspace
+          var matches = [];
+          /**
+          testing code
+          if( beforeKeyLength > searchKey.length ){
+            matches = beforenMatchIds[searchKey];
+          }
+          */
+
           var separated = UTIL.getMorphemes( searchKey ).toLowerCase();
 
           var datas = [];
@@ -191,6 +197,9 @@ angular.module('starter.directives', [])
           });
 
           poster( matches );
+          beforeKeyLength = searchKey.length;
+          beforenMatchIds = { searchKey : matches };
+          console.log( beforenMatchIds );
         } else {
           reseter();
         }

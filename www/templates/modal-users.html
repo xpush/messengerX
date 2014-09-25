@@ -8,11 +8,11 @@
 
   <ion-header-bar class="bar bar-subheader item-input-inset">
     <label class="item-input-wrapper input-search">
-          <i class="icon ion-ios7-search placeholder-icon"></i>
-          <input id="searchKey" type="search" placeholder="Search" ng-model="modal.search" autocorrect="off">
+      <i class="icon ion-ios7-search placeholder-icon"></i>
+      <input id="searchKey" type="search" placeholder="ID/Name Search" ng-enter="searchUsers();" ng-model="modal.search" autocorrect="off">
     </label>
-    <button class="button button-positive button-search" ng-click='searchUsers()'>
-          <i class="icon ion-search"></i>
+    <button class="button button-positive button-search" ng-click="searchUsers()">
+      <i class="icon ion-search"></i>
     </button>
   </ion-header-bar>
 
@@ -36,5 +36,4 @@
       </div>
     </div>
   </ion-content>
-
 </div>
