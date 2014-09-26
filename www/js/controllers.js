@@ -1,34 +1,6 @@
 angular.module('messengerx.controllers', [])
 
-.controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign, PopupLauncher ) {
-
-  $scope.channelArray = [];
-
-  $scope.gotoChat = function( channelId ) {
-
-    ChannelDao.get( channelId ).then(function(data) {
-      $stateParams.channelId = channelId;
-      $stateParams.channelUsers = data.channel_users;
-      $stateParams.channelName = data.channel_name;
-
-      PopupLauncher.gotoChat( $scope, channelId, $stateParams );
-    });
-  };
-
-  $rootScope.refreshChannel = function( ){
-    ChannelDao.list( $scope ).then(function(channels) {
-      $scope.channelArray = [];
-      $scope.channelArray = channels;
-    });
-
-    ChannelDao.getAllCount().then( function ( result ){
-      $rootScope.totalUnreadCount = result.total_count;
-    });
-  };
-
-  $scope.refreshChannel();
-})
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, $templateCache, Friends, EventManager, PopupLauncher, ChannelDao, Sign) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, $templateCache, Friends, EventManager, ChatLauncher, ChannelDao, Sign) {
 
   /**
    * @ngdoc function
@@ -37,6 +9,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Retrieve friends in database
+   * DB에서 친구 list 를 조회한다.
    */
   $scope.listFriend = function(){
     Friends.list(function(friends){
@@ -57,6 +30,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Sync friends with server
+   * 서버에서 친구 list 를 조회한다.
    */
   $scope.syncFriends = function(){
     Friends.refresh(function(result){
@@ -76,6 +50,7 @@ angular.module('messengerx.controllers', [])
     $scope.listFriend();
   }
 
+  // EventManager를 초기화한다.
   EventManager.init();
 
   /**
@@ -86,6 +61,7 @@ angular.module('messengerx.controllers', [])
    *
    * @description Apply friends display.
    * @param {array} filtered friends by searchKey;
+   * 초성검색 완료후 수행할 funtion. searchByKey directive에서 호출한다.
    */
   $scope.postFriends = function(friends){
     if( friends !== undefined ){
@@ -102,6 +78,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Reset friends list
+   * 초성검색 완료후 수행할 funtion. searchByKey directive에서 호출한다.
    */
   $scope.resetFriends = function(){
     Friends.list(function(friends){
@@ -120,6 +97,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Navigate to Account Menu.
+   * login 사용자의 profile 클릭시 tab.accout 화면으로 이동한다.
    */
   $scope.gotoAccount = function(){
     $state.go( 'tab.account' );
@@ -133,9 +111,12 @@ angular.module('messengerx.controllers', [])
    *
    * @description Navigate to Chat screen.
    * @param {string} Selected friend
+   * 친구이름 클릭시 채널을 생성하고 Chat window로 이동한다.
    */
   $scope.opening = false;
   $scope.gotoChat = function( friendIds ) {
+
+    // double click 시 중복으로 창이 open 되는 것을 막기 위한 변수
     if ($scope.opening) {
       return;
     }
@@ -144,8 +125,24 @@ angular.module('messengerx.controllers', [])
     var jsonObject = {};
     jsonObject.U = [friendIds,Sign.getUser().userId];
     var channelId = ChannelDao.generateId( jsonObject );
-    PopupLauncher.gotoChat( $scope, channelId, $stateParams, function(){
+    ChatLauncher.gotoChat( $scope, channelId, $stateParams, function(){
       $scope.opening = false;
+    });
+  };
+
+  /**
+   * @ngdoc function
+   * @name removeFriend
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description Save selected friends into server
+   * 선택한 친구를 삭제한다.
+   */
+  $scope.removeFriend = function( friendId, itemInx ) {
+    Friends.remove( friendId, function( data ){
+      $scope.friends.splice(itemInx, 1);
+      $scope.friendCount = $scope.friends.length;
     });
   };
 
@@ -156,6 +153,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Open User modal to friend management
+   * 친구 추가를 위한 modal popup을 open한다.
    */
   $scope.openUserModal = function() {
     $scope.modal.datas = [];
@@ -168,22 +166,8 @@ angular.module('messengerx.controllers', [])
   };
 
   /**
-   * @ngdoc function
-   * @name removeFriend
-   * @module messengerx.controllers
-   * @kind function
-   *
-   * @description Save selected friends into server
-   */
-  $scope.removeFriend = function( friendId, itemInx ) {
-    Friends.remove( friendId, function( data ){
-      $scope.friends.splice(itemInx, 1);
-      $scope.friendCount = $scope.friends.length;
-    });
-  };
-
-  /**
    * @description make template for modal-user
+   * modal-user 를 위한 popup을 초기화한다.
    */
   $ionicModal.fromTemplateUrl('templates/modal-users.html', {
     scope: $scope,
@@ -202,6 +186,7 @@ angular.module('messengerx.controllers', [])
    * @kind eventHandler
    *
    * @description event called when modal closing
+   * modal 종료 event 가 호출되면 modal 을 닫고 친구리스트를 서버에서 가져와서 갱신한다.
    */
   $scope.$on('modal.hidden', function() {
     $scope.modal.visible = false;
@@ -220,6 +205,7 @@ angular.module('messengerx.controllers', [])
    * @kind eventHandler
    *
    * @description event called when modal opening
+   * modal 종료 event 가 호출되면 검색값을 초기화한다.
    */
   $scope.$on('modal.shown', function() {
     document.getElementById( "searchKey" ).value = "";
@@ -236,6 +222,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Push selected userId into selection array
+   * 선택된 친구를 selection array에 추가하거나 제거한다.
    * @param {string} selected userId in user modal
    */
   $scope.toggleSelection = function( friendId ){
@@ -254,10 +241,12 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Save selected friends into server
+   * 선택된 친구를 친구리스트에 추가한다.
    */
   $scope.addFriends = function() {
     var res = $scope.modal.selection;
 
+    // res에는 modal에서 넘어오는 선택된 frenids
     if(res.length > 0){
       var addUsers = [];
       for( var key in res ){
@@ -266,6 +255,7 @@ angular.module('messengerx.controllers', [])
         }
       }
 
+      // 친구 추가 API를 호출 후 modal을 닫는다.
       Friends.add( addUsers, function( data ){
         $scope.modal.changed = true;
         $scope.modal.hide();
@@ -288,6 +278,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Search user from server
+   * 서버에서 검색조건을 이용하여 사용자를 검색한다.
    */
   $scope.retrieveUsers = function() {
 
@@ -296,10 +287,12 @@ angular.module('messengerx.controllers', [])
 
       var loginUserId = Sign.getUser().userId;
 
+      // 아직 친구가 아닌 사용자만 조회하기 위한 option
       var query = {
         GR: {'$ne': loginUserId}
       };
 
+      // 이름이나 ID로 사용자를 조회하기 위해 like조건을 만든다.
       if($scope.modal.search) {
         var searchKey = '%'+$scope.modal.search+'%';
         query['$or']= [{'DT.NM' : searchKey}, {'U' : searchKey }]
@@ -320,6 +313,7 @@ angular.module('messengerx.controllers', [])
           $scope.modal.num = $scope.modal.num + 1;
         }
 
+        // scroll이 끝났음을 알리는 event 를 호출한다.
         $scope.$broadcast('scroll.infiniteScrollComplete');
 
         if( !users || users.length < 50) {
@@ -328,6 +322,53 @@ angular.module('messengerx.controllers', [])
       });
     }
   };
+})
+.controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign, ChatLauncher ) {
+
+  $scope.channelArray = [];
+
+  /**
+   * @ngdoc function
+   * @name listFriend
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description transitionTo Chat window 
+   * channel 클릭시 해당 channel의 chat window로 이동한다.
+   */
+  $scope.gotoChat = function( channelId ) {
+
+    ChannelDao.get( channelId ).then(function(data) {
+      $stateParams.channelId = channelId;
+      $stateParams.channelUsers = data.channel_users;
+      $stateParams.channelName = data.channel_name;
+
+      ChatLauncher.gotoChat( $scope, channelId, $stateParams );
+    });
+  };
+
+  /**
+   * @ngdoc function
+   * @name listFriend
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description Retrieve channel in database
+   * local strorage에 있는 채널 정보를 조회후 갱신한다.
+   */
+  $rootScope.refreshChannel = function( ){
+    ChannelDao.list( $scope ).then(function(channels) {
+      $scope.channelArray = [];
+      $scope.channelArray = channels;
+    });
+
+    // unread count를 갱신한다.
+    ChannelDao.getAllCount().then( function ( result ){
+      $rootScope.totalUnreadCount = result.total_count;
+    });
+  };
+
+  $scope.refreshChannel();
 })
 .controller('FriendsModalCtrl', function($scope, $rootScope, $state, Users, Friends, Chat, UTIL, ChannelDao, Sign) {
   var loginUser = Sign.getUser();
@@ -339,6 +380,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Push selected userId into selection array
+   * local strorage에 있는 채널 정보를 조회후 갱신한다.
    */
   $scope.toggleSelection = function( friendId ){
     var inx = $scope.modal.selection.indexOf( friendId );
@@ -358,6 +400,8 @@ angular.module('messengerx.controllers', [])
    * @description Invite friend to current channel
    *  1:1 channel : create new channel for multiple channel
    *  multiple channel : Add selected friends into current channel and change channel name
+   * 현재 channel에 친구를 초대한다.
+   * 1:1 대화시에는 새로운 channel을 만들어 사용자를 추가하고 그렇지 않으면 사용자 추가 후 channel 이름을 변경한다.
    */
   $scope.inviteFriends = function() {
     var res = $scope.modal.selection;
@@ -382,7 +426,7 @@ angular.module('messengerx.controllers', [])
 
       $scope.modal.channelUsers = channelUsers;
 
-      // 1:1 channel
+      // 1:1 channel 인 경우 ID에 $가 separator로 포함되어 있다.
       if( channelId.indexOf( "$" ) > -1 ){
 
         // create new channel for multiple user
@@ -452,12 +496,13 @@ angular.module('messengerx.controllers', [])
 
   /**
    * @ngdoc function
-   * @name changeImage
+   * @name updateUserInfo
    * @module messengerx.controllers
    * @kind function
    *
-   * @description Reset friends list
+   * @description Update my info
    * @param {string} new image url;
+   * server의 사용자 정보를 수정한다.
    */
   $scope.updateUserInfo = function(newImage){
     if( newImage !== '' ){
@@ -477,6 +522,15 @@ angular.module('messengerx.controllers', [])
     });
   };
 
+  /**
+   * @ngdoc function
+   * @name clearData
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description delete all stored datas in current device
+   * local DB에 저장되어 있는 모든 data를 삭제한다.
+   */
   $scope.clearData = function(){
     // An elaborate, custom popup
     var myPopup = $ionicPopup.confirm({
@@ -509,6 +563,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description open file dialog
+   * file을 선택하기 위한 dialog를 호출한다.
    */
   $scope.openFileDialog = function() {
     ionic.trigger('click', { target: document.getElementById('file') });
@@ -521,6 +576,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description make self channel for emoticon file upload
+   * file 업로드를 위한 self channel을 생성한다.
    */
   var initSelfChannel = function(){
 
@@ -556,7 +612,8 @@ angular.module('messengerx.controllers', [])
    * @module messengerx.controllers
    * @kind eventHandler
    *
-   * @description make self channel for emoticon file upload
+   * @description event when object changed
+   * file 객체의 내용이 변경되면 호출되는 event
    */
   var inputObj = document.getElementById('file');
   var progressbar = document.getElementById( "progress_bar" );
@@ -565,7 +622,7 @@ angular.module('messengerx.controllers', [])
 
     var file = inputObj.files[0];
 
-    // Type check
+    // File Type check, image type 이 아닌 경우를 체크
     if( file.type.indexOf( "image" ) < 0 ){
       var alertMessage = {title: 'Upload Failed'};
       alertMessage.subTitle = 'Upload only images';
@@ -628,10 +685,12 @@ angular.module('messengerx.controllers', [])
 
   var delay = 1500;
   setTimeout( function (){
-    storedUser = $localStorage.loginUser;
 
+    storedUser = $localStorage.loginUser;
+    // local storage에 저장되어 있는 user가 있을 때, 
     if( storedUser != undefined ){
 
+      // xpush 객체가 있는지 체크 후 login 을 호출함.
       var checkXpush = setInterval( function(){
         if( $rootScope.xpush ){
           clearInterval( checkXpush );
@@ -640,12 +699,12 @@ angular.module('messengerx.controllers', [])
       }, 100 );
 
     } else {
+
+      // local storage의 객체가 없으면 login page로 이동한다.
       $state.go('signin');
     }
   }, delay);
 })
-
-
 .controller('ErrorCtrl', function($scope, $state){
   $scope.gotoSignIn = function(){
     $state.go('signin');
@@ -658,6 +717,7 @@ angular.module('messengerx.controllers', [])
 
   $scope.scan = function(){
 
+    // search key로 해당하는 message를 조회한다.
     MessageDao.scan( $scope.data.searchKey ).then(function(messageArray) {
       var messages = [];
       for( var inx = 0 ; inx < messageArray.length ; inx++ ){
@@ -682,6 +742,7 @@ angular.module('messengerx.controllers', [])
 })
 .controller('SignInCtrl', function($scope, $rootScope, $state, $location, $stateParams, $ionicPopup, Friends, Sign, Cache) {
 
+  // node webkit이 아닌 navigation bar를 보이지 않게 처리한다.
   if( window.root ){
     $scope.hideNavbar = "false";
   } else {
@@ -695,6 +756,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Authorization
+   * ID 와 PW를 입력받아 login 처리를 한다.
    * @param {jsonObject} Json object that is mapped to the screen
    */
   $scope.signIn = function(user) {
@@ -758,7 +820,7 @@ angular.module('messengerx.controllers', [])
     document.getElementById( "userId" ).focus();
   });
 })
-.controller('SignUpCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign) {
+.controller('SignUpCtrl', function($scope, $rootScope, $state, $stateParams, $http, Sign, STATIC_URL) {
   /**
    * @ngdoc function
    * @name signUp
@@ -766,17 +828,18 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Create user into server
+   * 새로운 user를 생성한다.
    * @param {jsonObject} Json object that is mapped to the screen
    */
   $scope.signUp = function(user) {
     var params = { 'A' : $rootScope.app, 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
-     'DT' : {'NM' : user.userName, 'I':'http://messenger.stalk.io:8080/img/default_image.jpg', 'MG':'' } };
+     'DT' : {'NM' : user.userName, 'I':STATIC_URL+'/img/default_image.jpg', 'MG':'' } };
     Sign.register( params, function(data){
       $state.go('signin');
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $xpushSlide, $ionicBackdrop, $ionicFrostedDelegate, Users, EventManager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons, STATIC_URL) {
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $xpushSlide, $ionicBackdrop, $ionicFrostedDelegate, $ionicScrollDelegate, $ionicModal, $window, Users, EventManager, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons, STATIC_URL) {
 
   var loginUser = Sign.getUser();
 
@@ -797,6 +860,7 @@ angular.module('messengerx.controllers', [])
    * @kind eventHandler
    *
    * @description Generate a pop-up screen from th parent screen
+   * parent 창에서 popupOpened를 호출하면, chat 초기화를 시작한다.
    * @param {jsonObject}
    * @param {jsonObject} Json object from the parent screen
    */
@@ -817,30 +881,37 @@ angular.module('messengerx.controllers', [])
 
       // Initialize chat controller
       channelId = args.stateParams.channelId;
+      $rootScope.activeChannel = channelId;
       if( channelId != undefined ){
-        $rootScope.xpush._getChannelAsync( channelId, function(){
-          init( args.stateParams );
+
+        // channelId가 있을 경우, init 한다.
+        $rootScope.xpush.getChannelAsync( channelId, function(){
+          prepareChatService( args.stateParams );
           EventManager.addEvent();
         });
       } else {
-        init( args.stateParams );
+        prepareChatService( args.stateParams );
         EventManager.addEvent();
       }
     });
 
+    // window에 focus를 잃으면
     $rootScope.$on('$windowBlur', function (){
       Chat.sendSys( 'off' );
     });
 
+    // window에 focus를 받으면 현재 channel 을 활성화시킨다.
     $rootScope.$on('$windowFocus', function (){
       $rootScope.activeChannel = channelId;
       Chat.sendSys( 'on' );
     });
 
+    // window에 close 되었을떄
     $rootScope.$on('$windowClose', function (){
       Chat.sendSys( 'off' );
     });
 
+    // node webkit 일때, popupClose event를 발생시킨다. 팝업리스트를 관리하기 위함.
     if( window.root ){
       var popupWin = require('nw.gui').Window.get();
       popupWin.on('close', function() {
@@ -855,15 +926,16 @@ angular.module('messengerx.controllers', [])
 
   /**
    * @ngdoc function
-   * @name initChat
+   * @name initChatService
    * @module messengerx.controllers
    * @kind function
    *
    * @description Initialize Chat service
+   * Chat service 를 초기화한다.
    * @param {jsonObject}
    * @param {String} Invite Message
    */
-  var initChat = function( inviteMsg ){
+  var initChatService = function( inviteMsg ){
 
     $rootScope.currentScope = $scope;
 
@@ -873,14 +945,13 @@ angular.module('messengerx.controllers', [])
     param.userId = loginUser.userId;
     param.deviceId = loginUser.deviceId;
 
-    $rootScope.activeChannel = channelId;
-
-    // Channel Init
+    // Chat Init
     Chat.init( param, inviteMsg, $scope, function( messages ){
 
       if( messages != undefined ){
 
         // Message in local database
+        $scope.messages = [];
         $scope.messages = $scope.messages.concat(messages);
 
         setTimeout( function(){
@@ -907,6 +978,7 @@ angular.module('messengerx.controllers', [])
           // YYYYMMDD min:ss
           var dateMessage = dateStrs[1]+" "+dateStrs[2];
 
+          // ChannelData 에서 Notice 정보를 추출한 뒤, notice가 있을 경우, 화면에 그려준다.
           $rootScope.xpush.getChannelData( channelId, function( err, channelInfo ){
             var noticeData = channelInfo.DT.NT;
             var noticeMessage = { date : dateMessage, message : data.message,location:data.location, name : Cache.get( data.sender_id ).NM,
@@ -922,42 +994,21 @@ angular.module('messengerx.controllers', [])
     });
   };
 
-  $scope.messages = [];
   var stateParams = $rootScope.$stateParams;
-
-  var setChannelUsers = function( noticeData ){
-    Users.search( { 'U' : { $in: channelUsers } }, -1, function( users ){
-      users.forEach( function( user ){
-        var data = { "NM" : user.DT.NM, "I" : user.DT.I };
-
-        if( !Cache.has( user.U ) ){
-          Cache.add( user.U, data );
-        }
-
-        data.U = user.U;
-        if( noticeData !== undefined ){
-          if( noticeData.Y.US.indexOf( user.U ) > -1 ){
-            data.agree = 'Y';
-          } else if( noticeData.N.US.indexOf( user.U ) > -1  ){
-            data.agree = 'N';
-          }
-        }
-
-        $scope.channelUserDatas.push( data );
-      });
-    });
-  };
+  if( stateParams !== undefined ){
+    prepareChatService( stateParams );
+  }
 
   /**
    * @ngdoc function
-   * @name init
+   * @name prepareChatService
    * @module messengerx.controllers
    * @kind function
    *
-   * @description Initialize current controller
-   * @param {jsonObject} channelId, channelName, channelUsers
+   * @description prepareChat current controller
+   * @param {jsonObject} stateParams
    */
-  var init = function( stateParams ){
+  var prepareChatService = function( stateParams ){
 
     // If channelId is exist, use the channel
     if( stateParams.channelId !== undefined ) {
@@ -967,7 +1018,7 @@ angular.module('messengerx.controllers', [])
       channelUsers.sort();
       channelName = stateParams.channelName;
 
-      initChat( '' );
+      initChatService( '' );
     } else {
       // make friend string to array
       var friendIds = stateParams.friendIds.split("$");
@@ -998,7 +1049,7 @@ angular.module('messengerx.controllers', [])
           inviteMsg = UTIL.getInviteMessage( channelUsers );
         }
 
-        initChat( inviteMsg );
+        initChatService( inviteMsg );
       });
     }
 
@@ -1008,22 +1059,55 @@ angular.module('messengerx.controllers', [])
     $scope.channelId = channelId;
     $scope.channelUsers = channelUsers;
 
-
     // Retrieve emoticon list from local db.
     Emoticons.list( {}, function(emoticons){
-      var baseImgPath = STATIC_URL;
+      var baseImgPath = STATIC_URL+'/img';
       $scope.emoticons.push( { group : 's2', tag : 'ion-happy', 'CN' : 'tab-item tab-item-active', items : {
           "01" : [baseImgPath+'/emo/s2/anger.PNG', baseImgPath+'/emo/s2/burn.PNG', baseImgPath+'/emo/s2/cool.PNG', baseImgPath+'/emo/s2/love.PNG'],
           "02" : [baseImgPath+'/emo/s2/shout.PNG', baseImgPath+'/emo/s2/smile.PNG']}}
       );
-      $scope.emoticons = $scope.emoticons.concat( emoticons );
-      //$scope.emoticons['b2'] = [rootImgPath+'/emo/b2/anger.png', rootImgPath+'/emo/b2/cry.png',  rootImgPath+'/emo/b2/haha.png', rootImgPath+'/emo/b2/money.png'];
+
+      $scope.emoticons.push( { group : 'b2', tag : 'ion-icecream', 'CN' : 'tab-item', items : {
+          "01" : [baseImgPath+'/emo/b2/anger.png', baseImgPath+'/emo/b2/exciting.png', baseImgPath+'/emo/b2/happy.png', baseImgPath+'/emo/b2/greedy.png'],
+          "02" : [baseImgPath+'/emo/b2/victory.png', baseImgPath+'/emo/b2/unhappy.png']}}
+      );
     });
   };
 
-  if( stateParams !== undefined ){
-    init( stateParams );
-  }
+  /**
+   * @ngdoc function
+   * @name setChannelUsers
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description Retrieve user in channel and set vote status;
+   * channel 내의 사용자 정보를 조회한 후 vote status 를 세팅한다.
+   * @param {jsonObject} noticeData
+   */
+  var setChannelUsers = function( noticeData ){
+    // Channel 에 속해있는 사용자 정보를 조회
+    Users.search( { 'U' : { $in: channelUsers } }, -1, function( users ){
+      users.forEach( function( user ){
+        var data = { "NM" : user.DT.NM, "I" : user.DT.I };
+
+        if( !Cache.has( user.U ) ){
+          Cache.add( user.U, data );
+        }
+
+        data.U = user.U;
+        // vote 여부를  확인한다.
+        if( noticeData !== undefined ){
+          if( noticeData.Y.US.indexOf( user.U ) > -1 ){
+            data.agree = 'Y';
+          } else if( noticeData.N.US.indexOf( user.U ) > -1  ){
+            data.agree = 'N';
+          }
+        }
+
+        $scope.channelUserDatas.push( data );
+      });
+    });
+  };
 
   /**
    * @ngdoc function
@@ -1032,16 +1116,33 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Add message to screen and Update scroll
-   * @param {jsonObject} channelId, channelName, channelUsers
+   * 신규 메세지를 화면에 나타내고 scroll을 update한다.
+   * @param {jsonObject} nextMessage
    */
   $scope.add = function( nextMessage ) {
     $scope.messages.push(angular.extend({}, nextMessage));
     $scope.$apply();
 
-    // Update the scroll area and tell the frosted glass to redraw itself
-    if( nextMessage.from !== 'RI' && nextMessage.from !== 'SI' ){
+    // Update the scroll area and tell the frosted glass to redraw itself.
+    if( nextMessage.type !== 'RI' && nextMessage.type !== 'SI' ){
       $ionicFrostedDelegate.update();
       $ionicScrollDelegate.scrollBottom(true);
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name send
+   * @module messengerx.controllers
+   * @kind function
+   * @description Send Message and reset input text
+   * 입력받은 메시지를 전송한 후, chat 입력 창을 초기화한다.
+   */
+  $scope.send = function() {
+    if( $scope.inputMessage !== '' ){
+      var msg = $scope.inputMessage;
+      $scope.inputMessage = '';
+      Chat.send( msg );
     }
   };
 
@@ -1052,33 +1153,20 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Display noticeMsg
+   * Notice 메세지를 화면에 보여준다.
    * @param {string} noticeMsg
+   * @param {boolean} resetFlag
    */
   $scope.setNotice = function( noticeMsg, resetFlag ) {
     $scope.notice = noticeMsg;
+
+    // notice 가 신규로 등록되었다면, 투표 상태를 초기화한다.
     if( resetFlag ){
       $scope.channelUserDatas.forEach( function( channelUserData ){
         channelUserData.agree = undefined;
       });
     }
     $scope.toggleNotice( true );
-  };
-
-  /**
-   * @ngdoc function
-   * @name send
-   * @module messengerx.controllers
-   * @kind function
-   *
-   * @description Send Message and reset input text
-   * @param {jsonObject} channelId, channelName, channelUsers
-   */
-  $scope.send = function() {
-    if( $scope.inputMessage !== '' ){
-      var msg = $scope.inputMessage;
-      $scope.inputMessage = '';
-      Chat.send( msg );
-    }
   };
 
   $scope.selection = [];
@@ -1090,6 +1178,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Open User modal to friend management
+   * channel에 사용자를 초대하기 위한 popup 창을 open한다.
    */
   $scope.openFriendModal = function() {
 
@@ -1142,11 +1231,12 @@ angular.module('messengerx.controllers', [])
 
   /**
    * @ngdoc eventHandler
-   * @name openFriendModal
+   * @name locationChangeStart
    * @module messengerx.controllers
    * @kind eventHandler
    *
-   * @description Open User modal to friend management
+   * @description called when chat screen out
+   * Chat 화면에서 나갈때 호출된다. popup window를 사용하지 않을때
    * @param {object} event
    * @param {object} next state
    * @param {object} currnet state
@@ -1154,7 +1244,7 @@ angular.module('messengerx.controllers', [])
 
   $scope.$on('$locationChangeStart', function(event, next, current) {
 
-    // called when chat screen out
+    // Chat screen 에서 나갈 떄 호출된다.
     if( current.indexOf('/chat') > -1 ){
       $rootScope.currentChannel = '';
       Chat.sendSys( 'off' );
@@ -1168,6 +1258,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Open webRTC for video chatting
+   * webRTC 창을 open한다.
    * @param {string} webRTC key
    */
   $scope.openWebRTC = function( key ){
@@ -1214,6 +1305,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description show or hide emoticon div
+   * Emoticon 영역을 표시하거나 숨긴다.
    * @param {boolean}
    */
   $scope.toggleEmoticons = function( flag ){
@@ -1239,6 +1331,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description show or hide extension div
+   * Emoticon extension 영역을 표시하거나 숨긴다.
    * @param {boolean}
    */
   $scope.toggleExt = function( flag ) {
@@ -1263,7 +1356,8 @@ angular.module('messengerx.controllers', [])
    * @module messengerx.controllers
    * @kind function
    *
-   * @description show or hide extension div
+   * @description show or hide menu div
+   * Emoticon menu 영역을 표시하거나 숨긴다.
    * @param {boolean}
    */
   $scope.chatExtendsMenuClass = "hidden";
@@ -1276,7 +1370,6 @@ angular.module('messengerx.controllers', [])
 
       document.getElementById( 'chat-emoticons' ).style.display = "none";
       document.getElementById( 'chat-extends' ).style.display = "none";
-      //$scope.chatExtendsMenuClass = "chat-extends-menu slide-in-right";
 
       $scope.slidePopup = $xpushSlide.show({
         templateUrl : 'templates/chat-menu.html',
@@ -1297,6 +1390,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description show or hide Notice div
+   * notice 영역을 보여주거나 숨긴다.
    * @param {boolean}
    */
   $scope.toggleNotice = function( flag ) {
@@ -1322,6 +1416,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description show or hide Notice div's menu
+   * notice menu 영역을 보여주거나 숨긴다.
    * @param {boolean}
    */
   $scope.toggleNoticeMenu = function(){
@@ -1336,19 +1431,6 @@ angular.module('messengerx.controllers', [])
     }
   };
 
-  $scope.toggleNoticeMap = function(){
-    if( $scope.showNoticeMap ){
-      document.getElementById( "chat-notice-map" ).style.display = "none";
-      document.getElementById( "notice-message" ).style.whiteSpace =  "nowrap";
-      $scope.showNoticeMap = false;
-    } else {
-      document.getElementById( "notice-message" ).style.whiteSpace = "normal";
-      document.getElementById( "chat-notice-map" ).style.display = "flex";
-      $scope.showNoticeMap = true;
-    }
-  };
-
-
   /**
    * @ngdoc function
    * @name sendEmoticon
@@ -1356,6 +1438,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Send selected emoticon url
+   * 선택한 emoticon의 URL 을 전송한다.
    * @param {string} url
    */
   $scope.sendEmoticon = function(url){
@@ -1371,6 +1454,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Active selected tab and deactive another tab
+   * 선택된 emoticon tab을 active 시킨다.
    * @param {string} selected tabId
    */
   $scope.tabActive = function( tabId ){
@@ -1390,12 +1474,14 @@ angular.module('messengerx.controllers', [])
 
 
   /**
-   * @ngdoc eventHandler
+   * @ngdoc function
    * @name openFileDialog
    * @module messengerx.controllers
-   * @kind eventHandler
+   * @kind function
    *
-   * @description make self channel for emoticon file upload
+   * @description open file dialog
+   * file을 선택하기 위한 dialog를 호출한다.
+   * @param {string} sourceType
    */
   var itemInx = 0;
   $scope.openFileDialog = function( sourceType ) {
@@ -1414,11 +1500,14 @@ angular.module('messengerx.controllers', [])
       function onSuccess(FILE_URI){
         $scope.toggleExt( false );
 
+        // cordova에서 넘어온 FILE_URI를 file 형태로 인식한다.
         window.resolveLocalFileSystemURL(
           FILE_URI,
           function(fileEntry){
             fileEntry.file(function(file){
               var sizeLimit = 20;
+
+              //20M가 넘는 경우 제한을 건다.
               if( file.size  > 1024 * 1024 * sizeLimit ){
                 $ionicPopup.alert({
                   title: 'Upload failed',
@@ -1456,6 +1545,7 @@ angular.module('messengerx.controllers', [])
           $ionicFrostedDelegate.update();
           $ionicScrollDelegate.scrollBottom(true);
 
+          // WebView에서는 file DOM 객체를 지원하지 않기 떄문에, REST 방식으로 file을 보낸다. 
           $rootScope.xpush.uploadFile(channelId, FILE_URI,
           options,
           function ( data ){
@@ -1482,6 +1572,7 @@ angular.module('messengerx.controllers', [])
     }
   };
 
+  // browser, nodewebkit 이용시 file DOM 객체에 event 를 적용한다.
   var inputObj = document.getElementById('file');
   angular.element( inputObj ).on('change',function(event) {
 
@@ -1505,6 +1596,7 @@ angular.module('messengerx.controllers', [])
       file: inputObj
     };
 
+    // image type 인 경우에는 thumbnail을 만들기 위해 options의 type에 image라고 추가한다.
     if( type === 'image' ){
       options.type = "image";
     }
@@ -1512,8 +1604,9 @@ angular.module('messengerx.controllers', [])
     var tp = "";
 
     // if video, add vido progress bar. Otherwise show progress bar.
+    // video 파일 전송시 progreess bar 형태가 조금 다르다 SVP : Send Video Progress, SFP : Send File Progress
     if( type === 'video' ){
-      tp = "SVP";
+      tp = "SVP"; 
     } else {
       tp = "SFP";
     }
@@ -1539,6 +1632,10 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description upload file using socket stream.
+   * socket stream을 이용해서 file을 전송한다.
+   * @param {object} options
+   * @param {string} type
+   * @param {number} itemJnx
    */
   var uploadStream = function( options, type, itemJnx ){
     var progressbar = document.getElementById( "progress_bar"+itemJnx );
@@ -1553,6 +1650,7 @@ angular.module('messengerx.controllers', [])
       var msg;
       var msgType;
 
+      // 전송 완료 후 type 에 따라 업로드한 결과를 공유한다.
       if( type === 'image' ){
         msg = $rootScope.xpush.getFileUrl(channelId, data.result.tname );
         msgType = 'I';
@@ -1580,6 +1678,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Open Notice popup to input notice message
+   * Notice 를 입력하기 위한 Popup을 open한다.
    */
   $scope.showNoticePopup = function() {
     $scope.toggleMenu( false );
@@ -1608,16 +1707,14 @@ angular.module('messengerx.controllers', [])
       ]
     });
     myPopup.then(function(data) {
-      console.log(data);
 
       var noticeMessage = data.notice;
-      var location = data.location;
-      noticeMessage +='^'+location;
 
       if( noticeMessage !== undefined ){
         Chat.send( noticeMessage, 'N' );
 
-        var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'LC':location, 'Y': { 'US':[] }, 'N': { 'US':[] } } } };
+        // Notice 입력완료 시, notice 정보를 channel에 update한다.
+        var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'Y': { 'US':[] }, 'N': { 'US':[] } } } };
         $rootScope.xpush.updateChannel( channelId, query, function( data ){
         });
       }
@@ -1631,6 +1728,9 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Update Notice option
+   * notice 를 upate한다.
+   * @param {boolean} useFlag
+   * @param {boolean} foldFlag
    */
   $scope.updateNotice = function( useFlag, foldFlag ) {
     var param = {'channelId': channelId, useFlag : useFlag, foldFlag : foldFlag };
@@ -1639,10 +1739,12 @@ angular.module('messengerx.controllers', [])
     NoticeDao.update( param );
 
     if( $scope.notice !== undefined ){
+      // notice 사용 여부와 접기 여부를 update한다.
       $scope.notice.useFlag = param.useFlag;
       $scope.notice.foldFlag = param.foldFlag;
     }
 
+    // 사용하지 않는다면, notice 창을 닫는다.
     if( useFlag === 'N' ){
       $scope.toggleNotice( false );
     } else {
@@ -1650,6 +1752,16 @@ angular.module('messengerx.controllers', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name voteNotice
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description Vote to the notice
+   * notice에 투표한다.
+   * @param {boolean} flag
+   */
   $scope.voteNotice = function( flag ){
     var param = {'channelId': channelId, 'useFlag' : $scope.notice.useFlag, 'foldFlag' : $scope.notice.foldFlag  };
     param.voteFlag = flag ? 'Y':'N';
@@ -1663,19 +1775,21 @@ angular.module('messengerx.controllers', [])
 
     var query;
 
+    // 투표 상태에 따라
     if( flag ){
       query = { $addToSet:{ 'DT.NT.Y.US' : loginUser.userId }, $pull:{ 'DT.NT.N.US' : loginUser.userId } };
     } else {
       query = { $pull:{ 'DT.NT.Y.US' : loginUser.userId }, $addToSet:{ 'DT.NT.N.US' : loginUser.userId } };
     }
 
+    // channel 을 update 한다. 
     $rootScope.xpush.updateChannel( channelId, query, function( err, result ){
       $scope.notice.voteFlag = param.voteFlag;
-
       $scope.notice.N_US = result.DT.NT.N.US;
       $scope.notice.Y_US = result.DT.NT.Y.US;
 
       var searchInx = -1;
+      // 사용자를 찾아 vote status를 수정한다.
       for( var inx = 0, until = $scope.channelUserDatas.length; searchInx < 0 && inx < until ; inx++){
         if( $scope.channelUserDatas[inx].U === loginUser.userId ){
           searchInx = inx;
@@ -1683,11 +1797,19 @@ angular.module('messengerx.controllers', [])
       }
       var channelUserData = $scope.channelUserDatas[searchInx];
       channelUserData.agree = param.voteFlag;
-      //$scope.channelUserDatas.splice( searchInx, 1, channelUserData );
       $scope.$apply();
     });
   };
 
+  /**
+   * @ngdoc function
+   * @name exitChannel
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description exit from channel
+   * channel에서 나간다.
+   */
   $scope.exitChannel = function(){
     // An elaborate, custom popup
     var myPopup = $ionicPopup.confirm({
@@ -1696,6 +1818,7 @@ angular.module('messengerx.controllers', [])
     myPopup.then(function(res) {
       if( res === true ){
         Chat.exitChannel( channelId, function(){
+          // popup 사용 중일때는 channel 정보를 갱신하고 popup 창을 닫는다.
           if( $rootScope.usePopupFlag ){
             if( $scope.parentScope && $scope.parentScope.refreshChannel ){
               $scope.parentScope.refreshChannel();
@@ -1704,6 +1827,8 @@ angular.module('messengerx.controllers', [])
               }, 100 );
             }
           } else {
+
+            // popup을 사용중이 아니라면, channel tab으로 화면 전환을 한다.
             if( $scope.slidePopup ){
               $scope.slidePopup.close();
             }
@@ -1723,6 +1848,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description history back for single application
+   * chat 화면에서 이전 화면으로 돌아가기 위한 history back
    */
   $scope.gotoBack = function( ) {
     $window.history.back();
@@ -1735,6 +1861,7 @@ angular.module('messengerx.controllers', [])
    * @kind function
    *
    * @description Set frined's online status on off
+   * 사용자의 online status를 변경한다.
    */
   $scope.setOnlineStatus = function( msg ){
     if( msg === "on" ){
@@ -1746,7 +1873,17 @@ angular.module('messengerx.controllers', [])
     }
   };
 
-  $scope.setBookmark = function( message, inx ){
+  /**
+   * @ngdoc function
+   * @name setBookmark
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description history back for single application
+   * local DB에 bookmark를 추가한다.
+   * @param {string} message
+   */
+  $scope.setBookmark = function( message ){
     var param = {'channel': channelId, 'senderId' : message.senderId, 'timestamp' : message.timestamp };
     if( message.bookmarkFlag == 'Y' ){
       message.bookmarkFlag = 'N';
@@ -1761,12 +1898,12 @@ angular.module('messengerx.controllers', [])
 
   /**
    * @ngdoc function
-   * @name toggleNotice
+   * @name toggleBookmarkOnly
    * @module messengerx.controllers
    * @kind function
    *
-   * @description show or hide Notice div
-   * @param {boolean}
+   * @description show or hide bookmark only
+   * bookmark 된 message만 보여준다.
    */
   $scope.toggleBookmarkOnly = function() {
     if( $scope.toggles.bookmarkOnly ){
@@ -1781,6 +1918,7 @@ angular.module('messengerx.controllers', [])
       param.bookmarkFlag = 'Y';
     }
 
+    // channel list 내에서 bookmark 된 message 만 조회한다.
     Chat.list( param, function( messages ){
 
       $scope.messages = [];
@@ -1793,6 +1931,15 @@ angular.module('messengerx.controllers', [])
     });
   };
 
+  /**
+   * @ngdoc function
+   * @name toggleTTS
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description enable or disable TTS
+   * TTS를 on 하거나 off 한다.
+   */
   $scope.toggleTTS = function() {
     if( $scope.toggles.useTTS ){
       $scope.toggles.useTTS = false;
@@ -1810,6 +1957,7 @@ angular.module('messengerx.controllers', [])
 })
 .controller('ViewCtrl', function($scope, $rootScope) {
 
+  // 전송한 이미지나 동영상을 보여주기 위한 controller
   if( window.root ){
     $scope.hideNavbar = "false";
 
@@ -1827,6 +1975,7 @@ angular.module('messengerx.controllers', [])
 
   $scope.movieSrc = "";
 
+  // 화면이 완료되면
   $scope.$watch('$viewContentLoaded', function() {
 
     var offsetX = $scope.hideNavbar=="true"?16:0;
@@ -1834,6 +1983,7 @@ angular.module('messengerx.controllers', [])
 
     var topBarY = $scope.hideNavbar=="true"?0:44;
 
+    // image 인 경우
     if( type == 'SI' || type == 'RI'  ){
       var imgObj =  document.getElementById('imgContent');
       imgObj.style.display = "block";
@@ -1845,6 +1995,9 @@ angular.module('messengerx.controllers', [])
       });
 
       $scope.imageSrc = srcName;
+
+
+    // video 인 경우
     } else if( type == 'SV' || type == 'RV' ) {
       var video =  document.getElementById('videoContent');
       var videoSourceObj =  document.getElementById('videoSource');

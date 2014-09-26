@@ -23,7 +23,7 @@
           <div class="from">
             <img ng-src="{{message.image}}" class="profile" />
             <span class="mw70">{{message.message}}</span>
-            <img ng-src="{{rootImgPath}}/star_{{message.bookmarkFlag}}.png" class="star"  ng-click="setBookmark( message, $index );"/>
+            <img ng-src="{{rootImgPath}}/star_{{message.bookmarkFlag}}.png" class="star"  ng-click="setBookmark( message );"/>
           </div>
         </div>
         <div ng-if="message.type=='RI'">

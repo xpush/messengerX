@@ -1,8 +1,9 @@
 angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.services', 'messengerx.constants', 'messengerx.directives', 'messengerx.dao', 'ionic.contrib.frostedGlass', 'ngStorage'])
 
-.run(function($location, $ionicPlatform, $rootScope, $state, $window, $localStorage, $sessionStorage, $templateCache, APP_INFO, DB, BASE_URL, Sign, PopupLauncher ) {
+.run(function($location, $ionicPlatform, $rootScope, $state, $window, $localStorage, $sessionStorage, $templateCache, APP_INFO, DB, BASE_URL, Sign, ChatLauncher ) {
   $ionicPlatform.ready(function() {
- 
+  
+    // cordova 에서 back button event 를 추가한다. 2초내에 2번 back button을 누르면 종료된다.
     $ionicPlatform.registerBackButtonAction(function(e){
 
       if ($rootScope.backButtonPressedOnceToExit) {
@@ -32,19 +33,24 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
 
     $rootScope.cameraFlag = false;
     
+    // cordova 를 활용한 mobile 빌드시
     if( window.device ){
+      // device의 unique한 id를 가져온다.
       $rootScope.deviceId = device.uuid;
       $rootScope.rootImgPath = "img";
       $rootScope.rootPath = "";
  
+      // 카메라 사용 여부는 true, 팝업 사용 여부는 false
       $rootScope.cameraFlag = true;
       $rootScope.usePopupFlag = false;
 
       if( device.model.indexOf('x86') === 0 ){ // emulator or desktop pc
         console.log('emulator or desktop pc');
       }else{
+
         var pushNotification = window.plugins.pushNotification;
 
+        // socket 연결이 끊겼을시, GCM 을 받기 위한 key 를 등록한다.
         if( device.platform === 'android' || device.platform === 'Android') {
           pushNotification.register(successHandler, errorHandler,{"senderID":"944977353393","ecb":"onNotification"});
         } else {
@@ -63,25 +69,28 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
         console.log('On Pause');
       }
 
+      // local 에서 활용시 image path를 세팅한다.
     } else if ( $location.absUrl().indexOf( 'file' ) > -1 ) {
       $rootScope.rootImgPath = "img";
       $rootScope.rootPath = "../www/";
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
-      // web
+      // web에서 직접 활용시
     } else {      
       $rootScope.deviceId = 'ionic';
       $rootScope.usePopupFlag = true;
       
-      // messengerX
+      // http://messenger.stalk.io/ site에서 접속시
       if( $location.absUrl().indexOf( 'stalk' ) > -1 ||$location.absUrl().indexOf( 'localhost' ) > -1 ) {        
         $rootScope.rootPath = "/";
         $rootScope.rootImgPath = "../img";
+      // http://messengerx.github.io/app/www/index.html#/splash에서 접속시
       } else {      
         $rootScope.rootPath = "../www/";
         $rootScope.rootImgPath = "../www/img";        
       }
 
+      // mobile agent 인 경우는 popup을 사용하지 않는다.
       var mobileAgents = ["android","iphone","bb","symbian","nokia", "ipad","extension"];
       var agent = window.navigator.userAgent.toLowerCase();
 
@@ -101,7 +110,9 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
 
       var tray = new gui.Tray({ title: 'Tray', icon: 'icon.png' });
 
-      if( process.platform == 'window' ){
+      // window에서 nodewebkit을 사용중인 경우, tray에 Logout과 Quit 메뉴를 등록함 
+      console.log( process.platform );
+      if( process.platform == 'window' || process.platform == 'win32' || process.platform == 'win64' ){
         var menu = new gui.Menu();
         menu.append(new gui.MenuItem({ label: 'Logout' }));
         menu.append(new gui.MenuItem({ label: 'Quit' }));
@@ -115,6 +126,8 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
           tray.remove();
           gui.App.quit();
         };
+
+      // linux나 MAC에서 nodewebkit을 사용중인 경우, menubar에 Logout과 Quit 메뉴를 등록함 
       } else if( process.platform == 'linux' || process.platform == 'darwin' ){
         var menubar = new gui.Menu({ type: "menubar" });
         var submenu = new gui.Menu();
@@ -149,11 +162,13 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
         winmain.menu = menubar;
       }
 
+      // Tray click 시 창을 활성화 함
       tray.click = function(){
         winmain.show();
         winmain.focus();
       }
   
+      // nodewebkit을 사용 중일때는, 창 종료버튼 누를 시 화면을 최소화한다.
       winmain.on('close', function(){
         winmain.minimize();
 
@@ -162,6 +177,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
         }
       });
 
+      // nodewebkit을 사용 중일때는, 창 종료버튼 누를 시 화면을 최소화한다.
       $rootScope.close = function(){
         winmain.minimize();
         if( process.platform == 'window' ){
@@ -185,7 +201,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
       $rootScope.supportWebRTC = false;
     }
 
-    // Use in cordova
+    // Use in cordova for local Notification
     $rootScope.localNoti = function(param, callback){
       if( window.plugin && window.plugin.notification.local ){
         window.plugin.notification.local.add({
@@ -283,19 +299,24 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
       console.log( 'error = ', result );
     }
 
+    // APN 토큰 등록시
     function tokenHandler(result) {
       console.log( 'device token = ', result );
     }
 
+    // WEB SQL DB 를 생성 또는 생성 여부를 확인한다.
     DB.init();
 
+    // Popup 사용하지 않을때는, autoInitFlag를 true 설정하여 메세지가 들어올 경우 채널을 자동으로 생성한다.
     var autoInitFlag = false;
     if( !$rootScope.usePopupFlag ){
       autoInitFlag = true;
     }
 
+    // xpush 를 생성한다.
     $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
 
+      // LOGOUT event 를 설정한다.
       if(type === 'LOGOUT'){
         if( !$sessionStorage.reloading ){
           $rootScope.logout( function(){
@@ -305,12 +326,13 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
       }
     }, autoInitFlag );
 
-    // tootScope function
+    // rootScope function
     $rootScope.logout = function( callback ){
       Sign.logout(function(){
         $rootScope.xpush.logout();
 
-        var popups = PopupLauncher.getPopups();
+        // 열려 있는 팝업이 있다면 팝업을 close 한다.
+        var popups = ChatLauncher.getPopups();
         for( var key in popups ){
           popups[key].close();
         }
@@ -322,6 +344,8 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
           callback();
         } else {
           $templateCache.removeAll();
+
+          // 로그인  창으로 이동한다.
           $state.transitionTo('signin', {}, { reload: true, notify: true });
         }
       });
@@ -330,7 +354,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
     $rootScope.totalUnreadCount = 0;
   });
 
-  // Add Auth Interceptor
+  // reloading 중에는 logout 이벤트를 발생시키지 않기 위한 설정
   $rootScope.$on("$stateChangeSuccess", function (event, toState, toParams, fromState, fromParams) {
     if( toState.name === 'splash' ){
       $sessionStorage.reloading = true;
@@ -339,6 +363,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
     }
   });
 
+  // siginin, signup, splash, error 페이지가 아닌 경우에는 로그인 되어 있지 않은 경우 splash 화면으로 이동한다.
   $rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams) {
     var ignoreStates = ["signin","signup","splash","error"];
 
@@ -352,13 +377,8 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
 
 .config(function($stateProvider, $urlRouterProvider) {
 
-  // Ionic uses AngularUI Router which uses the concept of states
-  // Learn more here: https://github.com/angular-ui/ui-router
-  // Set up the various states which the app can be in.
-  // Each state's controller can be found in controllers.js
-  $stateProvider
-
-   
+  // UrlProvier 를 세팅한다.
+  $stateProvider   
     .state('splash', {
       url: "/splash",
       templateUrl: "templates/splash.html",
@@ -407,6 +427,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
       }
     })
 
+    // Tab의 첫 화면
     .state('tab.friends', {
       url: '/friends',
       views: {
@@ -447,7 +468,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
       }
     });
 
-  // splash screen start
+  // default로 splash screen start
   $urlRouterProvider.otherwise('/splash');
 });
 
@@ -460,11 +481,13 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     }
   }
 }])
-.factory('PopupLauncher', function($rootScope, $state, Cache, Sign){
+// Main Window를 위한 ChatLauncher
+.factory('ChatLauncher', function($rootScope, $state, Cache, Sign){
   var popupCount = 0;
   var popups = {};
   var self;
 
+  // popupClose 이벤트를 받을 경우 popup map에서 제거
   $rootScope.$on("$popupClose", function ( data, key ){
     delete popups[key];
     popupCount--;
@@ -477,13 +500,15 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     gotoChat : function( scope, popupKey, stateParams, callback ){
       self = this;
 
+      // popup 사용여부가 true일 때는 chat window를 팝업으로 띠우고, 그렇지 않을땐  현재 창에서 이동한다.
       if( $rootScope.usePopupFlag ){
         if( popups[popupKey] !== undefined ){
           if( popups[popupKey].window ){
             popups[popupKey].window.focus();
           } else {
             popups[popupKey].focus();
-          }            
+          }
+          callback();     
         } else {
 
           var popup;
@@ -492,8 +517,9 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           var top = 0 + ( popupCount * 50 ) ;
           popupCount++;
 
-          if( $rootScope.nodeWebkit ){
+          if( $rootScope.nodeWebkit ){ 
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
+            // nodewebkit에서 채팅창이 option위치에서 열리지 않아, 채팅창을 정해진 위치로 이동시킨다.
             popup.moveTo(left,top);
           } else {
             popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
@@ -502,10 +528,13 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           var startTime = Date.now();
           var popupInterval = setInterval( function(){
             var endTime = Date.now();
+
+            // 팝업이 뜨는데 걸리는 시간이 10초를 넘어가면 팝업을 오픈한다.
             if( endTime - startTime > 10000 ){
               clearInterval( popupInterval );
             }
 
+            // popup의 angular socpe 및 popupOpened 이벤트가 발생할때가지 팝업 생성을 기다린다. 
             if( popup !== undefined ) {
               var popObj = popup.window.document.getElementById( "popupchat" );
               if( popObj !== undefined && popup.window.angular !== undefined ){
@@ -535,6 +564,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       } else {
         popups[popupKey] = popupWin;
 
+        // broswer 사용시 chat window를 종료할때 이벤트 처리를 위함
         popupWin.onbeforeunload = function(){
           scope.$broadcast("$windowClose" );
           popupCount--;
@@ -542,6 +572,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
         };
       }
 
+      // 채팅 창으로 로그인 정보와 세션 커넥션을 넘김.
       var args = {};
       args.loginUser = Sign.getUser();
       args.stateParams = stateParams;
@@ -550,6 +581,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       args.sessionConnection = $rootScope.xpush._sessionConnection;
       args.parentScope = $rootScope;
 
+      // 팝업 오픈이 완료되었음을 알리는 event를 발생시킨다.
       scope.$broadcast("$popupOpened", args );
     }
   };

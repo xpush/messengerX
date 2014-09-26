@@ -21,7 +21,7 @@
     var RMKEY = 'message';
 
     var isDebugging = false;
-    var debug = function(name){
+    var debug = function(){
       if( isDebugging ){
         if (console.log.bind === 'undefined') { // IE < 10
           Function.prototype.bind.call(console.log, console, context);
@@ -29,7 +29,7 @@
           console.log.apply(console, arguments);
         }
       }
-    };
+    }
     
     /**
      * Xpush의 생성자
@@ -92,14 +92,6 @@
       NODE : '/node'
     };
 
-    XPush.prototype.enableDebug = function(){
-      isDebugging = true;
-    }
-
-    XPush.prototype.disableDebug = function(){
-      isDebugging = false;
-    }
-
     /**
      * userId와 password를 이용하여 회원가입을 한다.
      * @name signup
@@ -140,7 +132,7 @@
      * @example
      * 
      * xpush.login( 'james', '1234', function(err,data){
-     *   console.log('login success : ', data);
+     *   console.log('register success : ', data);
      * });
      * @example
      * // login with deviceId
@@ -158,7 +150,6 @@
 
       if(typeof(mode) == 'function' && !cb){
         cb = mode;
-        mode = undefined;
       }
 
       self.userId = userId;
@@ -516,7 +507,7 @@
      */
     XPush.prototype.joinChannel = function(channel, param, cb){
       var self = this;
-      self._getChannelAsync(channel, function (err, ch){
+      self.getChannelAsync(channel, function (err, ch){
         ch.joinChannel( param, function( data ){
           cb( data );
         });
@@ -549,11 +540,11 @@
      * @param {string} channel - Channel Id
      * @param {callback} cb - 조회 후 수행할 callback function
      * @example
-     * xpush._getChannelAsync( 'channel03', function(err, result){
+     * xpush.getChannelAsync( 'channel03', function(err, result){
      *   console.log( 'result : ', result);
      * });
      */
-    XPush.prototype._getChannelAsync = function(channel, cb){
+    XPush.prototype.getChannelAsync = function(channel, cb){
       var self = this;
       var ch = self.getChannel(channel);
       if(!ch){
@@ -596,7 +587,7 @@
     XPush.prototype.uploadStream = function(channel, inputObj, fnPrg, fnCallback){
       var self = this;
 
-      self._getChannelAsync(channel, function (err, ch){
+      self.getChannelAsync(channel, function (err, ch){
 
         var blobs   = [];
         var streams = [];
@@ -658,7 +649,7 @@
     XPush.prototype.uploadFile = function(channel, fileUri, inputObj, fnPrg, fnCallback){
       var self = this;
 
-      self._getChannelAsync(channel, function(err, ch){
+      self.getChannelAsync(channel, function(err, ch){
 
         if(window.FileTransfer && window.FileUploadOptions){
 
@@ -889,7 +880,7 @@
     XPush.prototype.send = function(channel, name, data){
       var self = this;
 
-      self._getChannelAsync(channel, function (err, ch){
+      self.getChannelAsync(channel, function (err, ch){
         ch.send(name,data);
       });
     };
@@ -1144,9 +1135,7 @@
          options.headers = {};
       }
 
-      options.headers['Content-Type'] = 'application/json';
-
-      debug( options );
+      options.headers['Content-Type'] = 'application/json';      
 
       var result = '';
       var request = http.request( options, function(res) {
@@ -1171,7 +1160,6 @@
       });
       
       if( method.toLowerCase() !== 'GET'.toLowerCase() ){
-        debug( data );
         request.write(JSON.stringify(data));
       }
       request.end();

@@ -78,7 +78,7 @@ angular.module('messengerx.directives', [])
       element.bind("click" , function(event){
         var xpush = $rootScope.xpush;
                         
-        xpush._getChannelAsync( scope.channelId, function(ch){
+        xpush.getChannelAsync( scope.channelId, function(ch){
           var fileNm;
           var type = attrs.type;
 

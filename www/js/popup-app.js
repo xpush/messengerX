@@ -25,15 +25,15 @@ angular.module('popupchat', ['ionic', 'messengerx.controllers', 'messengerx.serv
       $rootScope.rootImgPath = "../img";
       $rootScope.rootPath = "/";
       $rootScope.deviceId = 'ionic';
-    }
 
-    // messengerX
-    if( $location.absUrl().indexOf( 'stalk' ) > -1 ||$location.absUrl().indexOf( 'localhost' ) > -1 ) {        
-      $rootScope.rootPath = "/";
-      $rootScope.rootImgPath = "../img";
-    } else {      
-      $rootScope.rootPath = "../www/";
-      $rootScope.rootImgPath = "../www/img";        
+      // messengerX
+      if( $location.absUrl().indexOf( 'stalk' ) > -1 ||$location.absUrl().indexOf( 'localhost' ) > -1 ) {        
+        $rootScope.rootPath = "/";
+        $rootScope.rootImgPath = "../img";
+      } else {      
+        $rootScope.rootPath = "../www/";
+        $rootScope.rootImgPath = "../www/img";        
+      }
     }
 
     if( window.root ){
