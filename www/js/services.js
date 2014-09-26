@@ -1,9 +1,9 @@
-angular.module('starter.services', [])
+angular.module('messengerx.services', [])
 
 /**
  * @ngdoc factory
  * @name Cache
- * @module starter.services
+ * @module messengerx.services
  * @kind factory
  *
  * @description Manage cache for image and userName
@@ -15,7 +15,7 @@ angular.module('starter.services', [])
     /**update
      * @ngdoc function
      * @name all
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description return cache object
@@ -28,7 +28,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name add
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description add cache object
@@ -42,7 +42,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name remove
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description remove cache object
@@ -55,7 +55,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name remove
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description get cache object by userId
@@ -73,7 +73,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name set
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description set entire cache object
@@ -86,7 +86,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name has
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description set entire cache object
@@ -108,7 +108,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name add
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Save friends into server
@@ -125,7 +125,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name remove
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Remove a friend from buddy list
@@ -143,7 +143,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name getRefreshHistory
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Retrieve refresh history from local DB
@@ -158,7 +158,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name list
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Retrieve friend list from local DB and save info Cache
@@ -183,7 +183,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name refresh
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Retrieve friends from server and save into local DB
@@ -209,7 +209,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name lish
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Retrieve users from server
@@ -224,7 +224,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name search
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Retrieve friend list from server
@@ -257,14 +257,14 @@ angular.module('starter.services', [])
     }
   };
 })
-.factory('Manager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, NoticeDao, UTIL ) {
+.factory('EventManager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, NoticeDao, UTIL ) {
   var _initFlag = false;
   return {
 
     /**
      * @ngdoc function
      * @name init
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Initialize this application's singleton object
@@ -295,13 +295,13 @@ angular.module('starter.services', [])
     addEvent : function(){
       var self = this;
 
-      $rootScope.$on("ON_POPUP_OPEN", function (data, args) {
+      $rootScope.$on("$popupOpen", function (data, args) {
         if( $rootScope.refreshChannel ){
           $rootScope.refreshChannel();
         }
       });
 
-      $rootScope.$on("ON_LOGOUT", function (data, args) {
+      $rootScope.$on("$logout", function (data, args) {
         _initFlag = false;
         $rootScope.xpush.clearEvent();
       });
@@ -495,7 +495,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name channelList
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Retrieve channel list from server
@@ -537,7 +537,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name unreadMessage
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Retrieve unread message list from server
@@ -623,7 +623,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name logout
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Clear login info and go to login page
@@ -642,7 +642,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc functionf
      * @name register
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Call REST API for register user
@@ -660,7 +660,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name update
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Call REST API for update user
@@ -678,7 +678,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name setUser
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description ser userInfo into session
@@ -691,7 +691,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name getUser
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description return logined user
@@ -712,7 +712,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name init
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description return logined user
@@ -784,7 +784,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name send
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Send message
@@ -804,7 +804,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name join
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Join channel
@@ -820,7 +820,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name send
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Send System Message
@@ -835,7 +835,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name send
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Send System Message
@@ -847,7 +847,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name send
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Send System Message
@@ -869,7 +869,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name list
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Retreive emoticon from local DB
@@ -932,7 +932,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name add
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Add emoticon into local DB and current Emoticon object
@@ -995,7 +995,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name getUniqueKey
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Generate uuid
@@ -1016,7 +1016,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name timeToString
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Generate uuid
@@ -1058,7 +1058,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name getChosung
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Get chosung for Korean character
@@ -1077,7 +1077,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name getChosung
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Get morphemes for Korean character
@@ -1131,7 +1131,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name getChosung
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Get morphemes for Korean character
@@ -1163,7 +1163,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name getNames
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Get channelName by channelUser
@@ -1212,7 +1212,7 @@ angular.module('starter.services', [])
     /**
      * @ngdoc function
      * @name getType
-     * @module starter.services
+     * @module messengerx.services
      * @kind function
      *
      * @description Get file type from DOM object

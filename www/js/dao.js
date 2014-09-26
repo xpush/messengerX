@@ -1,11 +1,11 @@
-angular.module('starter.dao', [])
+angular.module('messengerx.dao', [])
 
 .factory('UserDao', function(Sign, DB, UTIL) {
   return {
     /**
      * @ngdoc function
      * @name getRefreshHistory
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Get refresh history from local DB
@@ -23,7 +23,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name updateRefreshHistory
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Insert or update refresh history at local DB
@@ -47,7 +47,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name addAll
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Insert or update a lot of user data at local DB
@@ -89,7 +89,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name list
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Retrieve user list from local DB
@@ -107,7 +107,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name remove
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Delete user from local DB
@@ -133,7 +133,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name get
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Retrieve single channel data from local DB
@@ -151,7 +151,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name list
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Retrieve channel list from local DB
@@ -171,7 +171,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name getAllCount
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Retrieve total unread message count from local DB
@@ -190,7 +190,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name updateUsers
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description  Update channel name and channel users at local DB
@@ -213,7 +213,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name update
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description  Update channel info at local DB
@@ -252,7 +252,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name insert
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description  insert channel info into local DB
@@ -282,7 +282,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name add
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Insert or replace channel info with channel image at local DB
@@ -375,7 +375,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name generateId
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Generate channel Id
@@ -395,7 +395,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name delete
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description delelte channel Id
@@ -583,7 +583,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name notice
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Retrieve notice message from local DB
@@ -600,7 +600,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name add
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Insert or replace notice message at local DB
@@ -632,7 +632,7 @@ angular.module('starter.dao', [])
     /**
      * @ngdoc function
      * @name add
-     * @module starter.dao
+     * @module messengerx.dao
      * @kind function
      *
      * @description Update notice message at local DB

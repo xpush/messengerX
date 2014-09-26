@@ -1,4 +1,4 @@
-angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic.contrib.frostedGlass', 'ngStorage'])
+angular.module('popupchat', ['ionic', 'messengerx.controllers', 'messengerx.services', 'messengerx.constants', 'messengerx.directives', 'messengerx.dao', 'ionic.contrib.frostedGlass', 'ngStorage'])
 .run(function($location, $ionicPlatform, $window, $rootScope, APP_INFO, DB, BASE_URL, Sign ) {
   $ionicPlatform.ready(function() {
 
@@ -28,13 +28,13 @@ angular.module('popupchat', ['ionic', 'starter.controllers', 'starter.services',
     }
 
     // messengerX
-    if( $location.absUrl().indexOf( 'stalk' ) > -1 ) {        
+    if( $location.absUrl().indexOf( 'stalk' ) > -1 ||$location.absUrl().indexOf( 'localhost' ) > -1 ) {        
       $rootScope.rootPath = "/";
       $rootScope.rootImgPath = "../img";
     } else {      
       $rootScope.rootPath = "../www/";
       $rootScope.rootImgPath = "../www/img";        
-    }    
+    }
 
     if( window.root ){
       var gui = require('nw.gui');

@@ -1,6 +1,6 @@
-angular.module('starter.controllers', [])
+angular.module('messengerx.controllers', [])
 
-.controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign, NAVI ) {
+.controller('ChannelCtrl', function($scope, $rootScope, $rootElement, $window, $state, $stateParams, ChannelDao, Friends, Cache, Sign, PopupLauncher ) {
 
   $scope.channelArray = [];
 
@@ -11,7 +11,7 @@ angular.module('starter.controllers', [])
       $stateParams.channelUsers = data.channel_users;
       $stateParams.channelName = data.channel_name;
 
-      NAVI.gotoChat( $scope, channelId, $stateParams );
+      PopupLauncher.gotoChat( $scope, channelId, $stateParams );
     });
   };
 
@@ -28,12 +28,12 @@ angular.module('starter.controllers', [])
 
   $scope.refreshChannel();
 })
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, $templateCache, Friends, Manager, NAVI, ChannelDao, Sign) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, $templateCache, Friends, EventManager, PopupLauncher, ChannelDao, Sign) {
 
   /**
    * @ngdoc function
    * @name listFriend
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Retrieve friends in database
@@ -53,7 +53,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name syncFriends
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Sync friends with server
@@ -69,19 +69,19 @@ angular.module('starter.controllers', [])
   $scope.friendCount = 0;
   $scope.searchKey = "";
 
-  // Init Manager
+  // Init EventManager
   if( $rootScope.syncFlag ) {
     $scope.syncFriends();
   } else {
     $scope.listFriend();
   }
 
-  Manager.init();
+  EventManager.init();
 
   /**
    * @ngdoc function
    * @name postFriends
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Apply friends display.
@@ -98,7 +98,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name resetFriends
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Reset friends list
@@ -116,7 +116,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name gotoAccount
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Navigate to Account Menu.
@@ -128,7 +128,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name gotoChat
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Navigate to Chat screen.
@@ -144,7 +144,7 @@ angular.module('starter.controllers', [])
     var jsonObject = {};
     jsonObject.U = [friendIds,Sign.getUser().userId];
     var channelId = ChannelDao.generateId( jsonObject );
-    NAVI.gotoChat( $scope, channelId, $stateParams, function(){
+    PopupLauncher.gotoChat( $scope, channelId, $stateParams, function(){
       $scope.opening = false;
     });
   };
@@ -152,7 +152,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name openUserModal
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Open User modal to friend management
@@ -170,7 +170,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name removeFriend
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Save selected friends into server
@@ -198,7 +198,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc eventHandler
    * @name modal.hidden
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind eventHandler
    *
    * @description event called when modal closing
@@ -216,7 +216,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc eventHandler
    * @name modal.shown
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind eventHandler
    *
    * @description event called when modal opening
@@ -232,7 +232,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name toggleSelection
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Push selected userId into selection array
@@ -250,7 +250,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name addFriends
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Save selected friends into server
@@ -284,7 +284,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name retrieveUsers
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Search user from server
@@ -335,7 +335,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name toggleSelection
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Push selected userId into selection array
@@ -352,7 +352,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name inviteFriends
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Invite friend to current channel
@@ -414,7 +414,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name postFriends
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Apply friends display.
@@ -430,7 +430,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name resetFriends
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Reset friends list
@@ -453,7 +453,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name changeImage
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Reset friends list
@@ -505,7 +505,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name openFileDialog
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description open file dialog
@@ -517,7 +517,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name initSelfChannel
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description make self channel for emoticon file upload
@@ -553,7 +553,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc eventHandler
    * @name inputObj
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind eventHandler
    *
    * @description make self channel for emoticon file upload
@@ -691,7 +691,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name signIn
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Authorization
@@ -762,7 +762,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name signUp
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Create user into server
@@ -776,7 +776,7 @@ angular.module('starter.controllers', [])
     });
   };
 })
-.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $xpushSlide, $ionicBackdrop, $ionicFrostedDelegate, Users, Manager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons, STATIC_URL) {
+.controller('ChatCtrl', function($state, $scope, $rootScope, $ionicPopup, $xpushSlide, $ionicBackdrop, $ionicFrostedDelegate, Users, EventManager, $ionicScrollDelegate,  $ionicModal, $window, Friends, Sign, Chat, Cache, ChannelDao, NoticeDao, UTIL, Emoticons, STATIC_URL) {
 
   var loginUser = Sign.getUser();
 
@@ -792,15 +792,15 @@ angular.module('starter.controllers', [])
 
   /**
    * @ngdoc eventHandler
-   * @name INTER_WINDOW_DATA_TRANSFER
-   * @module starter.controllers
+   * @name $popupOpened
+   * @module messengerx.controllers
    * @kind eventHandler
    *
    * @description Generate a pop-up screen from th parent screen
    * @param {jsonObject}
    * @param {jsonObject} Json object from the parent screen
    */
-  $rootScope.$on("INTER_WINDOW_DATA_TRANSFER", function (data, args) {
+  $rootScope.$on("$popupOpened", function (data, args) {
     // Copy session object and cache object
 
     Sign.setUser( args.loginUser );
@@ -820,11 +820,11 @@ angular.module('starter.controllers', [])
       if( channelId != undefined ){
         $rootScope.xpush._getChannelAsync( channelId, function(){
           init( args.stateParams );
-          Manager.addEvent();
+          EventManager.addEvent();
         });
       } else {
         init( args.stateParams );
-        Manager.addEvent();
+        EventManager.addEvent();
       }
     });
 
@@ -856,7 +856,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name initChat
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Initialize Chat service
@@ -890,8 +890,8 @@ angular.module('starter.controllers', [])
           if( $scope.parentScope != undefined ){
             var args = {"channelId":channelId};
 
-            // Broadcast ON_POPUP_OPEN event for
-            $scope.parentScope.$broadcast("ON_POPUP_OPEN", args);
+            // Broadcast $popupOpen event for
+            $scope.parentScope.$broadcast("$popupOpen", args);
           }
         }, 300 );
       }
@@ -951,7 +951,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name init
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Initialize current controller
@@ -1028,7 +1028,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name add
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Add message to screen and Update scroll
@@ -1048,7 +1048,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name setNotice
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Display noticeMsg
@@ -1067,7 +1067,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name send
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Send Message and reset input text
@@ -1086,7 +1086,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name openFriendModal
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Open User modal to friend management
@@ -1143,7 +1143,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc eventHandler
    * @name openFriendModal
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind eventHandler
    *
    * @description Open User modal to friend management
@@ -1164,7 +1164,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name openWebRTC
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Open webRTC for video chatting
@@ -1210,7 +1210,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name toggleEmoticons
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description show or hide emoticon div
@@ -1235,7 +1235,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name toggleExt
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description show or hide extension div
@@ -1260,7 +1260,7 @@ angular.module('starter.controllers', [])
  /**
    * @ngdoc function
    * @name toggleExt
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description show or hide extension div
@@ -1293,7 +1293,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name toggleNotice
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description show or hide Notice div
@@ -1318,7 +1318,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name toggleNotice
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description show or hide Notice div's menu
@@ -1352,7 +1352,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name sendEmoticon
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Send selected emoticon url
@@ -1367,7 +1367,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name tabActive
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Active selected tab and deactive another tab
@@ -1392,7 +1392,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc eventHandler
    * @name openFileDialog
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind eventHandler
    *
    * @description make self channel for emoticon file upload
@@ -1535,7 +1535,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name uploadStream
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description upload file using socket stream.
@@ -1576,7 +1576,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name showNoticePopup
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Open Notice popup to input notice message
@@ -1627,7 +1627,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name updateNotice
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Update Notice option
@@ -1719,7 +1719,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name gotoBack
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description history back for single application
@@ -1731,7 +1731,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name setOnlineStatus
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description Set frined's online status on off
@@ -1762,7 +1762,7 @@ angular.module('starter.controllers', [])
   /**
    * @ngdoc function
    * @name toggleNotice
-   * @module starter.controllers
+   * @module messengerx.controllers
    * @kind function
    *
    * @description show or hide Notice div

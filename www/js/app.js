@@ -1,14 +1,13 @@
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'starter.directives', 'starter.dao', 'ionic', 'ionic.contrib.frostedGlass', 'ngStorage'])
+angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.services', 'messengerx.constants', 'messengerx.directives', 'messengerx.dao', 'ionic.contrib.frostedGlass', 'ngStorage'])
 
-.run(function($location, $ionicPlatform, $rootScope, APP_INFO, DB, BASE_URL, Sign, NAVI, $state, $window, $localStorage, $sessionStorage, $templateCache ) {
+.run(function($location, $ionicPlatform, $rootScope, $state, $window, $localStorage, $sessionStorage, $templateCache, APP_INFO, DB, BASE_URL, Sign, PopupLauncher ) {
   $ionicPlatform.ready(function() {
-
+ 
     $ionicPlatform.registerBackButtonAction(function(e){
 
       if ($rootScope.backButtonPressedOnceToExit) {
         ionic.Platform.exitApp();
-      }
-      else if('/tab/friends' === $location.path() ) {
+      } else if('/tab/friends' === $location.path() ) {
         $rootScope.backButtonPressedOnceToExit = true;
         window.plugins.toast.showShortCenter(
           "'뒤로가기'버튼을 한번 더 누르시면, \n종료됩니다.",function(a){},function(b){}
@@ -16,8 +15,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         setTimeout(function(){
           $rootScope.backButtonPressedOnceToExit = false;
         },2000);
-      }
-      else if ($rootScope.$viewHistory.backView) {
+      } else if ($rootScope.$viewHistory.backView) {
         console.log( $rootScope.$viewHistory.backView );
         $rootScope.$viewHistory.backView.go();
       }
@@ -312,13 +310,13 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       Sign.logout(function(){
         $rootScope.xpush.logout();
 
-        var popups = NAVI.getPopups();
+        var popups = PopupLauncher.getPopups();
         for( var key in popups ){
           popups[key].close();
         }
 
         // broadcast for clear event
-        $rootScope.$broadcast( "ON_LOGOUT" );
+        $rootScope.$broadcast( "$logout" );
 
         if ( callback && typeof callback === 'function') {
           callback();
@@ -462,7 +460,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
     }
   }
 }])
-.factory('NAVI', function($rootScope, $state, Cache, Sign){
+.factory('PopupLauncher', function($rootScope, $state, Cache, Sign){
   var popupCount = 0;
   var popups = {};
   var self;
@@ -513,7 +511,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
               if( popObj !== undefined && popup.window.angular !== undefined ){
                 var newWindowRootScope = popup.window.angular.element( popObj ).scope();
                 if( newWindowRootScope !== undefined && newWindowRootScope.xpush !== undefined ){
-                  if( newWindowRootScope.$$listeners.INTER_WINDOW_DATA_TRANSFER !== undefined ){
+                  if( newWindowRootScope.$$listeners.$popupOpened !== undefined ){
                     clearInterval( popupInterval );
                     self.openPopup( popup, popupKey, newWindowRootScope, stateParams );
                     if ( callback && typeof callback === 'function') {
@@ -552,7 +550,7 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
       args.sessionConnection = $rootScope.xpush._sessionConnection;
       args.parentScope = $rootScope;
 
-      scope.$broadcast("INTER_WINDOW_DATA_TRANSFER", args );
+      scope.$broadcast("$popupOpened", args );
     }
   };
 });

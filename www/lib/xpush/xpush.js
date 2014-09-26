@@ -20,8 +20,8 @@
 
     var RMKEY = 'message';
 
-    var isDebugging = true;
-    var debug = function(){
+    var isDebugging = false;
+    var debug = function(name){
       if( isDebugging ){
         if (console.log.bind === 'undefined') { // IE < 10
           Function.prototype.bind.call(console.log, console, context);
@@ -29,7 +29,7 @@
           console.log.apply(console, arguments);
         }
       }
-    }
+    };
     
     /**
      * Xpush의 생성자
@@ -92,6 +92,14 @@
       NODE : '/node'
     };
 
+    XPush.prototype.enableDebug = function(){
+      isDebugging = true;
+    }
+
+    XPush.prototype.disableDebug = function(){
+      isDebugging = false;
+    }
+
     /**
      * userId와 password를 이용하여 회원가입을 한다.
      * @name signup
@@ -132,7 +140,7 @@
      * @example
      * 
      * xpush.login( 'james', '1234', function(err,data){
-     *   console.log('register success : ', data);
+     *   console.log('login success : ', data);
      * });
      * @example
      * // login with deviceId
@@ -150,6 +158,7 @@
 
       if(typeof(mode) == 'function' && !cb){
         cb = mode;
+        mode = undefined;
       }
 
       self.userId = userId;
@@ -1135,7 +1144,9 @@
          options.headers = {};
       }
 
-      options.headers['Content-Type'] = 'application/json';      
+      options.headers['Content-Type'] = 'application/json';
+
+      debug( options );
 
       var result = '';
       var request = http.request( options, function(res) {
@@ -1160,6 +1171,7 @@
       });
       
       if( method.toLowerCase() !== 'GET'.toLowerCase() ){
+        debug( data );
         request.write(JSON.stringify(data));
       }
       request.end();

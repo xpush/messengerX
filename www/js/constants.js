@@ -1,4 +1,4 @@
-angular.module('starter.constants', [])
+angular.module('messengerx.constants', [])
 
   .constant('APP_INFO', {
     version: '1.0 BETA',

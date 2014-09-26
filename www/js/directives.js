@@ -1,4 +1,4 @@
-angular.module('starter.directives', [])
+angular.module('messengerx.directives', [])
 
 .directive('ngEnter', function() {
   return function(scope, element, attrs) {
