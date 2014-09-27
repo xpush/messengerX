@@ -316,9 +316,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
     $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
 
       // LOGOUT event 를 설정한다.
-      console.log( type );
       if(type === 'LOGOUT'){
-        console.log( '222 : ' + $sessionStorage.reloading );
         if( !$sessionStorage.reloading ){
           $rootScope.logout( function(){
             $state.go( "error" );
@@ -467,6 +465,12 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
           controller: 'MessageCtrl'
         }
       }
+    })
+
+    .state('view', {
+      url: "/view",
+      templateUrl: "templates/view.html",
+      controller: 'ViewCtrl'
     });
 
   // default로 splash screen start

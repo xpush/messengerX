@@ -133,9 +133,13 @@ angular.module('messengerx.directives', [])
           if( window.device ){
             var popup = window.open(url, '_blank', 'location=no');
           } else {
-            var popup = $window.open( '#/view?type='+type+'&src='+encodedUrl, '_blank', "top=" + top + ",left=" + left + ",width=80,height=60");
+            if( $rootScope.usePopupFlag ){
+              var popup = $window.open( '#/view?type='+type+'&src='+encodedUrl, '_blank', "top=" + top + ",left=" + left + ",width=80,height=60");
+            } else {
+              var popup = window.open(url, '_blank', 'location=no');
+            }
           }
-        });    
+        });
       });
     }
   }

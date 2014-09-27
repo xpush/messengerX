@@ -18,8 +18,6 @@
       ,'force new connection': true
     };
 
-    var RMKEY = 'message';
-
     var isDebugging = false;
     var debug = function(){
       if( isDebugging ){
@@ -41,10 +39,10 @@
      * @param {boolean} [autoInitFlag] - 자동 초기화 여부에 대한 flag
      * @example
      * // Create new Xpush Object
-     * var xpush = new Xpush( 'http://stalk-front-s01.cloudapp.net:8000', 'sample' );
+     * var xpush = new Xpush( 'http://demo.stalk.io:8000', 'sample' );
      * @example
      * // Create new Xpush Object with event Handler
-     * var xpush = new Xpush( 'http://stalk-front-s01.cloudapp.net:8000', 'sample', function (type, data){
+     * var xpush = new Xpush( 'http://demo.stalk.io:8000', 'sample', function (type, data){
      *   console.log( " type : ", type );
      *   console.log( " data : ", data );
      * });
@@ -67,6 +65,7 @@
       self.receiveMessageStack = [];
       self.isExistUnread = true;
       self.autoInitFlag = true;
+      self._userEventNames = [];
 
       if( autoInitFlag !=undefined ){
         self.autoInitFlag = autoInitFlag;
@@ -74,7 +73,7 @@
 
       self.on('newChannel',function(data){
         self.channelNameList.push( data.chNm );
-      });
+      }, true);
 
       if(eventHandler){
         self._isEventHandler = true;
@@ -90,6 +89,32 @@
       Signout : '/signout',
       Message : '/msg',
       NODE : '/node'
+    };
+
+    /**
+     * userId와 password를 이용하여 회원가입을 한다.
+     * @name enableDebug
+     * @memberof Xpush
+     * @function
+     * @example
+     * // enable debug
+     * xpush.enableDebug();
+     */
+    XPush.prototype.enableDebug = function(){
+      isDebugging = true;
+    };
+
+    /**
+     * userId와 password를 이용하여 회원가입을 한다.
+     * @name disableDebug
+     * @memberof Xpush
+     * @function
+     * @example
+     * // disable debug
+     * xpush.disableDebug();
+     */
+    XPush.prototype.disableDebug = function(){
+      isDebugging = true;
     };
 
     /**
@@ -120,7 +145,7 @@
     };
 
     /**
-     * userId와 password를 이용하여 Login을 한다.
+     * userId와 password를 이용하여 login을 한다.
      * @name login
      * @memberof Xpush
      * @function
@@ -150,6 +175,7 @@
 
       if(typeof(mode) == 'function' && !cb){
         cb = mode;
+        mode = undefined;
       }
 
       self.userId = userId;
@@ -284,7 +310,6 @@
 
       var newChannel;
       var channelNm = channel;
-      //var oldChNm = channelNm;
 
       //Add logined user if not in users
       if( users.indexOf(self.userId) < 0 ){
@@ -1088,8 +1113,7 @@
               for(var i = data.length-1 ; i >= 0; i--){
 
                 data[i].MG.DT = JSON.parse(data[i].MG.DT);
-                self.receiveMessageStack.unshift([RMKEY,  data[i].MG.DT.C, data[i].NM,  data[i].MG.DT]);
-                //self.emit(RMKEY,  data[i].message.data.channel, data[i].name,  data[i].message.data);
+                self.receiveMessageStack.unshift([data[i].NM,  data[i].MG.DT.C, data[i].NM,  data[i].MG.DT]);
               }
               self.isExistUnread = false;
               while(self.receiveMessageStack.length > 0 ){
@@ -1293,50 +1317,24 @@
      *   console.log( channel, name, data );
      * });
      */
-    XPush.prototype.on = function(event, fct){
+    XPush.prototype.on = function(event, fct, systemFlag){
       var self = this;
+
+      if( !systemFlag ){
+        self._userEventNames.push( event );
+      }
+
       self._events = self._events || {};
       self._events[event] = self._events[event] || [];
       self._events[event].push(fct);
-      /*
-      if(event == RMKEY ){
-        self.getUnreadMessage(function(err, data){
-          if(data && data.length > 0 )
-          for(var i = data.length ; i > 0; i--){
-            data[i].message.data = JSON.parse(data[i].message.data);
-            self.receiveMessageStack.shift([RMKEY,  data[i].message.data.channel, data[i].name,  data[i].message.data]);
-            //self.emit(RMKEY,  data[i].message.data.channel, data[i].name,  data[i].message.data);
-          }
-          self.isExistUnread = false;
-          for(var i = 0 ; i < self.receiveMessageStack.length;i++){
-            self.emit.apply(self, self.receiveMessageStack[i]);
-          }
-        });
-      };
-      */
-      /*
-      if(event == RMKEY ){
-        self.getUnreadMessage(function(err, data){
-          console.log("================================= " ,data);
-          self._events = self._events || {};
-          self._events[event] = self._events[event] || [];
-          self._events[event].push(fct);
 
-          if(data && data.length > 0 )
-          for(var i = data.length ; i > 0; i--){
-            data[i].message.data = JSON.parse(data[i].message.data);
-            receiveMessageStack.shift([RMKEY,  data[i].message.data.channel, data[i].name,  data[i].message.data]);
-            //self.emit(RMKEY,  data[i].message.data.channel, data[i].name,  data[i].message.data);
-          }
-
-          self.isExistUnread = false;
-        });
-      }else{
-        self._events = self._events || {};
-        self._events[event] = self._events[event] || [];
-        self._events[event].push(fct);
+      if( self._sessionConnection ){
+        self._sessionConnection.attchOnEvent( event );
       }
-      */
+
+      for ( var key in self._channels ){
+        self._channels[key].attchOnEvent( event );
+      }
     };
 
     /**
@@ -1373,6 +1371,7 @@
       var sessionEvent = self._events['___session_event'];
       self._events = {};
       self._events['___session_event'] = sessionEvent;
+      self._userEventNames = [];
     };
 
     /**
@@ -1532,15 +1531,9 @@
       var self = this;
       debug("xpush : connection ",'connectionCallback',self._type, self._xpush.userId,self.chNm);
 
-      self._socket.on('message',function(data){
-        debug("xpush : channel receive ", self.chNm, data, self._xpush.userId);
-        self._xpush.emit(RMKEY, self.chNm, RMKEY , data);
-      });
-
-      self._socket.on('system',function(data){
-        debug("xpush : channel receive system", self.chNm, data, self._xpush.userId);
-        self._xpush.emit("system", self.chNm, "system" , data);
-      });
+      for( var key in self._xpush._userEventNames ){
+        self.attchOnEvent( self._xpush._userEventNames[key] );
+      }
 
       if(self._xpush._isEventHandler) {
 
@@ -1570,7 +1563,6 @@
     Connection.prototype.disconnect = function(){
       debug("xpush : socketdisconnect ", this.chNm, this._xpush.userId);
       this._socket.disconnect();
-      //delete this._socket;
     };
 
     /**
@@ -1625,6 +1617,23 @@
     };
 
     /**
+     * Add on event in current socket
+     * @name attchOnEvent
+     * @memberof Connection
+     * @function
+     * @param {string} event key
+     */
+    Connection.prototype.attchOnEvent = function(eventNm){
+      var self = this;
+      if(self._socket){
+        self._socket.on( eventNm ,function(data){
+          debug("xpush : channel receive, " +eventNm, self.chNm, data, self._xpush.userId);
+          self._xpush.emit(eventNm, self.chNm, eventNm , data);
+        });    
+      }
+    };
+
+    /**
      * Stack the function into event array. The function will excute when an event occur.
      * @name on
      * @memberof Connection
@@ -1633,7 +1642,7 @@
      * @param {function} function
      */
     Connection.prototype.on = function(event, fct){
-     var self = this;
+      var self = this;
       self._events = self._events || {};
       self._events[event] = self._events[event] || [];
       self._events[event].push(fct);
