@@ -306,7 +306,7 @@
           //channel , seq, server.channel,name,url
 
           if(err){
-            console.log(" == node channel " ,err);
+            debug(" == node channel " ,err);
           }else if ( data.status == 'ok'){
             newChannel.setServerInfo(data.result);
             //newChannel.chNm = channelNm;
@@ -1370,7 +1370,9 @@
      */
     XPush.prototype.clearEvent = function(){
       var self = this;
+      var sessionEvent = self._events['___session_event'];
       self._events = {};
+      self._events['___session_event'] = sessionEvent;
     };
 
     /**

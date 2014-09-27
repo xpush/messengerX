@@ -7,6 +7,7 @@ angular.module('messengerx.services', [])
  * @kind factory
  *
  * @description Manage cache for image and userName
+ * user image 와 user name을 userId 로 관리한다.
  */
 .factory('Cache', function(){
   var cache = {};
@@ -19,7 +20,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description return cache object
-     * @returns {Object} cache object
+     * @returns {object} cache object
      */
     all : function(){
       return cache;
@@ -33,7 +34,7 @@ angular.module('messengerx.services', [])
      *
      * @description add cache object
      * @param {string} HashKey userId
-     * @param {Object} JSON Object. image and user name {'I' : image, 'NM' : userName }
+     * @param {object} JSON Object. image and user name {'I' : image, 'NM' : userName }
      */
     add : function(key, value){
       cache[key] = value;
@@ -60,7 +61,7 @@ angular.module('messengerx.services', [])
      *
      * @description get cache object by userId
      * @param {string} HashKey userId
-     * @return {Object} JSON Object. image and user name {'I' : image, 'NM' : userName }
+     * @return {object} JSON Object. image and user name {'I' : image, 'NM' : userName }
      */
     get : function(key){
       if( cache[key] ){
@@ -77,7 +78,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description set entire cache object
-     * @param {Object} cache object
+     * @param {object} cache object
      */
     set : function( map ){
       cache = map;
@@ -112,6 +113,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Save friends into server
+     * userId array를 인자로 받아서 친구로 등록한다.
      * @param {array} JSONArray that is consist of a number of userId
      * @param {function} callback function that be called after save success
      */
@@ -129,6 +131,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Remove a friend from buddy list
+     * userId를 인자로 받아서 친구에서 삭제한다.
      * @param {string} userId
      * @param {function} callback function that be called after save success
      */
@@ -147,6 +150,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Retrieve refresh history from local DB
+     * 최근에 동기화를 한 history를 조회한다.
      * @param {function} callback function that be called after retrieve
      */
     getRefreshHistory : function(callback){
@@ -162,6 +166,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Retrieve friend list from local DB and save info Cache
+     * 친구 list 를 조회하고, cache에 name 과 image를 담는다.
      * @param {function} callback function that be called after success
      */
     list : function(callback){
@@ -187,6 +192,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Retrieve friends from server and save into local DB
+     * 친구 list 를 조회하고, cache에 name 과 image를 담는다.
      * @param {function} callback function that be called after success
      */
     refresh : function(callback){
@@ -213,6 +219,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Retrieve users from server
+     * user list 를 server에서 조회한다.
      * @param {function} callback function that be called after retrieve
      */
     list : function(callback){
@@ -228,6 +235,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Retrieve friend list from server
+     * 조건을 활용해서 user를 조회한다.
      * @param {string}
      * @param {integer}
      * @param {function} callback function that be called after success
@@ -268,6 +276,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Initialize this application's singleton object
+     * Application에서 singleton에서 사용하는 Manager로, channel list를 조회한 후 unread message를 가져온다.
      * @param {function} callback function that be called after success
      */
     init : function(callback){
@@ -310,13 +319,15 @@ angular.module('messengerx.services', [])
       var startTime = 0;
       var endTime = 0;
 
+      // system 으로 넘어오는 event를 처리함.
       $rootScope.xpush.on('system', function (ch,name,data) {
 
         // compare sender's userId to logined UserId. send or receive
         var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
 
         // compare current channel id to received message's channel id
-        if( $rootScope.activeChannel === ch ){
+        // 현재 focus 된 channel 이 현재 channel 과 같을 때, onlineStatus 를 변경한다. 
+        if( $rootScope.focusedChannel === ch ){
           var currentChannel = $rootScope.xpush.getChannel( ch );
           if( currentChannel != undefined && currentChannel._connected && sr == 'R') {
             if( $rootScope.currentScope ){
@@ -326,6 +337,7 @@ angular.module('messengerx.services', [])
         }
       });
 
+      // message 으로 넘어오는 event를 처리한다.
       $rootScope.xpush.on('message', function (ch,name,data) {
         data.MG = decodeURIComponent(data.MG);
 
@@ -341,6 +353,7 @@ angular.module('messengerx.services', [])
           data.type = sr;
         }
 
+        // message를 받은 경우, navbar를 5초간 blink 처리한다.
         if( sr == 'R' ){
           try {
             var element = angular.element( window.document.getElementById( 'navBar' ) );
@@ -365,15 +378,13 @@ angular.module('messengerx.services', [])
         if( ( $rootScope.usePopupFlag && currentChannel != undefined && currentChannel._connected )
           || ( !$rootScope.usePopupFlag && ch === $rootScope.currentChannel ) ) {
 
+          // 받은 message의 Type이 notification일 때
           if( data.T == 'N' ){
-
-
 
             var MG = data.MG.split('^')[0];
             var LC = data.MG.split('^')[1];
             data.MG = MG;
             data.LC = LC;
-
 
             NoticeDao.add( data );
             if( $rootScope.currentScope ){
@@ -412,10 +423,15 @@ angular.module('messengerx.services', [])
 
           //  Update channel info
           var param = { 'channel':data.C, 'reset' : true };
+
+          // image 일때
           if( data.T == 'I' ){
             param.message = "@image@";
+
+            // emoticon 일때
           } else if( data.T == 'E' ){
             param.message = "@emoticon@";
+            // video 일때
           } else if ( data.T == 'VI' || data.T == 'V' ) {
             param.message = "@video@";
           } else {
@@ -446,7 +462,8 @@ angular.module('messengerx.services', [])
           }
 
         } else {
-
+          // 비활성화된 channel로 message가 오는 경우는 channel 정보에 최신 message를 update한다.
+          // notice 인 경우는 update하진 않는다.
           if( data.T == 'N' ){
             NoticeDao.add( data );
             return;
@@ -499,6 +516,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Retrieve channel list from server
+     * channel list를 server에서 가져온다.
      * @param {function} callback function that be called after success
      */
     channelList : function(callback){
@@ -512,19 +530,11 @@ angular.module('messengerx.services', [])
 
           if( data.DT != undefined ){
             channel.users = data.DT.US;
-
-            if( data.DT.UC > 2 ){
-              channel.name = data.DT.NM;
-            } else {
-              channel.name = data.DT.F;
-            }
-
           } else {
             channel.users = "";
-            channel.name = "";
           }
 
-          // Pass self channel
+          // self channel 인 경우는 채널리스트에 추가하지 않는다.
           if( data.DT != undefined && data.DT.UC > 1 ){
             channels[ data.channel ] =  channel;
           }
@@ -541,7 +551,8 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Retrieve unread message list from server
-     * @param {Array} JSONArray of channel info JSONObject
+     * channel array 를 인자로 받아, unread message 가 있는 경우에만 channel로 추가한다.
+     * @param {array} JSONArray of channel info JSONObject
      * @param {function} callback function that be called after success
      */
     unreadMessage : function(channels, callback){
@@ -562,21 +573,25 @@ angular.module('messengerx.services', [])
           data.MG = decodeURIComponent( data.MG );
 
           // Save notice
+          // unread message 가 notice 인 경우는 notic DB에 저장한다.
           if( data.T == 'N' ){
             if( data.MG.indexOf( "^" ) > -1 ){
               var MG = data.MG.split('^')[0];
               var LC = data.MG.split('^')[1];
               data.MG = MG;
               data.LC = LC;
-            }          
+            }
             NoticeDao.add( data );
             continue;
           }  
 
           var sr = data.UO.U == loginUser.userId ? 'S':'R';
 
+          // 초대 message 인 경우
           if( data.T == 'J' ){
             data.type = data.T;
+
+          // 특정 type이 있는 경우
           } else if( data.T != undefined){
             data.type = sr + data.T;
           } else {
@@ -595,6 +610,7 @@ angular.module('messengerx.services', [])
             channel.message = data.MG;
           }
 
+          // 2명이상인 경우는 channel name 을 그대로 사용하고, 그렇지 않을 때는 메세지를 보낸 사용자의 이름을 보여준다.
           if( channel.users.length > 2 ){
             channel.name = channel.name;
             channel.image = '';
@@ -605,6 +621,7 @@ angular.module('messengerx.services', [])
 
           channel.updated = data.TS;
 
+          // Join Message가 아닌 경우에만 channel DB에 저장한다. Join Message 이후 unread message가 있을때만 channel을 보여주기 위함.
           if( data.type != 'J' ){
             ChannelDao.add( channel );
           }
@@ -627,6 +644,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Clear login info and go to login page
+     * localStorage 의 user 정보를 삭제하고, session 정보를 삭제한다.
      */
     logout : function( callback ){
       loginUser = undefined;
@@ -646,7 +664,8 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Call REST API for register user
-     * @param {Object} userInfo for register
+     * /user/regiser api 를 호출하여 새로운 user를 생성한다.
+     * @param {object} userInfo for register
      * @param {function} callback function that be called after success
      */
     register : function( params, callback ){
@@ -664,7 +683,8 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Call REST API for update user
-     * @param {Object} userInfo for update
+     * /user/update api 를 호출하여 user 정보를 수정한다.
+     * @param {object} userInfo for update
      * @param {function} callback function that be called after success
      */
     update : function( params, callback ){
@@ -682,7 +702,8 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description ser userInfo into session
-     * @param {Object} userInfo
+     * user를 localStorage와 current session에 등록한다.
+     * @param {object} userInfo
      */
     setUser : function( user ){
       loginUser = user;
@@ -695,7 +716,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description return logined user
-     * @return {Object} userInfo
+     * @return {object} userInfo
      */
     getUser : function(){
       return loginUser;
@@ -715,10 +736,10 @@ angular.module('messengerx.services', [])
      * @module messengerx.services
      * @kind function
      *
-     * @description return logined user
-     * @param {Object} userInfo
+     * @description initilize chat service
+     * @param {object} params
      * @param {string} invite message
-     * @param {Object} current scope
+     * @param {scope} current scope
      * @param {function} callback function that be called after success
      */
     init : function( params, inviteMessage, $scope, callback ){
@@ -730,8 +751,10 @@ angular.module('messengerx.services', [])
       CONF._channel = params.channel;
       CONF._user = { U : loginUser.userId, NM : loginUser.userName, I : loginUser.image };
 
+      // 현재 channel 정보를 update하고
       $rootScope.currentChannel = params.channel;
 
+      // 초대 message가 없다면, 기존 channel 이기 때문에 channel 이력을 조회한다.
       if( inviteMessage == '' ){
         var latestMessage = '';
 
@@ -744,11 +767,22 @@ angular.module('messengerx.services', [])
         });
 
       } else {
+        // 초대 message가 있다면 신규 channel 이라는 의미이기에 초대 메세지를 바로 전송한다. 
         self.send( inviteMessage, 'J' );
         callback();
       }
     },
 
+    /**
+     * @ngdoc function
+     * @name init
+     * @module messengerx.services
+     * @kind function
+     *
+     * @description Get message list from local DB
+     * @param {object} params
+     * @param {function} callback function that be called after success
+     */
     list : function( params, callback ){
       var messages = [];
 
@@ -766,7 +800,7 @@ angular.module('messengerx.services', [])
             latestDate =  UTIL.timeToString( messageArray[inx-1].time )[3];
           }
 
-          // 10 minute
+          // 10 minute. 10분 이상 차이가 나는 경우 time 영역을 추가한다.
           if( latestDate !== dateStrs[3] ){
             var dateMessage = dateStrs[1]+" "+dateStrs[2];
             messages.push( { type : 'T', date : dateStrs[1], message : dateMessage } );
@@ -791,8 +825,8 @@ angular.module('messengerx.services', [])
      * @param {string} message
      * @param {string} messageType
      */
-    send : function(msg, type){
-      var DT = { UO : CONF._user, MG : encodeURIComponent(msg),  S : CONF._user.U };
+    send : function(msg, type){      
+      var DT = { UO : CONF._user, MG : encodeURIComponent(msg) };
 
       if( type !== undefined ){
         DT.T = type;
@@ -808,8 +842,9 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Join channel
+     * channel 에 사용자를 추가한다.
      * @param {string} channel id
-     * @param {Object} channel info, US : channel users
+     * @param {object} channel info, US : channel users
      * @param {function} callback function that be called after success
      */
     join : function(channelId, param, callback){
@@ -819,11 +854,12 @@ angular.module('messengerx.services', [])
     },
     /**
      * @ngdoc function
-     * @name send
+     * @name sendSys
      * @module messengerx.services
      * @kind function
      *
      * @description Send System Message
+     * system message를 전송한다.
      * @param {string} message
      */
     sendSys : function(msg){
@@ -834,24 +870,25 @@ angular.module('messengerx.services', [])
     },
     /**
      * @ngdoc function
-     * @name send
+     * @name message를 update한다.
      * @module messengerx.services
      * @kind function
      *
      * @description Send System Message
-     * @param {string} message
+     * @param {object} param
      */
     updateMessage : function( param ){
       MessageDao.update( param );
     },
     /**
      * @ngdoc function
-     * @name send
+     * @name exitChannel
      * @module messengerx.services
      * @kind function
      *
-     * @description Send System Message
-     * @param {string} message
+     * @description channel에서 나간다.
+     * @param {string} channel
+     * @param {function} callback function that be called after success
      */
     exitChannel : function( channel, callback){
       MessageDao.removeAll( channel ).then( function(){
@@ -873,7 +910,8 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Retreive emoticon from local DB
-     * @param {Object} Search param
+     * DB에서 emoticaon을 조회한다.
+     * @param {object} Search param
      * @param {function} callback function that be called after success
      */
     list : function( param, callback){
@@ -892,6 +930,8 @@ angular.module('messengerx.services', [])
         });
 
         var superResult = [];
+
+        // 조회한 결과를 group 에 맡게 4개씩 분할하여 보여주기 위한 로직
         for( var key in result ){
           var groups = result[key];
           var group = groups.group;
@@ -901,7 +941,7 @@ angular.module('messengerx.services', [])
 
           var jnx = 0;
 
-          // Divide result by 4
+          // Divide result by 4. 4개가 넘을때는 4개씩 잘라내면서 새로운 key를 만든다.
           if( groups.items.length > 4 ){
             var newKey;
             while( groups.items.length > 4 ){
@@ -936,8 +976,8 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Add emoticon into local DB and current Emoticon object
-     * @param {Object} param
-     * @param {Object} Search param
+     * @param {object} param
+     * @param {object} emoticon info
      */
     add : function (param,jsonObject) {
 
@@ -971,11 +1011,13 @@ angular.module('messengerx.services', [])
         jsonObject.items[groupKey] = [];
       }
 
+      // 4개 이하일떄는 같은 group에 추가
       if( jsonObject.items[groupKey].length < 4 ){
         k = groupKey;
       } else {
 
         // Item count larger than 4. make new group key
+        // 4개 이상일 때는 새로운 group에 등록
         k = groupKey + (++groupInx);
         jsonObject.items[k] = [];
         jsonObject.metas = groupInx;
@@ -988,9 +1030,30 @@ angular.module('messengerx.services', [])
     }
   };
 })
-.factory('UTIL', function(Cache, Sign){
+.factory('UTIL', function(Cache, Sign, APP_INFO){
   var cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
   return {
+
+    /**
+     * @ngdoc function
+     * @name generateChannelId
+     * @module messengerx.dao
+     * @kind function
+     *
+     * @description Generate channel Id
+     * channelId를 생성한다. 1:1 channel 일때는 userId와 friendId를 조합하고, multi channel 일때는 uuid로 생성한다. 
+     * @return {object} jsonObj
+     */
+    generateChannelId : function(jsonObj){
+
+      // multi user channel = generate uuid
+      if( jsonObj.U.length > 2 ){
+        return this.getUniqueKey()+"^"+APP_INFO.appKey;;
+      } else {
+        // 1:1 channel = userId concat friendId
+        return jsonObj.U.sort().join( "$" )+"^"+APP_INFO.appKey;
+      }
+    },
 
     /**
      * @ngdoc function
@@ -999,6 +1062,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Generate uuid
+     * uuid를 생성한다.
      * @return {string} uuid that generated
      */
     getUniqueKey : function () {
@@ -1021,7 +1085,8 @@ angular.module('messengerx.services', [])
      *
      * @description Generate uuid
      * @return {long} timestamp
-     * @return {Array} [ yyyy.mm.dd | hh:min, yyyy.mm.dd, hh:min, yyyymmddhhm]
+     * timestamp 를 여러 형태로 return한다.
+     * @return {array} [ yyyy.mm.dd | hh:min, yyyy.mm.dd, hh:min, yyyymmddhhm]
      */
     timeToString : function( timestamp ){
       var cDate = new Date();
@@ -1062,6 +1127,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Get chosung for Korean character
+     * 한글을 받아서 초성을 추출한다.
      * @param {string} userName
      * @return {string} chosung
      */
@@ -1076,11 +1142,12 @@ angular.module('messengerx.services', [])
 
     /**
      * @ngdoc function
-     * @name getChosung
+     * @name getMorphemes
      * @module messengerx.services
      * @kind function
      *
      * @description Get morphemes for Korean character
+     * 한글을 받아서 초성, 중성, 종성의 형태소로 return 한다. 홍길동 -> ㅎㅗㅇㄱㅣㄹㄷㅗㅇ
      * @param {string} userName
      * @return {string} chosung
      */
@@ -1130,24 +1197,25 @@ angular.module('messengerx.services', [])
 
     /**
      * @ngdoc function
-     * @name getChosung
+     * @name getInviteMessage
      * @module messengerx.services
      * @kind function
      *
-     * @description Get morphemes for Korean character
-     * @param {string} userName
-     * @return {string} chosung
+     * @description userId의 array를 받아 초대를 위한 message를 만든다.
+     * @param {string} userID array
+     * @return {string} invite message
      */
-    getInviteMessage: function(userArray){
+    getInviteMessage: function(userIds){
       var loginUser = Sign.getUser();
       var result = '';
 
-      var users = angular.copy( userArray );
+      var users = angular.copy( userIds );
 
       if( users.indexOf(loginUser.userId) > -1 ){
         users.splice( users.indexOf(loginUser.userId), 1 );
       }
 
+      // login user invite A, B, C 형태로 message를 생성한다.
       result = loginUser.userName+" invite ";
       for( var jnx = 0, until = users.length ; jnx < until ; jnx++ ){
         result += Cache.get( users[jnx] ).NM;
@@ -1167,8 +1235,9 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Get channelName by channelUser
-     * @param {string} userName
-     * @return {string} chosung
+     * userID array를 입력받아 channel name을 생성한다.
+     * @param {string} userID array
+     * @return {string} channel name
      */
     getNames : function( userIds ){
       var loginUserId = Sign.getUser().userId;
@@ -1184,6 +1253,7 @@ angular.module('messengerx.services', [])
       if( userArray.length === 2 && userArray.indexOf( loginUserId ) > -1 ){
 
         // Remove loginUserId from userArray
+        // 2명 방이기 때문에, 현재 user의 이름을 제외하여 channel message를 만든다.
         userArray.splice( userArray.indexOf( loginUserId ), 1 );
 
         var name = userArray[0];
@@ -1194,6 +1264,7 @@ angular.module('messengerx.services', [])
         userNames.push( name );
       } else {
 
+        // multi channel 인 경우, Cache에서 userId를 이용하여 NM을 추출한다.
         for( var inx = 0, until = userArray.length ; inx < until ; inx++ ){
           var name = userArray[inx];
           if( userArray[inx] === loginUserId ){
@@ -1216,7 +1287,8 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Get file type from DOM object
-     * @param {Object} file DOM object
+     * file element의 type을 추출한다.
+     * @param {object} file DOM object
      * @return {string} file type
      */
     getType : function( fileUrl ){

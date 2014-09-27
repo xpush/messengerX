@@ -1,9 +1,9 @@
 angular.module('messengerx.controllers', [])
 
-.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, $templateCache, Friends, EventManager, ChatLauncher, ChannelDao, Sign) {
+.controller('FriendsCtrl', function($scope, $rootScope, $state, $stateParams, $ionicModal, $ionicScrollDelegate, $templateCache, Friends, EventManager, ChatLauncher, ChannelDao, Sign, UTIL) {
 
   /**
-   * @ngdoc function
+   * @ngdoc function, 
    * @name listFriend
    * @module messengerx.controllers
    * @kind function
@@ -124,10 +124,14 @@ angular.module('messengerx.controllers', [])
     $stateParams.friendIds = friendIds;
     var jsonObject = {};
     jsonObject.U = [friendIds,Sign.getUser().userId];
-    var channelId = ChannelDao.generateId( jsonObject );
+    var channelId = UTIL.generateChannelId( jsonObject );
     ChatLauncher.gotoChat( $scope, channelId, $stateParams, function(){
       $scope.opening = false;
     });
+
+    setTimeout( function (){
+       $scope.opening = false;
+    }, 10000 );
   };
 
   /**
@@ -545,7 +549,7 @@ angular.module('messengerx.controllers', [])
     });
   };  
 })
-.controller('EmoticonCtrl', function($scope, $rootScope, $ionicPopup, Sign, ChannelDao, Chat, Emoticons) {
+.controller('EmoticonCtrl', function($scope, $rootScope, $ionicPopup, Sign, ChannelDao, Chat, UTIL, Emoticons) {
   var loginUser = Sign.getUser();
   var channelId = '';
 
@@ -585,7 +589,7 @@ angular.module('messengerx.controllers', [])
 
     var createObject = {};
     createObject.U = channelUsers;
-    channelId = ChannelDao.generateId(createObject);
+    channelId = UTIL.generateChannelId(createObject);
     createObject.DT = { 'US' : channelUsers, 'UC': channelUsers.length };
     createObject.C = channelId;
 
@@ -846,6 +850,8 @@ angular.module('messengerx.controllers', [])
   var channelId;
   var channelName;
   var channelUsers = [];
+  var stateParams = $rootScope.$stateParams;
+  $scope.messages = [];
 
   $scope.channelUserDatas = [];
 
@@ -881,7 +887,7 @@ angular.module('messengerx.controllers', [])
 
       // Initialize chat controller
       channelId = args.stateParams.channelId;
-      $rootScope.activeChannel = channelId;
+      $rootScope.focusedChannel = channelId;
       if( channelId != undefined ){
 
         // channelId가 있을 경우, init 한다.
@@ -902,7 +908,7 @@ angular.module('messengerx.controllers', [])
 
     // window에 focus를 받으면 현재 channel 을 활성화시킨다.
     $rootScope.$on('$windowFocus', function (){
-      $rootScope.activeChannel = channelId;
+      $rootScope.focusedChannel = channelId;
       Chat.sendSys( 'on' );
     });
 
@@ -994,11 +1000,6 @@ angular.module('messengerx.controllers', [])
     });
   };
 
-  var stateParams = $rootScope.$stateParams;
-  if( stateParams !== undefined ){
-    prepareChatService( stateParams );
-  }
-
   /**
    * @ngdoc function
    * @name prepareChatService
@@ -1036,7 +1037,7 @@ angular.module('messengerx.controllers', [])
       createObject.DT = { 'NM' : channelName, 'US' : channelUsers, 'F' : loginUser.userName, 'UC': channelUsers.length };
 
       // Generate channel id
-      channelId = ChannelDao.generateId(createObject);
+      channelId = UTIL.generateChannelId(createObject);
       createObject.C = channelId;
 
       // Create channel with channel info and save into local db
@@ -1073,6 +1074,10 @@ angular.module('messengerx.controllers', [])
       );
     });
   };
+
+  if( stateParams !== undefined ){
+    prepareChatService( stateParams );
+  }
 
   /**
    * @ngdoc function
@@ -1948,7 +1953,7 @@ angular.module('messengerx.controllers', [])
 
       if( window.speechSynthesis ){
         var u = new SpeechSynthesisUtterance();
-        u.text = '수지 is ready.';
+        u.text = 'She is ready';
         u.lang = 'ko-KR';
         window.speechSynthesis.speak(u);
       }

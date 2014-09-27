@@ -1,5 +1,14 @@
 angular.module('messengerx.directives', [])
 
+/**
+ * @ngdoc directive
+ * @name ngEnter
+ * @module messengerx.directives
+ * @kind directive
+ *
+ * @description execute function on enter key
+ * enter 입력시 ng-enter에 등록된 함수를 실행한다.
+ */
 .directive('ngEnter', function() {
   return function(scope, element, attrs) {
     element.bind("keydown keypress", function(event) {
@@ -13,15 +22,16 @@ angular.module('messengerx.directives', [])
     });
   };
 })
-.directive('ngBackButton', function() {  
-  return function(scope, element, attrs) {
-    element.bind("keydown keypress", function(event) {
-      if ( event.keyCode == 8 || event.keyCode == 4 ) {
-        event.preventDefault();
-      }
-    });
-  };
-})
+
+/**
+ * @ngdoc directive
+ * @name channelImage
+ * @module messengerx.directives
+ * @kind directive
+ *
+ * @description execute function on enter key
+ * enter 입력시 ng-enter에 등록된 함수를 실행한다.
+ */
 .directive('channelImage', function(Cache, Sign, $rootScope) {
   return {
     restrict: 'A',
@@ -35,6 +45,8 @@ angular.module('messengerx.directives', [])
     transclude: false,
     controller: function($scope) {
       var loginUserId = Sign.getUser().userId;
+
+      // default image
       var result = $rootScope.rootImgPath+"/channel_image.jpg";
       var users = $scope.users;
 
@@ -43,6 +55,7 @@ angular.module('messengerx.directives', [])
       var channelImage = $scope.channelImage;
       var channelName = $scope.channelName;
 
+      // channel users가 있고, 1:1 채널인 경우는 친구의 image를 보여주기 위해, 친구의 id를 추출한다.
       if( users !== undefined ){
         var userArray = users.split( "," );
         if( userArray.length == 2  ){
@@ -50,12 +63,14 @@ angular.module('messengerx.directives', [])
         }
       }
 
+      // channel image가 있는 경우는 channel image를 그대로 보여주고
       if( channelImage !== '' ){
         result = channelImage;
         if( friendId !== '' ){
           Cache.add( friendId, { 'NM':channelName , 'I': result } );
         }
 
+      // 그렇지 않은 경우는 친구의 image를 보여준다.
       } else if( friendId !== '' && Cache.get( friendId ) !== undefined ){
         result = Cache.get( friendId ).I;
       } 
@@ -64,10 +79,21 @@ angular.module('messengerx.directives', [])
     template: '<img ng-src="{{image}}" />'
   };
 })
+
+/**
+ * @ngdoc directive
+ * @name popupLink
+ * @module messengerx.directives
+ * @kind directive
+ *
+ * @description make popup link for image or video
+ * enter 입력시 ng-enter에 등록된 함수를 실행한다.
+ */
 .directive('popupLink', function ( $rootScope, $window, $state, $ionicFrostedDelegate, $ionicScrollDelegate, $ionicPopup ) {       
   return {
     link: function(scope, element, attrs) {
 
+      // popup link 가 활성화 되었다면, onload 이벤트로 발생시 scroll 위치를 업데이트 한다.
       if( attrs.popupLink === "true" ){
         element.bind("load" , function(event){
           $ionicFrostedDelegate.update();
@@ -75,6 +101,7 @@ angular.module('messengerx.directives', [])
         });
       }
 
+      // 해당 element click 시 
       element.bind("click" , function(event){
         var xpush = $rootScope.xpush;
                         
@@ -82,10 +109,12 @@ angular.module('messengerx.directives', [])
           var fileNm;
           var type = attrs.type;
 
+          // fileName 이 있다면, srcUrl 을 세팅한다. video인 경우
           if( attrs.fileName !== undefined ){
             var srcUrl = attrs.fileName;
             fileNm = srcUrl.indexOf("/") > 0 ? srcUrl.substr( srcUrl.lastIndexOf("/") + 1 ) : srcUrl;
           } else {
+            // thumbnail image가 있는 경우, 원본 filename을 추출한다.
             var tnUrl = attrs.src;
             fileNm = tnUrl.substr( tnUrl.lastIndexOf( "/") + 1 ).replace( "T_", "" );
           }
@@ -100,6 +129,7 @@ angular.module('messengerx.directives', [])
           var left = screen.width/2 - 400
             , top = screen.height/2 - 300;
 
+          // cordova를 이용해 화면이 오픈된 경우, 일반 popup을 사용
           if( window.device ){
             var popup = window.open(url, '_blank', 'location=no');
           } else {
@@ -110,6 +140,16 @@ angular.module('messengerx.directives', [])
     }
   }
 })
+
+/**
+ * @ngdoc directive
+ * @name channelUsers
+ * @module messengerx.directives
+ * @kind directive
+ *
+ * @description make image tag for channelUser 
+ * multi channel에 포함된 user의 숫자와 image를 보여준다.
+ */
 .directive('channelUsers', function(UTIL, $rootScope) {
   return {
     restrict: 'A',
@@ -122,6 +162,8 @@ angular.module('messengerx.directives', [])
     transclude: false,
     controller: function($scope) {
       $scope.count = $scope.users.split( "," ).length;
+
+      // 2명 이상 일때만 보여준다.
       if( $scope.count > 2 ){
         $scope.className = "users";
       } else {
@@ -131,6 +173,16 @@ angular.module('messengerx.directives', [])
     template: '<span class="{{className}}"><img src="'+$rootScope.rootImgPath+'/user-icon.png"></img>&nbsp;{{count}}</span>'
   };
 })
+
+/**
+ * @ngdoc directive
+ * @name updatedTime
+ * @module messengerx.directives
+ * @kind directive
+ *
+ * @description make span for display updated time
+ * multi channel에 포함된 user의 숫자와 image를 보여준다.
+ */
 .directive('updatedTime', function(UTIL) {
   return {
     restrict: 'A',
@@ -146,17 +198,24 @@ angular.module('messengerx.directives', [])
     template: '<span class="channel-time">{{timeString}}</span>'
   };
 })
+
+/**
+ * @ngdoc directive
+ * @name searchByKey
+ * @module messengerx.directives
+ * @kind directive
+ *
+ * @description key 입력시 초성 검색을 사용한다.
+ */
 .directive('searchByKey', function($parse, $timeout, UTIL){
   var DELAY_TIME_BEFORE_POSTING = 100;
   return function(scope, elem, attrs) {
 
     var element = angular.element(elem)[0];
     var currentTimeout = null;
-    var beforeKeyLength = 0;
 
     var poster = $parse(attrs.post)(scope);
     var reseter = $parse(attrs.reset)(scope);
-    var beforenMatchIds = {};
 
     element.oninput = function() {
 
@@ -167,19 +226,14 @@ angular.module('messengerx.directives', [])
         var searchKey = angular.element(element).val();        
 
         if( searchKey !== '' ){
-          // backspace
           var matches = [];
-          /**
-          testing code
-          if( beforeKeyLength > searchKey.length ){
-            matches = beforenMatchIds[searchKey];
-          }
-          */
 
+          // 초성을 추출함.
           var separated = UTIL.getMorphemes( searchKey ).toLowerCase();
 
           var datas = [];
 
+          // items를 array 로 가져와서
           var items =attrs.items.split('.');
           if( items.length === 2  ){
             var item1 = items[0];
@@ -189,6 +243,7 @@ angular.module('messengerx.directives', [])
             datas = scope[attrs.items];
           }
 
+          // 초성이 같거나, 포함되어 있는 경우 matches에 추가한다.
           angular.forEach(datas, function(data) {
             if( UTIL.getMorphemes( data.user_name ).toLowerCase().indexOf( separated ) > -1
               || data.chosung.indexOf( searchKey ) > -1 ){
@@ -196,11 +251,10 @@ angular.module('messengerx.directives', [])
             }
           });
 
+          // matches에 등록한다.
           poster( matches );
-          beforeKeyLength = searchKey.length;
-          beforenMatchIds = { searchKey : matches };
-          console.log( beforenMatchIds );
         } else {
+          // 입력값이 없는 경우 array를 reset한다.
           reseter();
         }
 
@@ -208,6 +262,15 @@ angular.module('messengerx.directives', [])
     }
   }
 })
+
+/**
+ * @ngdoc factory
+ * @name xpushSlide
+ * @module messengerx.directives
+ * @kind factory
+ *
+ * @description slide 되는 popup을 생성한다.
+ */
 .factory('$xpushSlide', [
   '$ionicTemplateLoader',
   '$ionicBackdrop',
@@ -406,6 +469,16 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
     var focusOn = element[0].querySelector('[autofocus]');
     if (focusOn) {
       focusOn.focus();
+    }
+  }
+}]);
+
+angular.module('ionic.contrib.frostedGlass', ['ionic'])
+
+.factory('$ionicFrostedDelegate', ['$rootScope', function($rootScope) {
+  return {
+    update: function() {
+      $rootScope.$emit('ionicFrosted.update');
     }
   }
 }]);

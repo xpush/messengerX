@@ -101,7 +101,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
       }
     }
 
-    // node wekit ==  true
+    // node webkit ==  true
     if( window.root ){
       var gui = require('nw.gui');
       var winmain = gui.Window.get();
@@ -110,8 +110,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
 
       var tray = new gui.Tray({ title: 'Tray', icon: 'icon.png' });
 
-      // window에서 nodewebkit을 사용중인 경우, tray에 Logout과 Quit 메뉴를 등록함 
-      console.log( process.platform );
+      // window에서 nodewebkit을 사용중인 경우, tray에 Logout과 Quit 메뉴를 등록함
       if( process.platform == 'window' || process.platform == 'win32' || process.platform == 'win64' ){
         var menu = new gui.Menu();
         menu.append(new gui.MenuItem({ label: 'Logout' }));
@@ -317,7 +316,9 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
     $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
 
       // LOGOUT event 를 설정한다.
+      console.log( type );
       if(type === 'LOGOUT'){
+        console.log( '222 : ' + $sessionStorage.reloading );
         if( !$sessionStorage.reloading ){
           $rootScope.logout( function(){
             $state.go( "error" );
@@ -470,17 +471,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
 
   // default로 splash screen start
   $urlRouterProvider.otherwise('/splash');
-});
-
-angular.module('ionic.contrib.frostedGlass', ['ionic'])
-
-.factory('$ionicFrostedDelegate', ['$rootScope', function($rootScope) {
-  return {
-    update: function() {
-      $rootScope.$emit('ionicFrosted.update');
-    }
-  }
-}])
+})
 // Main Window를 위한 ChatLauncher
 .factory('ChatLauncher', function($rootScope, $state, Cache, Sign){
   var popupCount = 0;
@@ -508,7 +499,10 @@ angular.module('ionic.contrib.frostedGlass', ['ionic'])
           } else {
             popups[popupKey].focus();
           }
-          callback();     
+
+          if ( callback && typeof callback === 'function') {
+            callback();
+          }
         } else {
 
           var popup;

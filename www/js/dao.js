@@ -9,7 +9,8 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Get refresh history from local DB
-     * @returns {Object} history object
+     * Refresh History를 조회한다. 서버와 친구리스트를 동기화할 때 사용한다.
+     * @returns {object} history object
      */
     getRefreshHistory : function(){
       var loginUserId = Sign.getUser().userId;
@@ -27,7 +28,8 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Insert or update refresh history at local DB
-     * @returns {Object} query result
+     * Refresh History를 기록한다.
+     * @returns {object} query result
      */
     updateRefreshHistory : function(){
       var loginUserId = Sign.getUser().userId;
@@ -51,6 +53,7 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Insert or update a lot of user data at local DB
+     * user array를 인자로 받아 친구로 등록한다.
      * @param {Array} User Array
      * @param {function} callback function that be called after save success
      */
@@ -93,6 +96,7 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Retrieve user list from local DB
+     * local DB에서 user list 를 조회한다.
      * @return {Array} User Array
      */
     list : function(){
@@ -111,7 +115,9 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Delete user from local DB
-     * @return {Array} User Array
+     * local DB에서 user를 삭제한다.
+     * @param {string} userId  
+     * @return {object} query result
      */
     remove : function(userId){
       var loginUserId = Sign.getUser().userId;
@@ -137,7 +143,9 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Retrieve single channel data from local DB
-     * @return {Object} Channel data
+     * local DB에서 특정 channel을 조회한다.
+     * @param {string} channelId     
+     * @return {object} Channel data
      */
     get : function( channelId ){
       loginUserId = Sign.getUser().userId;
@@ -155,9 +163,11 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Retrieve channel list from local DB
+     * local DB에서 channel list를 조회한다.
+     * @param {object} jsonObj
      * @return {Array} Channel data list
      */
-    list : function( $scope, socket ){
+    list : function( $scope ){
       scope = $scope;
       loginUserId = Sign.getUser().userId;
 
@@ -175,6 +185,8 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Retrieve total unread message count from local DB
+     * local DB에서 channel 안의 읽지 않은 메세지 count를 조회한다.
+     * @param {object} jsonObj
      * @return {integer} total nread message count 
      */
     getAllCount : function(jsonObj){
@@ -194,7 +206,9 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description  Update channel name and channel users at local DB
-     * @return {Object} query result
+     * 특정 channel의 name과 user 정보를 수정한다. channel에 user 초대시 변경시 호출한다.
+     * @param {object}  param
+     * @return {object} query result
      */
     updateUsers : function(param){
       loginUserId = Sign.getUser().userId;
@@ -217,7 +231,9 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description  Update channel info at local DB
-     * @return {Object} query result
+     * 특정 channel의 전체적인 정보를 수정한다. 
+     * @param {object}  param
+     * @return {object} query result
      */
     update : function(param){
       loginUserId = Sign.getUser().userId;
@@ -256,7 +272,9 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description  insert channel info into local DB
-     * @return {Object} query result
+     * 특정 channel을 생성한다. 이미 있는 channel 이면 생성하지 않는다. server와의 channel 동기화를 할때 사용한다.
+     * @param {object}  jsonObj
+     * @return {object} query result
      */
     insert : function(jsonObj){
       loginUserId = Sign.getUser().userId;
@@ -285,8 +303,10 @@ angular.module('messengerx.dao', [])
      * @module messengerx.dao
      * @kind function
      *
-     * @description Insert or replace channel info with channel image at local DB
-     * @return {Object} query result
+     * @description Insert or replace channel info with channel image at local 
+     * 특정 channel을 추가하거나 수정한다. message가 들어 왔을 때 channel 정보를 update한다.
+     * @param {object}  jsonObj
+     * @return {object} query result
      */
     add : function(jsonObj){
       loginUserId = Sign.getUser().userId;
@@ -351,55 +371,16 @@ angular.module('messengerx.dao', [])
         return result;
       });
     },
-    resetCount : function( channelId ){
-      var unreadCount = 1;
-      var searchIndex = -1;
-
-      if( scope != undefined ){
-        var until = scope.channelArray.length;
-        for( var inx = 0 ; inx < until; inx++ ){
-          if( scope.channelArray[inx].channel_id == channelId ){
-            searchIndex = inx;
-            break;
-          }
-        }
-
-        if( searchIndex > -1 ){
-          var channel = scope.channelArray[ searchIndex ];
-          channel.unread_count = 0;
-          scope.channelArray.splice(searchIndex, 1, channel);
-        }
-      }
-    },
 
     /**
      * @ngdoc function
-     * @name generateId
+     * @name remove
      * @module messengerx.dao
      * @kind function
      *
-     * @description Generate channel Id
-     * @return {string} channelId
-     */
-    generateId : function(jsonObj){
-
-      // multi user channel = generate uuid
-      if( jsonObj.U.length > 2 ){
-        return UTIL.getUniqueKey()+"^"+APP_INFO.appKey;;
-      } else {
-        // 1:1 channel = userId concat friendId
-        return jsonObj.U.sort().join( "$" )+"^"+APP_INFO.appKey;
-      }
-    },
-
-    /**
-     * @ngdoc function
-     * @name delete
-     * @module messengerx.dao
-     * @kind function
-     *
-     * @description delelte channel Id
-     * @return {string} channelId
+     * @description delelte channel by Id
+     * @param {string} channel
+     * @return {object} query result
      */
     remove : function(channel){
 
@@ -422,6 +403,17 @@ angular.module('messengerx.dao', [])
 .factory('EmoticonDao', function(DB, Sign) {
 
   return {
+    /**
+     * @ngdoc function
+     * @name list
+     * @module messengerx.dao
+     * @kind function
+     *
+     * @description Retrieve emoticon list
+     * local DB의 emoticon list를 조회한다.
+     * @param {object} param
+     * @return {Array} list of emoticons
+     */
     list : function(param){
       var loginUserId = Sign.getUser().userId;
       var query = "SELECT group_id, tag, image FROM TB_EMOTICON WHERE owner_id = ? ";
@@ -439,6 +431,18 @@ angular.module('messengerx.dao', [])
         return DB.fetchAll(result);
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name add
+     * @module messengerx.dao
+     * @kind function
+     *
+     * @description Insert or remove emoticon
+     * local DB에 새로운 emoticon을 추가한다.
+     * @param {object} jsonObj
+     * @return {object} query result
+     */
     add : function(jsonObj){
       var loginUserId = Sign.getUser().userId;
       var query =
@@ -463,6 +467,17 @@ angular.module('messengerx.dao', [])
   var scope;
 
   return {
+    /**
+     * @ngdoc function
+     * @name list
+     * @module messengerx.dao
+     * @kind function
+     *
+     * @description Retrieve message list
+     * local DB에서 message list를 조회한다.
+     * @param {object} params
+     * @return {Array} list of message
+     */
     list : function( params ){
       var loginUserId = Sign.getUser().userId;
       var query = 'SELECT sender_id, sender_name, sender_image, message, time, type, bookmark_flag FROM TB_MESSAGE WHERE channel_id = ? and owner_id = ? ';
@@ -479,6 +494,18 @@ angular.module('messengerx.dao', [])
         return DB.fetchAll(result);
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name add
+     * @module messengerx.dao
+     * @kind function
+     *
+     * @description Retrieve message list
+     * local DB에 message를 저장한다.
+     * @param {object} jsonObj
+     * @return {object} query result
+     */
     add : function(jsonObj){
       var loginUserId = Sign.getUser().userId;
       var query =
@@ -506,6 +533,18 @@ angular.module('messengerx.dao', [])
         return result;
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name update
+     * @module messengerx.dao
+     * @kind function
+     *
+     * @description Update a message
+     * bookmark flag를 update 한다.
+     * @param {object} jsonObj
+     * @return {object} query result
+     */
     update : function(jsonObj){
       var loginUserId = Sign.getUser().userId;
       var query =
@@ -525,6 +564,18 @@ angular.module('messengerx.dao', [])
         return result;
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name removeAll
+     * @module messengerx.dao
+     * @kind function
+     *
+     * @description Remove all message
+     * 특정 channel의 모든 message를 삭제한다.
+     * @param {string} channel
+     * @return {object} query result
+     */
     removeAll : function(channel){
       var loginUserId = Sign.getUser().userId;
       var query =
@@ -540,6 +591,18 @@ angular.module('messengerx.dao', [])
         return result;
       });
     },
+
+    /**
+     * @ngdoc function
+     * @name addScan
+     * @module messengerx.dao
+     * @kind function
+     *
+     * @description Add message into scan DB
+     * scan을 위한 DB에 message를 저장한다.
+     * @param {object} jsonObj
+     * @return {object} query result
+     */
     addScan : function(jsonObj){
       var loginUserId = Sign.getUser().userId;
       var query =
@@ -562,6 +625,18 @@ angular.module('messengerx.dao', [])
         return result;
       });     
     },
+
+    /**
+     * @ngdoc function
+     * @name scan
+     * @module messengerx.dao
+     * @kind function
+     *
+     * @description Retrieve message from scan DB
+     * scan을 DB에서 message를 scan한다.
+     * @param {string} search
+     * @return {Array} list of message
+     */
     scan : function( search ){
       var loginUserId = Sign.getUser().userId;
       var query = 'SELECT sender_id, sender_name, sender_image, message, time, type, bookmark_flag FROM TB_SCAN '+
@@ -587,7 +662,9 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Retrieve notice message from local DB
-     * @return {string} Query Result
+     * local DB에서 notice message를 조회한다.
+     * @param {string} channelId 
+     * @return {object} notice info
      */
     get : function( channelId ){
       var loginUserId = Sign.getUser().userId;
@@ -597,6 +674,7 @@ angular.module('messengerx.dao', [])
         return DB.fetch(result);
       });
     },
+
     /**
      * @ngdoc function
      * @name add
@@ -604,7 +682,9 @@ angular.module('messengerx.dao', [])
      * @kind function
      *
      * @description Insert or replace notice message at local DB
-     * @return {string} Query Result
+     * local DB에 notice message를 추가하거나 수정한다.
+     * @param {object} jsonObj 
+     * @return {object} query result
      */
     add : function( jsonObj ){
       loginUserId = Sign.getUser().userId;
@@ -629,15 +709,17 @@ angular.module('messengerx.dao', [])
         return result;
       });
     },
+
     /**
      * @ngdoc function
-     * @name add
+     * @name update
      * @module messengerx.dao
      * @kind function
      *
      * @description Update notice message at local DB
-     * @return {object} Parameter 
-     * @return {string} Query Result
+     * local DB 의 notice 를 update한다.
+     * @param {object} jsonObj 
+     * @return {object} query result
      */
     update : function( jsonObj ){
       loginUserId = Sign.getUser().userId;
@@ -671,6 +753,15 @@ angular.module('messengerx.dao', [])
   var changeDBFlag = false;
   $rootScope.syncFlag = false;
 
+  /**
+   * @ngdoc function
+   * @name init
+   * @module messengerx.dao
+   * @kind function
+   *
+   * @description Initialize local DB
+   * WEB SQL을 사용하는 local DB를 초기화한다.
+   */
   self.init = function() {
 
     try {
@@ -690,6 +781,7 @@ angular.module('messengerx.dao', [])
       return;
     }
 
+    // DB Version 이 update 되었다면, 기존 메시지를 모두 삭제하고 DB를 변경한다.
     if( self.db.version != DB_CONFIG.version ){
       self.db.changeVersion(self.db.version, DB_CONFIG.version, function (t) {
         changeDBFlag = true;
@@ -700,6 +792,16 @@ angular.module('messengerx.dao', [])
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name createTable
+   * @module messengerx.dao
+   * @kind function
+   *
+   * @description Initialize local DB
+   * DB_CONFIG의 tables 정보를 이용하여 table을  생성한다.
+   * @param {boolean} changeDBFlag 
+   */
   self.createTable = function( changeDBFlag ){
 
     angular.forEach(DB_CONFIG.tables, function(table) {
@@ -709,6 +811,7 @@ angular.module('messengerx.dao', [])
         columns.push(column.name + ' ' + column.type);
       });
 
+      // version 이 다른 경우 table을 drop 하고 신규생성한다.
       if( changeDBFlag ){
         $rootScope.syncFlag = true;
         var query = 'DROP TABLE ' + table.name;
@@ -716,6 +819,8 @@ angular.module('messengerx.dao', [])
       }
 
       var query1;
+
+      // SCAN을 위한 fts3를 이용한 virtual table 생성
       if( table.virtual ){
         query1 = 'CREATE VIRTUAL TABLE ' + table.name + ' USING fts3(' + columns.join(',') + ')';
       } else {
@@ -723,6 +828,7 @@ angular.module('messengerx.dao', [])
       }
       self.query(query1);
 
+      // TABLE info에 index정보가 있다면, index를 생성
       if( table.table_index != undefined ){
         for( var key in table.table_index ){
           var tableInx = table.table_index[key];
@@ -733,6 +839,16 @@ angular.module('messengerx.dao', [])
     });
   };
 
+  /**
+   * @ngdoc function
+   * @name clearAll
+   * @module messengerx.dao
+   * @kind function
+   *
+   * @description Remove all data from local DB
+   * 모든 DB에서 data를 삭제한다.
+   * @param {string} userId 
+   */
   self.clearAll = function( userId ){
     var querys = [];
     var conds = [];
@@ -746,6 +862,17 @@ angular.module('messengerx.dao', [])
     self.queryAll(querys, conds);
   };
 
+  /**
+   * @ngdoc function
+   * @name query
+   * @module messengerx.dao
+   * @kind function
+   *
+   * @description executeSql with query and binding
+   * query 와 binding을 인자로 받아 query를 실행한다.
+   * @param {string} query
+   * @param {array} binding
+   */
   self.query = function(query, binding) {
     binding = typeof binding !== 'undefined' ? binding : [];
     var deferred = $q.defer();
@@ -760,6 +887,17 @@ angular.module('messengerx.dao', [])
     return deferred.promise;
   };
 
+  /**
+   * @ngdoc function
+   * @name queryAll
+   * @module messengerx.dao
+   * @kind function
+   *
+   * @description executeSql multi query in single transaction
+   * query 와 binding의 array를 인자로 받아 여러개의 query를 하나의 transaction에서 실행한다.
+   * @param {array} querys
+   * @param {array} bindings
+   */
   self.queryAll = function(querys, bindings) {
     var deferred = $q.defer();
     self.db.transaction(function(transaction) {
@@ -780,6 +918,17 @@ angular.module('messengerx.dao', [])
     return deferred.promise;
   };
 
+  /**
+   * @ngdoc function
+   * @name fetchAll
+   * @module messengerx.dao
+   * @kind function
+   *
+   * @description convert SQL query result to JSON array
+   * sql 실행 결과를 인자로 받아 array로 반환한다.
+   * @param {object} resut - SQL query result 
+   * @return {array} JSON array
+   */
   self.fetchAll = function(result) {
     var output = [];
 
@@ -790,6 +939,17 @@ angular.module('messengerx.dao', [])
     return output;
   };
 
+  /**
+   * @ngdoc function
+   * @name fetch
+   * @module messengerx.dao
+   * @kind function
+   *
+   * @description executeSql multi query in single transaction
+   * query 와 binding의 array를 인자로 받아 여러개의 query를 하나의 transaction에서 실행한다.
+   * @param {object} resut - SQL query result 
+   * @return {object} JSON object
+   */
   self.fetch = function(result) {
     if( result.rows == undefined || result.rows.length == 0 ){
       return undefined;

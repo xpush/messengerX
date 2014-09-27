@@ -10,32 +10,40 @@ angular.module('popupchat', ['ionic', 'messengerx.controllers', 'messengerx.serv
     }
 
     $rootScope.cameraFlag = false;
+
+    // cordova 를 활용한 mobile 빌드시
     if( window.device ){
       $rootScope.deviceId = device.uuid;
       $rootScope.rootImgPath = "img";
       $rootScope.rootPath = "";
 
+      // 카메라 사용 여부는 true, 팝업 사용 여부는 false
       $rootScope.cameraFlag = true;
 
+      // local 에서 활용시 image path를 세팅한다.
     } else if ( $location.absUrl().indexOf( 'file' ) > -1 ) {
       $rootScope.rootImgPath = "img";
       $rootScope.rootPath = "../www/";
       $rootScope.deviceId = 'ionic';
     } else {
+
+      // web에서 직접 활용시
       $rootScope.rootImgPath = "../img";
       $rootScope.rootPath = "/";
       $rootScope.deviceId = 'ionic';
 
-      // messengerX
+      // http://messenger.stalk.io/ site에서 접속시
       if( $location.absUrl().indexOf( 'stalk' ) > -1 ||$location.absUrl().indexOf( 'localhost' ) > -1 ) {        
         $rootScope.rootPath = "/";
         $rootScope.rootImgPath = "../img";
+      // http://messengerx.github.io/app/www/index.html#/splash에서 접속시
       } else {      
         $rootScope.rootPath = "../www/";
         $rootScope.rootImgPath = "../www/img";        
       }
     }
 
+    // node webkit ==  true
     if( window.root ){
       var gui = require('nw.gui');
 
@@ -84,7 +92,7 @@ angular.module('popupchat', ['ionic', 'messengerx.controllers', 'messengerx.serv
     }, false );
     DB.init();
 
-    // tootScope function
+    // rootScope function
     $rootScope.logout = function(){
       Sign.logout();
       $rootScope.xpush.logout();
@@ -96,12 +104,8 @@ angular.module('popupchat', ['ionic', 'messengerx.controllers', 'messengerx.serv
 
 .config(function($stateProvider, $urlRouterProvider) {
 
-  // Ionic uses AngularUI Router which uses the concept of states
-  // Learn more here: https://github.com/angular-ui/ui-router
-  // Set up the various states which the app can be in.
-  // Each state's controller can be found in controllers.js
+  // UrlProvier 를 세팅한다.
   $stateProvider
-
     .state('chat', {
       url: '/chat',
       templateUrl: "templates/chat.html",
@@ -114,15 +118,6 @@ angular.module('popupchat', ['ionic', 'messengerx.controllers', 'messengerx.serv
       controller: 'ViewCtrl'
     });
 
+    // default는 chat provider
   $urlRouterProvider.otherwise('/chat');
 });
-
-angular.module('ionic.contrib.frostedGlass', ['ionic'])
-
-.factory('$ionicFrostedDelegate', ['$rootScope', function($rootScope) {
-  return {
-    update: function() {
-      $rootScope.$emit('ionicFrosted.update');
-    }
-  };
-}]);
