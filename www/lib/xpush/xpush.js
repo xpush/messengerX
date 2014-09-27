@@ -1,7 +1,7 @@
 (function(){
 
   var XPush = (function() {
-    if (typeof module !== 'undefined' ) {
+    if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
       http = require('http');
       io = require('socket.io-client');
     }
