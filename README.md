@@ -2,7 +2,7 @@ messengerX
 =====================
 **This project is currently under development.**
 
-"messengerX" is the messenger application based node-xpush.
+"messengerX" is the messenger application based [node-xpush](https://github.com/xpush/node-xpush).
 
 ## Using this project
 
@@ -17,23 +17,35 @@ $ sudo npm install -g ionic
 Then run:
 
 ```bash
-$ sudo npm install -g ionic
 $ ionic start messengerX tabs
 ```
 
 More info on this can be found on the Ionic [Getting Started](http://ionicframework.com/getting-started) page.
 
-## Installation
+## Installation & Run
 
 While we recommend using the `ionic` utility to create new Ionic projects, you can use this repo as a barebones starting point to your next Ionic app.
 
 To use this project as is, first clone the repo from GitHub, then run:
 
 ```bash
+$ git clone https://github.com/xpush/messengerX.git
 $ cd messengerX
 $ sudo npm install -g cordova ionic gulp
 $ npm install
 $ gulp install
+```
+
+This following command will display the url, then open the url with your chrome browser.
+
+```bash
+$ ionic serve
+Running dev server at http://**USER_IP**:8100/
+```
+
+## Add cordova plugins for mobile application (optional)
+
+```bash
 $ cordova plugin add org.apache.cordova.console  // only for developing
 $ cordova plugin add org.apache.cordova.device
 $ cordova plugin add https://github.com/driftyco/ionic-plugins-keyboard
@@ -41,8 +53,7 @@ $ cordova plugin add de.appplant.cordova.plugin.local-notification
 $ cordova plugin add https://github.com/phonegap-build/PushPlugin.git
 $ cordova plugins add org.apache.cordova.inappbrowser
 $ cordova plugin add https://github.com/EddyVerbruggen/Toast-PhoneGap-Plugin.git
-
-`` `
+```
 
 ## Using Sass (optional)
 
@@ -65,6 +76,8 @@ the include to your `ionic.app.css` file which now contains all your Sass code a
 To update to a new version of Ionic, open bower.json and change the version listed there.
 
 For example, to update from version `1.0.0-beta.9` to `1.0.0-beta.10`, open bower.json and change this:
+
+>**Note**: This application optimized with ionic version 1.0.1-beta.11 
 
 ```
 "ionic": "driftyco/ionic-bower#1.0.0-beta.9"
@@ -94,6 +107,24 @@ Warning: the nightly version is not stable.
 ## Issues
 Issues have been disabled on this repo, if you do find an issue or have a question consider posting it on the [Ionic Forum](http://forum.ionicframework.com/).  Or else if there is truly an error, follow our guidelines for [submitting an issue](http://ionicframework.com/contribute/#issues) to the main Ionic repository. On the other hand, pull requests are welcome here!
 
+## Downloads binary files
+
+#### Windows
+
+[*download*](https://github.com/messengerx/messengerx.github.io/raw/master/download/messengerX-0.0.1-win.zip)
+
+#### Linux 32 bit
+
+[*download*](https://github.com/messengerx/messengerx.github.io/raw/master/download/messengerX-0.0.1-i386.tar.gz)
+
+#### Linux 64 bit
+
+[*download*](https://github.com/messengerx/messengerx.github.io/raw/master/download/messengerX-0.0.1-x86_64.tar.gz)
+
+#### MAC
+
+[*download*](https://github.com/messengerx/messengerx.github.io/raw/master/download/messengerX-0.0.1-osx.dmg)
+
 ## Use With node-webkit
 
 #### In Ubuntu 13.04+ 32bit
@@ -105,4 +136,4 @@ sudo apt-get install libudev1 && cd /lib/i386-linux-gnu/ && sudo ln -s libudev.s
 sudo apt-get install libudev1 && cd /lib/x86_64-linux-gnu/ && sudo ln -s libudev.so.1 libudev.so.0
 ```
 
-[For detail] https://github.com/rogerwang/node-webkit/wiki/The-solution-of-lacking-libudev.so.0
+[For detail] https://github.com/rogerwang/node-webkit/wiki/The-solution-of-lacking-libudev.so.0 
