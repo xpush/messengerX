@@ -1,8 +1,9 @@
 messengerX
 =====================
-**This project is currently under development.**
 
 "messengerX" is the messenger application based [node-xpush](https://github.com/xpush/node-xpush).
+
+Visit messengerX web site - [messengerx.github.io](http://messengerx.github.io)
 
 ## Using this project
 
