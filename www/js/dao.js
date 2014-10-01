@@ -515,7 +515,7 @@ angular.module('messengerx.dao', [])
 
       var cond = [
         jsonObj.C,
-        jsonObj.S,
+        jsonObj.UO.U,
         jsonObj.UO.NM,
         jsonObj.UO.I,
         jsonObj.MG,
@@ -525,7 +525,7 @@ angular.module('messengerx.dao', [])
       ];
 
       // Add to Cache
-      Cache.add( jsonObj.S, {'NM':jsonObj.UO.NM, 'I':jsonObj.UO.I} );
+      Cache.add( jsonObj.UO.U, {'NM':jsonObj.UO.NM, 'I':jsonObj.UO.I} );
 
       this.addScan( jsonObj );
 
@@ -612,7 +612,7 @@ angular.module('messengerx.dao', [])
 
       var cond = [
         jsonObj.C,
-        jsonObj.S,
+        jsonObj.UO.U,
         jsonObj.UO.NM,
         jsonObj.UO.I,
         jsonObj.MG,
@@ -697,7 +697,7 @@ angular.module('messengerx.dao', [])
       var cond = [
         jsonObj.MG,
         jsonObj.LC,
-        jsonObj.S,
+        jsonObj.UO.U,
         jsonObj.C,
         jsonObj.TS,
         'Y',

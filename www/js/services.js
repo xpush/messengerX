@@ -526,12 +526,14 @@ angular.module('messengerx.services', [])
         // foreach channelArray channelInfo
         for( var inx = 0, until = channelArray.length ; inx < until ; inx++ ){
           var data = channelArray[inx];
-          var channel = {'channel': data.channel };
+          var channel = {'channel': data.channel };        
 
           if( data.DT != undefined ){
             channel.users = data.DT.US;
+            channel.name = data.DT.NM;
           } else {
             channel.users = "";
+            channel.name = "";
           }
 
           // self channel 인 경우는 채널리스트에 추가하지 않는다.
@@ -598,6 +600,7 @@ angular.module('messengerx.services', [])
             data.type = sr;
           }
 
+          console.log( channels );
           var channel = channels[data.C];
 
           if( data.T == 'I' ){
