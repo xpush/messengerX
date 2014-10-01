@@ -136,5 +136,20 @@ sudo apt-get install libudev1 && cd /lib/i386-linux-gnu/ && sudo ln -s libudev.s
 ```sh
 sudo apt-get install libudev1 && cd /lib/x86_64-linux-gnu/ && sudo ln -s libudev.so.1 libudev.so.0
 ```
+#### In OS X
+```sh
+My-Macbook:node-webkit-v0.8.6-osx-ia32$ cp node-webkit.app myApp/myApp.app
+
+My-Macbook:node-webkit-v0.8.6-osx-ia32$ cd myApp/www
+
+My-Macbook:www $ zip -r ../${PWD##*/}.nw *
+
+My-Macbook:www $ cd ..
+
+My-Macbook:myApp $ cp www.nw myApp.app/Contents/Resource/app.nw
+
+```
+Run myApp.app
+
 
 [For detail] https://github.com/rogerwang/node-webkit/wiki/The-solution-of-lacking-libudev.so.0 
