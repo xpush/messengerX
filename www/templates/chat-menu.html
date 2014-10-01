@@ -11,7 +11,12 @@
     <div class="col" ng-click="toggleTTS();" >
       <button ng-class="{'button ion-volume-medium': toggles.useTTS, 'button ion-volume-mute': !toggles.useTTS }"></button>
       <p>TTS</p>
-    </div>        
+    </div>
+    <div class="col" ng-click="toggleSnap();" >
+      <button ng-class="{'button ion-ios7-bolt-outline': 
+      !toggles.useSnap, 'button ion-ios7-bolt': toggles.useSnap }"></button>
+      <p>Snap</p>
+    </div>    
   </div>
   <div class="list">
     <div class="item item-icon-left transparent" ng-click="openFriendModal();">

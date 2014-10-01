@@ -448,7 +448,7 @@ angular.module('messengerx.controllers', [])
             var iMsg = UTIL.getInviteMessage( joinUsers );
 
             // Send channel join message and update channel info in local db
-            Chat.send( iMsg, 'J' );
+            Chat.send( iMsg, false, 'J' );
             ChannelDao.updateUsers( { 'channel': channelId, 'name' : channelName, 'users': channelUsers } );
           }
         });
@@ -1123,8 +1123,9 @@ angular.module('messengerx.controllers', [])
    * @description Add message to screen and Update scroll
    * 신규 메세지를 화면에 나타내고 scroll을 update한다.
    * @param {jsonObject} nextMessage
+   * @param {blloean} snapFlag
    */
-  $scope.add = function( nextMessage ) {
+  $scope.add = function( nextMessage, snapFlag ) {
     $scope.messages.push(angular.extend({}, nextMessage));
     $scope.$apply();
 
@@ -1133,6 +1134,29 @@ angular.module('messengerx.controllers', [])
       $ionicFrostedDelegate.update();
       $ionicScrollDelegate.scrollBottom(true);
     }
+
+    if( snapFlag ){
+      $scope.remove( nextMessage.id );  
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name add
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description Remove message in 10 seconds
+   * 10분 내에 해당 메세지를 삭제한다.
+   * @param {string} messageId
+   */
+  $scope.remove = function( msgId ){
+    setTimeout( function(){
+      var msg = document.getElementById( "message_"+msgId );
+      var msgInx = msg.getAttribute( "index" );
+      angular.element( msg ).remove();
+      $scope.messages.splice(msgInx, 1);
+    }, 10000 );
   };
 
   /**
@@ -1147,7 +1171,7 @@ angular.module('messengerx.controllers', [])
     if( $scope.inputMessage !== '' ){
       var msg = $scope.inputMessage;
       $scope.inputMessage = '';
-      Chat.send( msg );
+      Chat.send( msg, $scope.toggles.useSnap );
     }
   };
 
@@ -1290,19 +1314,19 @@ angular.module('messengerx.controllers', [])
 
     var popup = $window.open(url, chKey, "width=800,height=600,location=no,toolbar=no,menubar=no,scrollbars=no,resizable=yes");
     popup.onbeforeunload = function(){
-      Chat.send( chKey, 'VO' );
+      Chat.send( chKey, $scope.toggles.useSnap, 'VO' );
     };
 
     // Send video call
     if( newFlag ){
-      Chat.send( chKey, 'VI' );
+      Chat.send( chKey, $scope.toggles.useSnap, 'VI' );
     }
   };
 
   $scope.emoticons = [];
 
   $scope.curEmoTabId = "0";
-  $scope.toggles = { 'showEmo' : false, 'showExt' : false, 'showMenu' : false, 'useTTS' : false, 'bookmarkOnly' : false };
+  $scope.toggles = { 'showEmo' : false, 'showExt' : false, 'showMenu' : false, 'useTTS' : false, 'bookmarkOnly' : false, 'useSnap' : false};
   /**
    * @ngdoc function
    * @name toggleEmoticons
@@ -1449,7 +1473,7 @@ angular.module('messengerx.controllers', [])
   $scope.sendEmoticon = function(url){
     $scope.toggleEmoticons( false );
     document.getElementById( 'chat-emoticons' ).style.display = "none";
-    Chat.send( url, 'E' );
+    Chat.send( url, $scope.toggles.useSnap, 'E' );
   };
 
   /**
@@ -1559,7 +1583,7 @@ angular.module('messengerx.controllers', [])
           function (data){
             var imageUrl = $rootScope.xpush.getFileUrl(channelId, JSON.parse(data.response).result.tname );
             angular.element( tempDiv ).remove();
-            Chat.send( imageUrl, 'I' );
+            Chat.send( imageUrl, $scope.toggles.useSnap, 'I' );
           });
 
         }, 100 );
@@ -1672,7 +1696,7 @@ angular.module('messengerx.controllers', [])
       inputObj.value = "";
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
 
-      Chat.send( msg, msgType );
+      Chat.send( msg, $scope.toggles.useSnap, msgType );
     });
   };
 
@@ -1716,7 +1740,7 @@ angular.module('messengerx.controllers', [])
       var noticeMessage = data.notice;
 
       if( noticeMessage !== undefined ){
-        Chat.send( noticeMessage, 'N' );
+        Chat.send( noticeMessage, $scope.toggles.useSnap, 'N' );
 
         // Notice 입력완료 시, notice 정보를 channel에 update한다.
         var query = { $set:{ 'DT.NT' : { 'MG' : noticeMessage, 'Y': { 'US':[] }, 'N': { 'US':[] } } } };
@@ -1957,6 +1981,23 @@ angular.module('messengerx.controllers', [])
         u.lang = 'ko-KR';
         window.speechSynthesis.speak(u);
       }
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name toggleTTS
+   * @module messengerx.controllers
+   * @kind function
+   *
+   * @description enable or disable TTS
+   * TTS를 on 하거나 off 한다.
+   */
+  $scope.toggleSnap = function() {
+    if( $scope.toggles.useSnap ){
+      $scope.toggles.useSnap = false;
+    } else {
+      $scope.toggles.useSnap = true;
     }
   };
 })

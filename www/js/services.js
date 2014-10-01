@@ -344,6 +344,9 @@ angular.module('messengerx.services', [])
         // compare sender's userId to logined UserId. send or receive
         var sr = data.UO.U == loginUser.userId ? 'S':'R' ;
 
+        // set snapFlag;
+        var snapFlag = data.F;
+
         // Join message not need to compare send or receive
         if( data.T == 'J' ){
           data.type = data.T;
@@ -416,10 +419,13 @@ angular.module('messengerx.services', [])
             $rootScope.currentChannelLatestDate = latestDate;
           }
 
-          var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, senderId : data.UO.U, timestamp : data.TS, active : "true", bookmarkFlag : 'N' };
+          var id = data.UO.U+ "_" + data.TS;
+          var nextMessage = { type : data.type, date : dateStrs[1], message : data.MG, name : data.UO.NM, image : data.UO.I, senderId : data.UO.U, timestamp : data.TS, active : "true", bookmarkFlag : 'N', id : id };
 
           // Add to local DB
-          MessageDao.add( data );
+          if( !snapFlag ){
+            MessageDao.add( data );
+          }
 
           //  Update channel info
           var param = { 'channel':data.C, 'reset' : true };
@@ -451,14 +457,14 @@ angular.module('messengerx.services', [])
             param.image = data.UO.I;
           }
 
-          // Join message is not need to update channel info
-          if( data.type != 'J' ){
+          // Join message is not need to update channel info, snapFlag false
+          if( !snapFlag && data.type != 'J' ){
             ChannelDao.update( param );
           }
 
           // If current channel's chatting is activated, show received message
           if( $rootScope.currentScope ){
-            $rootScope.currentScope.add( nextMessage );
+            $rootScope.currentScope.add( nextMessage, snapFlag );
           }
 
         } else {
@@ -600,7 +606,6 @@ angular.module('messengerx.services', [])
             data.type = sr;
           }
 
-          console.log( channels );
           var channel = channels[data.C];
 
           if( data.T == 'I' ){
@@ -771,7 +776,7 @@ angular.module('messengerx.services', [])
 
       } else {
         // 초대 message가 있다면 신규 channel 이라는 의미이기에 초대 메세지를 바로 전송한다. 
-        self.send( inviteMessage, 'J' );
+        self.send( inviteMessage, false, 'J' );
         callback();
       }
     },
@@ -809,8 +814,9 @@ angular.module('messengerx.services', [])
             messages.push( { type : 'T', date : dateStrs[1], message : dateMessage } );
             latestDate = dateStrs[3];
           }
+          var id = data.sender_id + "_" + data.time;
           messages.push( { type : data.type, date : dateStrs[1], message : data.message, name : data.sender_name,image : Cache.get( data.sender_id ).I,
-                        senderId : data.sender_id, timestamp : data.time, active : "false", bookmarkFlag : data.bookmark_flag } );
+                        senderId : data.sender_id, timestamp : data.time, active : "false", bookmarkFlag : data.bookmark_flag, id:id } );
         }
 
         $rootScope.currentChannelLatestDate = latestDate;
@@ -826,11 +832,12 @@ angular.module('messengerx.services', [])
      *
      * @description Send message
      * @param {string} message
+     * @param {boolean} useSnap
      * @param {string} messageType
      */
-    send : function(msg, type){      
+    send : function(msg, useSnap, type){      
       var DT = { UO : CONF._user, MG : encodeURIComponent(msg) };
-
+      DT.F = useSnap;      
       if( type !== undefined ){
         DT.T = type;
       }
@@ -913,7 +920,7 @@ angular.module('messengerx.services', [])
      * @kind function
      *
      * @description Retreive emoticon from local DB
-     * DB에서 emoticaon을 조회한다.
+     * DB에서 emoticon을 조회한다.
      * @param {object} Search param
      * @param {function} callback function that be called after success
      */

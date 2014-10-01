@@ -17,7 +17,7 @@
   </ion-nav-buttons>
   <ion-content padding="true" class="has-header" start-y="120" has-bouncing="true">
     <ol class="messages">
-      <li ng-repeat="message in messages" ng-class="message.type">
+      <li ng-repeat="message in messages" ng-class="message.type" id="message_{{message.id}}" index={{$index}}>
         <div ng-if="message.type=='R'">
           <div class="small">{{message.name}}</div>
           <div class="from">
