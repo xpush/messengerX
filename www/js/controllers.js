@@ -1399,6 +1399,8 @@ angular.module('messengerx.controllers', [])
 
       document.getElementById( 'chat-emoticons' ).style.display = "none";
       document.getElementById( 'chat-extends' ).style.display = "none";
+      $scope.toggles.showExt = false;
+      $scope.toggles.showEmo = false;
 
       $scope.slidePopup = $xpushSlide.show({
         templateUrl : 'templates/chat-menu.html',
