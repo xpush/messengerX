@@ -638,18 +638,18 @@ angular.module('messengerx.controllers', [])
 
     // upload file stream
     $rootScope.xpush.uploadStream( channelId, {
-      file: inputObj
+      file: inputObj, type : 'image'
     }, function(data, idx){
       inputObj.value = "";
       progressbar.value = data;
       progressbar.style.display = "block";
     }, function(data,idx){
-      var name = data.result.name;
+      var tname = data.result.tname;
 
       inputObj.value = "";
       console.log("completed ["+idx+"]: "+JSON.stringify(data));
 
-      var imageUrl = $rootScope.xpush.getFileUrl(channelId, name );
+      var imageUrl = $rootScope.xpush.getFileUrl(channelId, tname );
       var param = {group:'custom', tag :'', image : imageUrl};
       progressbar.style.display = "none";
 
@@ -836,6 +836,9 @@ angular.module('messengerx.controllers', [])
    * @param {jsonObject} Json object that is mapped to the screen
    */
   $scope.signUp = function(user) {
+    var hash = CryptoJS.SHA256( user.password );
+    var encPassword = hash.toString(CryptoJS.enc.Base64);
+    
     var params = { 'A' : $rootScope.app, 'U' : user.userId, 'PW' : user.password, 'D' : $rootScope.deviceId, 'N' : $rootScope.notiId,
      'DT' : {'NM' : user.userName, 'I':STATIC_URL+'/img/default_image.jpg', 'MG':'' } };
     Sign.register( params, function(data){
@@ -1072,6 +1075,8 @@ angular.module('messengerx.controllers', [])
           "01" : [baseImgPath+'/emo/b2/anger.png', baseImgPath+'/emo/b2/exciting.png', baseImgPath+'/emo/b2/happy.png', baseImgPath+'/emo/b2/greedy.png'],
           "02" : [baseImgPath+'/emo/b2/victory.png', baseImgPath+'/emo/b2/unhappy.png']}}
       );
+
+      $scope.emoticons = $scope.emoticons.concat( emoticons );
     });
   };
 
