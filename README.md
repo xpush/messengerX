@@ -128,6 +128,9 @@ Issues have been disabled on this repo, if you do find an issue or have a questi
 
 ## Use With node-webkit
 
+#### Windows
+[*download*](http://dl.node-webkit.org/v0.10.5/node-webkit-v0.10.5-win-ia32.zip)
+
 #### In Ubuntu 13.04+ 32bit
 ```sh
 sudo apt-get install libudev1 && cd /lib/i386-linux-gnu/ && sudo ln -s libudev.so.1 libudev.so.0
