@@ -18,16 +18,9 @@
       ,'force new connection': true
     };
 
-    var isDebugging = false;
-    var debug = function(){
-      if( isDebugging ){
-        if (console.log.bind === 'undefined') { // IE < 10
-          Function.prototype.bind.call(console.log, console, context);
-        } else {
-          console.log.apply(console, arguments);
-        }
-      }
-    }
+    var oldDebug;
+    var debug = function() {
+    };
     
     /**
      * Xpush의 생성자
@@ -92,7 +85,7 @@
     };
 
     /**
-     * userId와 password를 이용하여 회원가입을 한다.
+     * debug 기능을 켠다.
      * @name enableDebug
      * @memberof Xpush
      * @function
@@ -101,11 +94,27 @@
      * xpush.enableDebug();
      */
     XPush.prototype.enableDebug = function(){
-      isDebugging = true;
+      if( oldDebug ){
+        return;
+      }
+
+      if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+        debug = Function.prototype.bind.call(console.log, console);
+      } else {
+        if (window.console) {
+          if (Function.prototype.bind) {
+            debug = Function.prototype.bind.call(console.log, console);
+          } else {
+            debug = function() {
+              Function.prototype.apply.call(console.log, console, arguments);
+            };
+          }
+        }
+      }
     };
 
     /**
-     * userId와 password를 이용하여 회원가입을 한다.
+     * debug 기능을 끈다.
      * @name disableDebug
      * @memberof Xpush
      * @function
@@ -114,7 +123,11 @@
      * xpush.disableDebug();
      */
     XPush.prototype.disableDebug = function(){
-      isDebugging = true;
+      // Init debug funciton
+      debug = function(){
+      };
+
+      oldDebug = undefined;
     };
 
     /**
@@ -395,10 +408,9 @@
           ch.connect(function(){
             if(cb) cb();
           }, 'CHANNEL_ONLY');
-
         }
       });
-
+      return ch;
     };
 
     /**
@@ -474,7 +486,7 @@
       var self = this;
       self.sEmit('channel-list-active',data, function(err, result){
         //app, channel, created
-        cb(result);
+        cb(err, result);
       });
     };
 
@@ -882,7 +894,11 @@
         column: _params.column
       };
 
-      if(_params.options) params['options'] = _params.options;
+      if(_params.options) {
+        params['options'] = _params.options;
+      } else {
+        params['options'] = {};
+      }
 
       debug("xpush : queryUser ",params);
 
@@ -1172,7 +1188,7 @@
         res.on("end", function() {
           var r = JSON.parse(result);
           if(r.status != 'ok'){
-            cb(r.status,r.mesage);
+            cb(r.status,r.message);
           }else{
             cb(null,r);
           }  
@@ -1243,7 +1259,7 @@
         if(xhr.readyState === 4) {
           var r = JSON.parse(xhr.responseText);
           if(r.status != 'ok'){
-            cb(r.status,r.mesage);
+            cb(r.status,r.message);
           }else{
             cb(null,r);
           }
@@ -1288,9 +1304,9 @@
           cb(null, result.result);
         }else{
           if(result.status.indexOf('WARN') == 0){
-            console.warn("xpush : ", key, result.status, result.message);
+            debug("xpush : ", key, result.status, result.message);
           }else{
-            console.error("xpush : ", key, result.status, result.message);
+            debug("xpush : ", key, result.status, result.message);
           }
           cb(result.status, result.message);
         }
