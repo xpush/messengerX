@@ -265,7 +265,7 @@ angular.module('messengerx.services', [])
     }
   };
 })
-.factory('EventManager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, NoticeDao, UTIL ) {
+.factory('EventManager', function($http, $sce, $rootScope, Sign, ChannelDao, MessageDao, NoticeDao, UTIL, NotificationManager ) {
   var _initFlag = false;
   return {
 
@@ -510,6 +510,9 @@ angular.module('messengerx.services', [])
             if( data.T != 'J' && channelJson.DT.UC >= 2 ){
               ChannelDao.add( channel );
             }
+
+            channel.title = 'New message arrived';
+            NotificationManager.notify( channel );
           });
         }
       });
@@ -1316,5 +1319,204 @@ angular.module('messengerx.services', [])
 
       return result;
     }
+  };
+})
+.factory('ChatLauncher', function($rootScope, $state, Cache, Sign){
+  // Main Window를 위한 ChatLauncher
+  var popupCount = 0;
+  var popups = {};
+  var self;
+
+  // popupClose 이벤트를 받을 경우 popup map에서 제거
+  $rootScope.$on("$popupClose", function ( data, key ){
+    delete popups[key];
+    popupCount--;
+  });  
+
+  return {
+    getPopups : function(){
+      return popups;
+    },
+    gotoChat : function( popupKey, stateParams, callback ){
+      self = this;
+
+      // popup 사용여부가 true일 때는 chat window를 팝업으로 띠우고, 그렇지 않을땐  현재 창에서 이동한다.
+      if( $rootScope.usePopupFlag ){
+        if( popups[popupKey] !== undefined ){
+          if( popups[popupKey].window ){
+            popups[popupKey].window.focus();
+          } else {
+            popups[popupKey].focus();
+          }
+
+          if ( callback && typeof callback === 'function') {
+            callback();
+          }
+        } else {
+
+          var popup;
+
+          var left = screen.width - 620 + ( popupCount * 50 );
+          var top = 0 + ( popupCount * 50 ) ;
+          popupCount++;
+
+          if( $rootScope.nodeWebkit ){ 
+            popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
+            // nodewebkit에서 채팅창이 option위치에서 열리지 않아, 채팅창을 정해진 위치로 이동시킨다.
+            popup.moveTo(left,top);
+          } else {
+            popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
+          }
+
+          var startTime = Date.now();
+          var popupInterval = setInterval( function(){
+            var endTime = Date.now();
+
+            // 팝업이 뜨는데 걸리는 시간이 10초를 넘어가면 팝업을 오픈한다.
+            if( endTime - startTime > 10000 ){
+              clearInterval( popupInterval );
+            }
+
+            // popup의 angular socpe 및 popupOpened 이벤트가 발생할때가지 팝업 생성을 기다린다. 
+            if( popup !== undefined ) {
+              var popObj = popup.window.document.getElementById( "popupchat" );
+              if( popObj !== undefined && popup.window.angular !== undefined ){
+                var newWindowRootScope = popup.window.angular.element( popObj ).scope();
+                if( newWindowRootScope !== undefined && newWindowRootScope.xpush !== undefined ){
+                  if( newWindowRootScope.$$listeners.$popupOpened !== undefined ){
+                    clearInterval( popupInterval );
+                    self.openPopup( popup, popupKey, newWindowRootScope, stateParams );
+                    if ( callback && typeof callback === 'function') {
+                      callback();
+                    }
+                  }
+                }
+              }
+            }
+          }, 200 );
+        }
+      } else {
+        $rootScope.$stateParams = stateParams;
+        $state.go( 'chat' );
+      }
+    },
+    openPopup : function( popupWin, popupKey, scope, stateParams ){
+
+      if( $rootScope.nodeWebkit ) {
+        popups[popupKey] = popupWin;
+      } else {
+        popups[popupKey] = popupWin;
+
+        // broswer 사용시 chat window를 종료할때 이벤트 처리를 위함
+        popupWin.onbeforeunload = function(){
+          scope.$broadcast("$windowClose" );
+          popupCount--;
+          delete popups[popupKey];
+        };
+      }
+
+      // 채팅 창으로 로그인 정보와 세션 커넥션을 넘김.
+      var args = {};
+      args.loginUser = Sign.getUser();
+      args.stateParams = stateParams;
+      args.cache = Cache.all();
+      args.popupKey = popupKey;
+      args.sessionConnection = $rootScope.xpush._sessionConnection;
+      args.parentScope = $rootScope;
+
+      // 팝업 오픈이 완료되었음을 알리는 event를 발생시킨다.
+      scope.$broadcast("$popupOpened", args );
+    }
+  };
+})
+.factory('NotificationManager', function($window, ChatLauncher, ChannelDao ){
+  var notificationsUiSupport = ('Notification' in window) || ('mozNotification' in navigator);
+  var notificationsCount = 0;
+  var notificationIndex = 0;
+  //var vibrateSupport = !!navigator.vibrate;
+  var win = angular.element($window);
+
+  return {
+    start: start,
+    notify: notify
+  };
+
+  function start () {
+    if (!notificationsUiSupport) {
+      return false;
+    }
+
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      win.on('click', requestPermission );
+    }
+
+    try {
+      win.on('beforeunload', notificationsClear);
+    } catch (e) {}
+  }
+
+  function requestPermission() {
+    Notification.requestPermission(function (permission) {
+      // Whatever the user answers, we make sure we store the information
+      if(!('permission' in Notification)) {
+        Notification.permission = permission;
+      }
+    });
+    win.off('click', requestPermission );
+  }
+
+  function notify (data) {
+    notificationsCount++;
+    if (!notificationsUiSupport ||
+        'Notification' in window && Notification.permission !== 'granted') {
+      return false;
+    }
+
+    /**
+    if (vibrateSupport) {
+      navigator.vibrate([200, 100, 200]);
+      return;
+    }
+    */
+
+    var idx = ++notificationIndex,
+        key = data.key || 'k' + idx,
+        notification;
+
+    if ('Notification' in window) {
+      notification = new Notification(data.title, {
+        icon: data.image || '',
+        body: data.message || ''
+      });
+    } else if ('mozNotification' in navigator) {
+      notification = navigator.mozNotification.createNotification(data.title, data.message || '', data.image || '');
+    } else {
+      return;
+    }
+
+    notification.onclick = function () {
+      notification.close();
+      //notificationsClear();
+
+      var $stateParams = {};
+      var channelId = data.channel;
+      ChannelDao.get( channelId ).then(function(result) {
+        $stateParams.channelId = channelId;
+        $stateParams.channelUsers = result.channel_users;
+        $stateParams.channelName = result.channel_name;
+
+        ChatLauncher.gotoChat( channelId, $stateParams );
+      });
+    };
+
+    notification.onclose = function () {
+      //delete notificationsShown[key];
+      //notificationsClear();
+    };
+
+    if (notification.show) {
+      notification.show();
+    }
+    //notificationsShown[key] = notification;
   };
 });

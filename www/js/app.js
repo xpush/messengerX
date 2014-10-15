@@ -1,6 +1,6 @@
 angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.services', 'messengerx.constants', 'messengerx.directives', 'messengerx.dao', 'ionic.contrib.frostedGlass', 'ngStorage'])
 
-.run(function($location, $ionicPlatform, $rootScope, $state, $window, $localStorage, $sessionStorage, $templateCache, APP_INFO, DB, BASE_URL, Sign, ChatLauncher ) {
+.run(function($location, $ionicPlatform, $rootScope, $state, $window, $localStorage, $sessionStorage, $templateCache, APP_INFO, DB, BASE_URL, Sign, ChatLauncher, NotificationManager ) {
   $ionicPlatform.ready(function() {
   
     // cordova 에서 back button event 를 추가한다. 2초내에 2번 back button을 누르면 종료된다.
@@ -32,6 +32,8 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
     }
 
     $rootScope.cameraFlag = false;
+
+    NotificationManager.start();
     
     // cordova 를 활용한 mobile 빌드시
     if( window.device ){
@@ -164,7 +166,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
       // Tray click 시 창을 활성화 함
       tray.click = function(){
         winmain.show();
-        winmain.focus();
+        winmain.focuslll();
       }
   
       // nodewebkit을 사용 중일때는, 창 종료버튼 누를 시 화면을 최소화한다.
@@ -475,112 +477,4 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
 
   // default로 splash screen start
   $urlRouterProvider.otherwise('/splash');
-})
-// Main Window를 위한 ChatLauncher
-.factory('ChatLauncher', function($rootScope, $state, Cache, Sign){
-  var popupCount = 0;
-  var popups = {};
-  var self;
-
-  // popupClose 이벤트를 받을 경우 popup map에서 제거
-  $rootScope.$on("$popupClose", function ( data, key ){
-    delete popups[key];
-    popupCount--;
-  });  
-
-  return {
-    getPopups : function(){
-      return popups;
-    },
-    gotoChat : function( scope, popupKey, stateParams, callback ){
-      self = this;
-
-      // popup 사용여부가 true일 때는 chat window를 팝업으로 띠우고, 그렇지 않을땐  현재 창에서 이동한다.
-      if( $rootScope.usePopupFlag ){
-        if( popups[popupKey] !== undefined ){
-          if( popups[popupKey].window ){
-            popups[popupKey].window.focus();
-          } else {
-            popups[popupKey].focus();
-          }
-
-          if ( callback && typeof callback === 'function') {
-            callback();
-          }
-        } else {
-
-          var popup;
-
-          var left = screen.width - 620 + ( popupCount * 50 );
-          var top = 0 + ( popupCount * 50 ) ;
-          popupCount++;
-
-          if( $rootScope.nodeWebkit ){ 
-            popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
-            // nodewebkit에서 채팅창이 option위치에서 열리지 않아, 채팅창을 정해진 위치로 이동시킨다.
-            popup.moveTo(left,top);
-          } else {
-            popup = window.open( $rootScope.rootPath + 'popup-chat.html', popupKey, 'screenX='+ left + ',screenY=' + top +',width=400,height=600');
-          }
-
-          var startTime = Date.now();
-          var popupInterval = setInterval( function(){
-            var endTime = Date.now();
-
-            // 팝업이 뜨는데 걸리는 시간이 10초를 넘어가면 팝업을 오픈한다.
-            if( endTime - startTime > 10000 ){
-              clearInterval( popupInterval );
-            }
-
-            // popup의 angular socpe 및 popupOpened 이벤트가 발생할때가지 팝업 생성을 기다린다. 
-            if( popup !== undefined ) {
-              var popObj = popup.window.document.getElementById( "popupchat" );
-              if( popObj !== undefined && popup.window.angular !== undefined ){
-                var newWindowRootScope = popup.window.angular.element( popObj ).scope();
-                if( newWindowRootScope !== undefined && newWindowRootScope.xpush !== undefined ){
-                  if( newWindowRootScope.$$listeners.$popupOpened !== undefined ){
-                    clearInterval( popupInterval );
-                    self.openPopup( popup, popupKey, newWindowRootScope, stateParams );
-                    if ( callback && typeof callback === 'function') {
-                      callback();
-                    }
-                  }
-                }
-              }
-            }
-          }, 200 );
-        }
-      } else {
-        $rootScope.$stateParams = stateParams;
-        $state.go( 'chat' );
-      }
-    },
-    openPopup : function( popupWin, popupKey, scope, stateParams ){
-
-      if( $rootScope.nodeWebkit ) {
-        popups[popupKey] = popupWin;
-      } else {
-        popups[popupKey] = popupWin;
-
-        // broswer 사용시 chat window를 종료할때 이벤트 처리를 위함
-        popupWin.onbeforeunload = function(){
-          scope.$broadcast("$windowClose" );
-          popupCount--;
-          delete popups[popupKey];
-        };
-      }
-
-      // 채팅 창으로 로그인 정보와 세션 커넥션을 넘김.
-      var args = {};
-      args.loginUser = Sign.getUser();
-      args.stateParams = stateParams;
-      args.cache = Cache.all();
-      args.popupKey = popupKey;
-      args.sessionConnection = $rootScope.xpush._sessionConnection;
-      args.parentScope = $rootScope;
-
-      // 팝업 오픈이 완료되었음을 알리는 event를 발생시킨다.
-      scope.$broadcast("$popupOpened", args );
-    }
-  };
 });

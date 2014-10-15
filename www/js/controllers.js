@@ -125,7 +125,7 @@ angular.module('messengerx.controllers', [])
     var jsonObject = {};
     jsonObject.U = [friendIds,Sign.getUser().userId];
     var channelId = UTIL.generateChannelId( jsonObject );
-    ChatLauncher.gotoChat( $scope, channelId, $stateParams, function(){
+    ChatLauncher.gotoChat( channelId, $stateParams, function(){
       $scope.opening = false;
     });
 
@@ -347,7 +347,7 @@ angular.module('messengerx.controllers', [])
       $stateParams.channelUsers = data.channel_users;
       $stateParams.channelName = data.channel_name;
 
-      ChatLauncher.gotoChat( $scope, channelId, $stateParams );
+      ChatLauncher.gotoChat( channelId, $stateParams );
     });
   };
 
