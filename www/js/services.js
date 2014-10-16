@@ -511,7 +511,6 @@ angular.module('messengerx.services', [])
               ChannelDao.add( channel );
             }
 
-            channel.title = 'New message arrived';
             NotificationManager.notify( channel );
           });
         }
@@ -1430,19 +1429,20 @@ angular.module('messengerx.services', [])
   };
 })
 .factory('NotificationManager', function($window, ChatLauncher, ChannelDao ){
-  var notificationsUiSupport = ('Notification' in window) || ('mozNotification' in navigator);
-  var notificationsCount = 0;
-  var notificationIndex = 0;
-  //var vibrateSupport = !!navigator.vibrate;
+  var notificationsSupport = ('Notification' in window) || ('mozNotification' in navigator);
+  var notificationsCnt = 0;
+  var notificationsInx = 0;
   var win = angular.element($window);
+  var notificationsShown = {};
 
   return {
     start: start,
-    notify: notify
+    notify: notify,
+    clear:clearNotification
   };
 
   function start () {
-    if (!notificationsUiSupport) {
+    if (!notificationsSupport) {
       return false;
     }
 
@@ -1451,13 +1451,12 @@ angular.module('messengerx.services', [])
     }
 
     try {
-      win.on('beforeunload', notificationsClear);
+      win.on('beforeunload', clearNotification);
     } catch (e) {}
   }
 
   function requestPermission() {
     Notification.requestPermission(function (permission) {
-      // Whatever the user answers, we make sure we store the information
       if(!('permission' in Notification)) {
         Notification.permission = permission;
       }
@@ -1466,40 +1465,35 @@ angular.module('messengerx.services', [])
   }
 
   function notify (data) {
-    notificationsCount++;
-    if (!notificationsUiSupport ||
+    notificationsCnt++;
+
+    if (!notificationsSupport ||
         'Notification' in window && Notification.permission !== 'granted') {
       return false;
     }
 
-    /**
-    if (vibrateSupport) {
-      navigator.vibrate([200, 100, 200]);
-      return;
-    }
-    */
-
-    var idx = ++notificationIndex,
-        key = data.key || 'k' + idx,
+    var idx = ++notificationsInx,
+        channel = data.channel,
         notification;
 
     if ('Notification' in window) {
-      notification = new Notification(data.title, {
-        icon: data.image || '',
-        body: data.message || ''
+      notification = new Notification(data.name, {
+        icon: data.image, body: data.message
       });
     } else if ('mozNotification' in navigator) {
-      notification = navigator.mozNotification.createNotification(data.title, data.message || '', data.image || '');
+      notification = navigator.mozNotification.createNotification(data.name, data.message, data.image);
     } else {
       return;
     }
 
     notification.onclick = function () {
       notification.close();
-      //notificationsClear();
 
       var $stateParams = {};
       var channelId = data.channel;
+
+      closeChannelNotification( channelId );
+
       ChannelDao.get( channelId ).then(function(result) {
         $stateParams.channelId = channelId;
         $stateParams.channelUsers = result.channel_users;
@@ -1509,14 +1503,45 @@ angular.module('messengerx.services', [])
       });
     };
 
-    notification.onclose = function () {
-      //delete notificationsShown[key];
-      //notificationsClear();
-    };
-
     if (notification.show) {
       notification.show();
     }
-    //notificationsShown[key] = notification;
+
+    if( !notificationsShown[channel] ){
+      notificationsShown[channel] = [];
+    }
+
+    notificationsShown[channel].push( notification );
   };
+
+  function closeChannelNotification( channel ) {
+    angular.forEach(notificationsShown[channel], function (notification) {
+      try {
+        if (notification.close) {
+          notification.close();
+        }
+
+        if( notificationsCnt > 0 ){
+          notificationsCnt--;
+        }
+      } catch (e) {}
+    });
+
+    notificationsShown[channel] = [];
+  }
+
+  function clearNotification() {
+    for( var channel in notificationsShown ){
+      angular.forEach(notificationsShown[channel], function (notification) {
+        try {
+          if (notification.close) {
+            notification.close();
+          }
+        } catch (e) {}
+      });
+    }
+
+    notificationsShown = {};
+    notificationsCnt = 0;
+  }
 });
