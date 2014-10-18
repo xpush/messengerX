@@ -13,14 +13,14 @@
   var localVideo;
   var remoteVideo;
 
-  var turnUrl='https://computeengineondemand.appspot.com/turn?username=92474599&key=4080218913';
-
   var CONFIG = {};
   var STATUS = {
     READY: false,
     INIT: false,
     STARTED: false
   };
+
+  var turnUrl='';
 
   var _initProcess = function (type, data){
     console.log('EVENT', type, data);
