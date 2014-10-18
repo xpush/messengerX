@@ -674,9 +674,8 @@ angular.module('messengerx.controllers', [])
 
       // Retrieve refresh history for sync friends
       Friends.getRefreshHistory(function(history){
-
-        // Do not update within an hour( 60s )
-        if( history != undefined && ( history.time - Date.now() ) < 60000 ){
+        // Do not update within 30 min
+        if( history != undefined && ( Date.now() - history.time ) < (60 * 30 * 1000) ){
           $rootScope.syncFlag = false;
         } else {
           $rootScope.syncFlag = true;
