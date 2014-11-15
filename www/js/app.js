@@ -17,7 +17,6 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
           $rootScope.backButtonPressedOnceToExit = false;
         },2000);
       } else if ($rootScope.$viewHistory.backView) {
-        console.log( $rootScope.$viewHistory.backView );
         $rootScope.$viewHistory.backView.go();
       }
       e.preventDefault();

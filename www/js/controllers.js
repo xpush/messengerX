@@ -1264,6 +1264,10 @@ angular.module('messengerx.controllers', [])
 
   $scope.$on('$destroy', function() {
     window.onbeforeunload = undefined;
+
+    // Init currentChannel
+    $rootScope.currentChannel = '';
+    Chat.sendSys( 'off' );
   });
 
   /**
