@@ -545,6 +545,7 @@ angular.module('messengerx.controllers', [])
       if( res === true ){
         DB.clearAll( Sign.getUser().userId);
         $rootScope.syncFlag = true;
+        $rootScope.totalUnreadCount = 0;
       }
     });
   };  
@@ -1095,6 +1096,9 @@ angular.module('messengerx.controllers', [])
    */
   var setChannelUsers = function( noticeData ){
     // Channel 에 속해있는 사용자 정보를 조회
+
+    $scope.channelUserDatas = [];
+
     Users.search( { 'U' : { $in: channelUsers } }, -1, function( users ){
       users.forEach( function( user ){
         var data = { "NM" : user.DT.NM, "I" : user.DT.I };
@@ -1823,16 +1827,11 @@ angular.module('messengerx.controllers', [])
       $scope.notice.N_US = result.DT.NT.N.US;
       $scope.notice.Y_US = result.DT.NT.Y.US;
 
-      var searchInx = -1;
-      // 사용자를 찾아 vote status를 수정한다.
-      for( var inx = 0, until = $scope.channelUserDatas.length; searchInx < 0 && inx < until ; inx++){
-        if( $scope.channelUserDatas[inx].U === loginUser.userId ){
-          searchInx = inx;
-        }
-      }
-      var channelUserData = $scope.channelUserDatas[searchInx];
-      channelUserData.agree = param.voteFlag;
-      $scope.$apply();
+      $rootScope.xpush.getChannelData( channelId, function( err, channelInfo ){
+        var noticeData = channelInfo.DT.NT;
+        setChannelUsers( noticeData );
+        $scope.$apply();
+      });
     });
   };
 
