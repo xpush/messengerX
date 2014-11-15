@@ -994,6 +994,7 @@ angular.module('messengerx.controllers', [])
                                   image : Cache.get( data.sender_id ).I , useFlag : data.use_flag, foldFlag : data.fold_flag,
                                   voteFlag : data.vote_flag, Y_US : noticeData.Y.US, N_US: noticeData.N.US };
             $scope.setNotice( noticeMessage );
+            
             setChannelUsers( noticeData );
           });
         } else {
