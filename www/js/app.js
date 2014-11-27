@@ -153,26 +153,23 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
 
         submenu.append( logoutMenuItem );
         submenu.append( closeMenuItem );
-        menubar.append( fileMenuItem );
         fileMenuItem.submenu = submenu;
+        menubar.append( fileMenuItem );
         
-        if( process.platform == 'darwin' ){
-          //menubar.createMacBuiltin("messengerX");
-        }
         winmain.menu = menubar;
       }
 
       // Tray click 시 창을 활성화 함
       tray.click = function(){
         winmain.show();
-        winmain.focuslll();
+        winmain.focus();
       }
   
       // nodewebkit을 사용 중일때는, 창 종료버튼 누를 시 화면을 최소화한다.
       winmain.on('close', function(){
         winmain.minimize();
 
-        if( process.platform == 'window' ){
+        if( process.platform == 'window' || process.platform == 'win32' || process.platform == 'win64' ){
           winmain.setShowInTaskbar(false);
         }
       });
@@ -180,7 +177,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
       // nodewebkit을 사용 중일때는, 창 종료버튼 누를 시 화면을 최소화한다.
       $rootScope.close = function(){
         winmain.minimize();
-        if( process.platform == 'window' ){
+        if( process.platform == 'window' || process.platform == 'win32' || process.platform == 'win64' ){
           winmain.hide();
         }
       };
