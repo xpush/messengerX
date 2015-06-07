@@ -14,7 +14,7 @@
 		  </div>
 	    <a class="item item-thumbnail-left" >
 	    	<div class="account-profile">
-	      	<img ng-src="{{loginUser.image}}" />
+	      	<img ng-src="{{loginUser.image}}" err-src="{{defaultImage}}"/>
 	    	</div>
 	      <label class="item item-input">
     			<input type="text" placeholder="Name" ng-model="loginUser.userName" />
@@ -25,7 +25,7 @@
 	  	</a>
 			<div class="item item-input-inset">
 				<label class="item-input-wrapper">
-		  		<input type="text" placeholder="Select New Profile Image" ng-model="newImage" />
+		  		<input type="text" placeholder="Select New Profile Image" ng-model="newImage" style="width:100%"/>
 				</label>
 				<button class="button button-small" ng-click="updateUserInfo(newImage);">
 		  		Submit

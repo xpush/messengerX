@@ -7,6 +7,7 @@ angular.module('messengerx.constants', [])
   })
   .constant('BASE_URL', 'http://stalk-front-s01.cloudapp.net:8000')
   .constant('STATIC_URL', 'http://messengerx.github.io/app/www')  
+  .constant('DEFAULT_IMAGE', 'http://messengerx.github.io/app/www/img/default_image.jpg' )
   .constant('DB_CONFIG', {
     name: 'stalk.db',
     version: '0.56',

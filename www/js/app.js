@@ -1,6 +1,6 @@
 angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.services', 'messengerx.constants', 'messengerx.directives', 'messengerx.dao', 'ionic.contrib.frostedGlass', 'ngStorage'])
 
-.run(function($location, $ionicPlatform, $rootScope, $state, $window, $localStorage, $sessionStorage, $templateCache, APP_INFO, DB, BASE_URL, Sign, ChatLauncher, NotificationManager ) {
+.run(function($location, $ionicPlatform, $rootScope, $state, $window, $localStorage, $sessionStorage, $templateCache, APP_INFO, DB, BASE_URL, Sign, ChatLauncher, NotificationManager, DEFAULT_IMAGE ) {
   $ionicPlatform.ready(function() {
   
     // cordova 에서 back button event 를 추가한다. 2초내에 2번 back button을 누르면 종료된다.
@@ -187,6 +187,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
 
     $rootScope.host = BASE_URL;
     $rootScope.app  = APP_INFO.appKey;
+    $rootScope.defaultImage = DEFAULT_IMAGE;
 
     // webrtc support ?
     if (

@@ -1,5 +1,5 @@
 angular.module('popupchat', ['ionic', 'messengerx.controllers', 'messengerx.services', 'messengerx.constants', 'messengerx.directives', 'messengerx.dao', 'ionic.contrib.frostedGlass', 'ngStorage'])
-.run(function($location, $ionicPlatform, $window, $rootScope, APP_INFO, DB, BASE_URL, Sign ) {
+.run(function($location, $ionicPlatform, $window, $rootScope, APP_INFO, DB, BASE_URL, DEFAULT_IMAGE, Sign ) {
   $ionicPlatform.ready(function() {
 
     if(window.cordova && window.cordova.plugins.Keyboard) {
@@ -10,6 +10,7 @@ angular.module('popupchat', ['ionic', 'messengerx.controllers', 'messengerx.serv
     }
 
     $rootScope.cameraFlag = false;
+    $rootScope.defaultImage = DEFAULT_IMAGE;
 
     // cordova 를 활용한 mobile 빌드시
     if( window.device ){

@@ -17,7 +17,7 @@
         Profile
       </div>
       <ion-item class="item item-avatar" ng-click="gotoAccount()">
-      <img ng-src="{{loginUser.image}}" />
+      <img ng-src="{{loginUser.image}}" err-src="{{defaultImage}}"/>
         <h2>{{loginUser.userName}}</h2>
         <p>{{loginUser.message}}</p>
       </ion-item>
@@ -27,10 +27,11 @@
         </button>
         -->
       </div>
-    	<ion-item ng-repeat="friend in friends" class="item item-avatar" ng-click='gotoChat("{{friend.user_id}}")' >
-        <img ng-src="{{friend.image}}" />
+    	<ion-item ng-repeat="friend in friends" class="item-remove-animate item-avatar item-icon-right" type="item-text-wrap" ng-click='gotoChat("{{friend.user_id}}")' >
+        <img ng-src="{{friend.image}}" err-src="{{defaultImage}}" />
         <h2>{{friend.user_name}}</h2>
         <p>{{friend.message}}</p>
+        <i class="icon ion-chevron-right icon-accessory"></i>
         <ion-option-button class="button-assertive" ng-click='removeFriend("{{friend.user_id}}", $index)'>
           <B>Remove</B>
         </ion-option-button>

@@ -1,9 +1,9 @@
 <ion-view title="{{channelName}}">
   <ion-nav-buttons side="left">
     <div>
-      <button class="button icon ion-ios7-arrow-back" ng-if=" !usePopupFlag " ng-click="gotoBack()" ></button>
+      <button class="button icon ion-ios-arrow-back" ng-if=" !usePopupFlag " ng-click="gotoBack()" ></button>
       <i class="icon icon-large ion-ios7-eye icon-nav-bar" id="status_on" style="display:none;"></i>
-      <i class="icon icon-large ion-android-timer icon-nav-bar" id="status_off" style="display:inline;"></i>
+      <i class="icon icon-large ion-ios-clock-outline icon-nav-bar" id="status_off" style="display:inline;"></i>
     </div>
   </ion-nav-buttons>
 
@@ -110,9 +110,8 @@
     <button ng-if=" toggles.showExt == false " class="button icon ion-plus-round" ng-click="toggleExt(true)"></button>
     <button ng-if=" toggles.showEmo == true " class="button icon ion-sad" ng-click="toggleEmoticons(false)"></button>
     <button ng-if=" toggles.showEmo == false " class="button icon ion-happy" ng-click="toggleEmoticons(true)"></button>
-
-    <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="margin:0 40px 0 10px;"/>
-    <button class="button button-positive" style="min-width:50px;" ng-click="send()" >Send </button>
+      <input type="text" ng-model="inputMessage" placeholder="Start typing..." ng-enter="send();" style="width:100%;margin:0 90px 0 10px;"/>
+      <button class="button button-positive pull-right" style="min-width:50px;" ng-click="send()" >Send </button>
   </ion-footer-bar>
   <div class="chat-extends slider-top closed" id="chat-extends" style="display:none">
     <div class="row center">
@@ -184,7 +183,7 @@
 
 
   <button class="button ion-arrow-expand btn-expand hidden icon-large" id="chat-notice-button" ng-click="updateNotice('Y','N');"></button>
-  <img ng-src="{{loginUserImage}}" class="floating-image" />
+  <img ng-src="{{loginUserImage}}" err-src="{{defaultImage}}" class="floating-image" />
 
 
 </ion-view>

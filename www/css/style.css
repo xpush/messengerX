@@ -360,10 +360,10 @@ paper-input {
 	position:absolute;
 	z-index:11;
 	right:0px;
-	/* display:none; */
 	width:80%;
 	height:100%;
 	background: #F0F3F8;
+	transition: transform 200ms ease-in;
 }
 
 .chat-extends-menu .list{
@@ -648,4 +648,16 @@ img.emoticon{
 	text-overflow: ellipsis;
 	margin-top: 10px;
 	white-space: nowrap;
+}
+
+.slide-in-right {
+  -webkit-transform: translateX(0%);
+  -moz-transform: translateX(0%);
+  transform: translateX(0%);
+}
+
+.slide-out-right {
+  -webkit-transform: translateX(100%);
+  -moz-transform: translateX(100%);
+  transform: translateX(100%);
 }

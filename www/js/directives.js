@@ -268,6 +268,25 @@ angular.module('messengerx.directives', [])
 })
 
 /**
+ * @ngdoc directive
+ * @name errSrc
+ * @module messengerx.directives
+ * @kind factory
+ *
+ * @description 이미지 에러시 default 이미지를 보여줌
+ */
+.directive('errSrc', function() {
+  return {
+    link: function(scope, element, attrs) {
+      element.bind('error', function() {
+        if (attrs.src != attrs.errSrc) {
+          attrs.$set('src', attrs.errSrc);
+        }
+      });
+    }
+  }
+})
+/**
  * @ngdoc factory
  * @name xpushSlide
  * @module messengerx.directives
@@ -447,12 +466,17 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $docume
         if (previousPopup) {
           previousPopup.show();
         } else {
-          //Remove menu-open & backdrop if this is last popup
-          document.body.classList.remove('menu-open');
-          ($xpushSlide._backButtonActionDone || angular.noop)();
+          //Remove popup-open & backdrop if this is last popup
+          $timeout(function() {
+            // wait to remove this due to a 300ms delay native
+            // click which would trigging whatever was underneath this
+            $ionicBody.removeClass('menu-open');
+          }, 400);
+          $timeout(function() {
+            $ionicBackdrop.release();
+          }, config.stackPushDelay || 0);
+          ($ionicPopup._backButtonActionDone || angular.noop() )();
         }
-        // always release the backdrop since it has an internal backdrop counter
-        $ionicBackdrop.release();
         return result;
       });
     });
