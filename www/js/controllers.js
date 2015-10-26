@@ -286,7 +286,6 @@ angular.module('messengerx.controllers', [])
    */
   $scope.retrieveUsers = function() {
 
-    console.log('$scope.modal.visible : ',$scope.modal.visible, $scope.modal.num);
     if($scope.modal.visible){
 
       var loginUserId = Sign.getUser().userId;
@@ -298,11 +297,16 @@ angular.module('messengerx.controllers', [])
 
       // 이름이나 ID로 사용자를 조회하기 위해 like조건을 만든다.
       if($scope.modal.search) {
-        var searchKey = '%'+$scope.modal.search+'%';
-        query['$or']= [{'DT.NM' : searchKey}, {'U' : searchKey }]
       }
 
-      Users.search(query, $scope.modal.num, function(users){
+      var searchKey = $scope.modal.search;
+      if( searchKey == '' ){
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+        return;
+      }
+
+      Users.search(searchKey, $scope.modal.num, function(response){
+        var users = response.result.users;
 
         if( users !== undefined ){
           if($scope.modal.num > 1) {

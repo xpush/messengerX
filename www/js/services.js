@@ -240,20 +240,12 @@ angular.module('messengerx.services', [])
      * @param {integer}
      * @param {function} callback function that be called after success
      */
-    search : function(_q, pageNumber, callback){
+    search : function(key, pageNumber, callback){
 
       var params = {
-        query : _q,
-        column: { U: 1, DT: 1, _id: 0 },
-        options: {
-          skipCount : true,
-          sortBy : { 'DT.NM': 1}
-        }
+        query : key,
+        options : { pageNum : 1,pageSize: 50 }
       };
-
-      if( pageNumber > -1 ){
-        angular.extend( params.options, { pageNum : 1,pageSize: 50 } );
-      }
 
       if(pageNumber > 0) {
         params.options['pageNum'] = pageNumber;
@@ -302,6 +294,7 @@ angular.module('messengerx.services', [])
       }
     },
     addEvent : function(){
+
       var self = this;
 
       $rootScope.$on("$popupOpen", function (data, args) {
@@ -477,7 +470,7 @@ angular.module('messengerx.services', [])
 
           // differ from current channel, get channel data
           $rootScope.xpush.getChannelData( data.C, function( err, channelJson ){
-            var channel = {'channel': data.C, 'users' : channelJson.DT.US};
+            var channel = {'channel': data.C, 'users' : channelJson.US};
 
             //  Update channel info
             if( data.T == 'I' ){
@@ -491,12 +484,12 @@ angular.module('messengerx.services', [])
             }
 
             // multi user channel : not need to update channel info
-            if( channelJson.DT.UC > 2 ){
+            if( channelJson.US.length > 2 ){
               channel.name = channelJson.DT.NM;
               channel.image = '';
 
             // 1:1 channel : update channel image and channel name
-            } else if( channelJson.DT.UC == 2 ){
+            } else if( channelJson.US.length == 2 ){
               channel.name = data.UO.NM;
               channel.image = data.UO.I;
             }
@@ -507,7 +500,7 @@ angular.module('messengerx.services', [])
             // Increase rootScope's unread count
             $rootScope.totalUnreadCount++;
 
-            if( data.T != 'J' && channelJson.DT.UC >= 2 ){
+            if( data.T != 'J' && channelJson.US.length >= 2 ){
               ChannelDao.add( channel );
             }
 
@@ -578,7 +571,7 @@ angular.module('messengerx.services', [])
             continue;
           }
 
-          var data = messageObject.MG.DT;
+          var data = messageObject.DT;
           data = JSON.parse(data);
           data.MG = decodeURIComponent( data.MG );
 
@@ -610,32 +603,36 @@ angular.module('messengerx.services', [])
 
           var channel = channels[data.C];
 
-          if( data.T == 'I' ){
-            channel.message = "@image@";
-          } else if( data.T == 'E' ){
-            channel.message = "@emoticon@";
-          } else if ( data.T == 'VI' || data.T == 'V' ) {
-            channel.message = "@video@";
-          } else {
-            channel.message = data.MG;
-          }
+          if( channel ){
 
-          // 2명이상인 경우는 channel name 을 그대로 사용하고, 그렇지 않을 때는 메세지를 보낸 사용자의 이름을 보여준다.
-          if( channel.users.length > 2 ){
-            channel.name = channel.name;
-            channel.image = '';
-          } else {
-            channel.name = data.UO.NM;
-            channel.image = data.UO.I;
-          }
+            if( data.T == 'I' ){
+              channel.message = "@image@";
+            } else if( data.T == 'E' ){
+              channel.message = "@emoticon@";
+            } else if ( data.T == 'VI' || data.T == 'V' ) {
+              channel.message = "@video@";
+            } else {
+              channel.message = data.MG;
+            }
 
-          channel.updated = data.TS;
+            // 2명이상인 경우는 channel name 을 그대로 사용하고, 그렇지 않을 때는 메세지를 보낸 사용자의 이름을 보여준다.
+            if( channel.users.length > 2 ){
+              channel.name = channel.name;
+              channel.image = '';
+            } else {
+              channel.name = data.UO.NM;
+              channel.image = data.UO.I;
+            }
 
-          // Join Message가 아닌 경우에만 channel DB에 저장한다. Join Message 이후 unread message가 있을때만 channel을 보여주기 위함.
-          if( data.type != 'J' ){
-            ChannelDao.add( channel );
+            channel.updated = data.TS;
+
+            // Join Message가 아닌 경우에만 channel DB에 저장한다. Join Message 이후 unread message가 있을때만 channel을 보여주기 위함.
+            if( data.type != 'J' ){
+              ChannelDao.add( channel );
+            }
+
+            MessageDao.add( data );
           }
-          MessageDao.add( data );
         }
 
         callback({'status':'ok'});

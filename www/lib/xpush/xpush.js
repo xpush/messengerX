@@ -6,7 +6,7 @@
       io = require('socket.io-client');
     }
 
-    var SESSION = 'session';
+    var GLOBAL = 'global';
     var CHANNEL = 'channel';
 
     var ST = {A:'app',C:'channel',U:'userId',US:'users',D:'deviceId',N:'notiId',S:'server'
@@ -28,7 +28,7 @@
      * @constructor
      * @param {string} host - 접속할 Session Server의 address
      * @param {string} appId - application id
-     * @param {string} [eventHandler] - session event를 처리하기 위한 함수
+     * @param {string} [eventHandler] - global event를 처리하기 위한 함수
      * @param {boolean} [autoInitFlag] - 자동 초기화 여부에 대한 flag
      * @example
      * // Create new Xpush Object
@@ -50,7 +50,7 @@
       //self.initStatus;        // manage async problem
       self.headers = {};        // request header
       //self.liveSockets = {};  // ch : Connection
-      self._sessionConnection;
+      self._globalConnection;
       self.maxConnection = 5;
       self.maxTimeout = 30000;
       self.channelNameList = [];
@@ -70,8 +70,9 @@
 
       if(eventHandler){
         self._isEventHandler = true;
-        self.on('___session_event', eventHandler);
+        self.on('___global_event', eventHandler);
       }
+
       return self;
     };
 
@@ -205,11 +206,10 @@
 
         if(result.status == 'ok'){
           // result.result = {"token":"HS6pNwzBoK","server":"215","serverUrl":"http://www.notdol.com:9990"};
-          var c = self._sessionConnection = new Connection(self, SESSION, result.result);
-
+          var c = self._globalConnection = new Connection(self, GLOBAL, result.result);
           c.connect(function(){
             debug("xpush : login end", self.userId);
-            self._initSessionSocket(self._sessionConnection._socket, function(){
+            self._initSessionSocket(self._globalConnection._socket, function(){
               if(cb) cb(result.message, result.result); // @ TODO from yohan.
             });
           });
@@ -221,7 +221,7 @@
     };
 
     /**
-     * 현재 xpush 객체에 userId와 deviceId를 세팅한다. session socket이 이미 연결되어 있는 경우만 
+     * 현재 xpush 객체에 userId와 deviceId를 세팅한다. global socket이 이미 연결되어 있는 경우만 
      * @name setSessionInfo
      * @memberof Xpush
      * @function
@@ -229,10 +229,10 @@
      * @param {string} [deviceId] - Device Id
      * @param {callback} cb - 세팅 후 수행할 callback function
      * @example
-     * // Set session info
+     * // Set global info
      * xpush.setSessionInfo( 'james', function(){} );
      * @example
-     * // Set session info with deviceId
+     * // Set global info with deviceId
      * xpush.setSessionInfo( 'james', 'WEB', function(){} );
      */
     XPush.prototype.setSessionInfo = function(userId, deviceId, cb){
@@ -250,7 +250,7 @@
     };
 
     /**
-     * session socket 과 channel socket의 연결을 끊는다.
+     * global socket 과 channel socket의 연결을 끊는다.
      * @name logout
      * @memberof Xpush
      * @function
@@ -262,9 +262,9 @@
       var self = this;
       if( self != undefined ) {
 
-        // Disconnect session connection
-        if( self._sessionConnection != undefined  ){
-          self._sessionConnection.disconnect();
+        // Disconnect global connection
+        if( self._globalConnection != undefined  ){
+          self._globalConnection.disconnect();
         }
 
         // Disconnect channel connections
@@ -329,7 +329,7 @@
         users.push(self.userId);
       }
 
-      self.sEmit('channel-create',{C: channel, U: users, DT:datas},function(err, result){
+      self.sEmit('channel.create',{C: channel, U: users, DT:datas},function(err, result){
         //_id: "53b039e6a2f41316d7046732"
         //app: "stalk-io"
         //channel: "b14qQ6wI"
@@ -428,7 +428,7 @@
     XPush.prototype.getChannels = function(cb){
       var self = this;
       debug("xpush : getChannels ",self.userId);
-      self.sEmit('channel-list',function(err, result){
+      self.sEmit('channel.list',function(err, result){
         //app(A), channel(C), created(CD) , users(US)
         debug("xpush : getChannels end ",result);
         ['A','C','CD','US'].forEach(function(item){
@@ -462,9 +462,9 @@
     XPush.prototype.updateChannel = function(channel, query, cb){
       var self = this;
       var param = { 'A': self.appId, 'C': channel, 'Q' : query };
-      self.sEmit('channel-update', param, function(err, result){
+      self.sEmit('channel.update', param, function(err, result){
         //app(A), channel(C), created(CD) , users(US)
-        debug("xpush : channel-update end ",result);
+        debug("xpush : channel.update end ",result);
         cb(err,result);
       });
     };
@@ -484,7 +484,7 @@
      */
     XPush.prototype.getChannelsActive = function(data, cb){ //data.key(option)
       var self = this;
-      self.sEmit('channel-list-active',data, function(err, result){
+      self.sEmit('channel.list.active',data, function(err, result){
         //app, channel, created
         cb(err, result);
       });
@@ -524,7 +524,7 @@
      */
     XPush.prototype.getChannelData = function(channel, cb){
       var self = this;
-      self.sEmit('channel-get', {C: channel, U: /*userId*/{} }, function(err, result){
+      self.sEmit('channel.get', {C: channel, U: /*userId*/{} }, function(err, result){
         if(cb) cb(err,result);
       });
     };
@@ -565,7 +565,7 @@
      */
     XPush.prototype.exitChannel = function(channel, cb){
       var self = this;
-      self.sEmit('channel-exit', {C: channel}, function(err, result){
+      self.sEmit('channel.exit', {C: channel}, function(err, result){
         if(cb) cb(err,result);
       });
     };
@@ -882,16 +882,9 @@
 
       var self = this;
 
-      if(!_params.query) {
-        console.error('Query User', 'query is not existed.');
-      };
-      if(!_params.column) {
-        console.error('Query User', 'column is not existed.');
-      };
-
       var params = {
-        query : _params.query,
-        column: _params.column
+        'K' : _params.query,
+        'A' : self.appId
       };
 
       if(_params.options) {
@@ -902,9 +895,7 @@
 
       debug("xpush : queryUser ",params);
 
-      self.sEmit('user-query' , params, function(err, result){
-        if(cb) cb(err, result.users, result.count);
-      });
+      self.ajax( '/user/search' , 'POST', params, cb);
     };
 
     /**
@@ -938,19 +929,31 @@
      *   console.log( result );
      * });
      */
-    XPush.prototype.getUnreadMessage = function(cb){
+    XPush.prototype.getUnreadMessage = function(channel, cb){
       var self = this;
-      debug("xpush : getUnreadMessage ",self.userId);
-      self.sEmit('message-unread',function(err, result){
-        //app, channel, created
-        debug("xpush : getUnreadMessage end ", result);
-        if(result && result.length > 0){
-          result.sort(UTILS.messageTimeSort);
-        }
-        self.isExistUnread = false;
-        self.sEmit('message-received');
-        cb(err, result);
-      });
+      if( channel && cb ){
+        self.getChannelAsync(channel, function (err, ch){
+          ch.getUnreadMessage( function( err, result ){
+            if(result && result.length > 0){
+              result.sort(UTILS.messageTimeSort);
+            }
+            cb( err, result );
+          });
+        });
+      } else if( typeof( channel ) == 'function' ){
+        cb = channel;
+        debug("xpush : getUnreadMessage ",self.userId);
+        self.sEmit('message.unread',function(err, result){
+          //app, channel, created
+          debug("xpush : getUnreadMessage end ", result);
+          if(result && result.length > 0){
+            result.sort(UTILS.messageTimeSort);
+          }
+          self.isExistUnread = false;
+          self.sEmit('message-received');
+          cb(err, result);
+        });
+      }
     };
 
     /**
@@ -982,7 +985,7 @@
       var self = this;
     if(typeof(arguments[0]) == 'function') {cb = arguments[0]; groupId = undefined;}
       groupId = groupId ? groupId : self.userId;
-      self.sEmit('group-list',{'GR': groupId}, function(err,result){
+      self.sEmit('group.list',{'GR': groupId}, function(err,result){
         cb(err,result);
       });
     };
@@ -1005,7 +1008,7 @@
       if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userIds = groupId; groupId = undefined;}
       groupId = groupId ? groupId : self.userId;
       userIds = userIds ? userIds : [];
-      self.sEmit('group-add',{'GR': groupId, 'U': userIds}, function(err,result){
+      self.sEmit('group.add',{'GR': groupId, 'U': userIds}, function(err,result){
         //app, channel, created
         cb(err,result);
       });
@@ -1029,7 +1032,7 @@
       if(typeof(arguments[1]) == 'function') {cb = arguments[1]; userId = groupId; groupId = undefined;}
       groupId = groupId ? groupId : self.userId;
 
-      self.sEmit('group-remove',{'GR': groupId, 'U': userId}, function(err, result){
+      self.sEmit('group.remove',{'GR': groupId, 'U': userId}, function(err, result){
         cb(err,result);
       });
     };
@@ -1040,7 +1043,7 @@
     };
 
     XPush.prototype.signout = function(cb){
-      //session end
+      //global end
       var self = this;
       var sendData = { };
       self.ajax( XPush.Context.Signout , 'POST', sendData, cb);
@@ -1048,7 +1051,7 @@
     */
 
     /**
-     * session socket을 초기화 후에 event를 추가한다. `autoInitFlag`가 true면 channel 정보 및 읽지 않은 message를 조회한다.
+     * global socket을 초기화 후에 event를 추가한다. `autoInitFlag`가 true면 channel 정보 및 읽지 않은 message를 조회한다.
      * @private
      * @function
      * @param {Object} socket.io
@@ -1056,8 +1059,9 @@
      */
     XPush.prototype._initSessionSocket = function(socket,cb){
       var self = this;
+
       socket.on('_event',function(data){
-        debug('xpush : session receive ', data.event, data.C,data.NM,data.DT, self.userId);
+        debug('xpush : global receive ', data.event, data.C,data.NM,data.DT, self.userId);
         // data.event = NOTIFICATION
         // channel,name, timestamp, data= {}
         switch(data.event){
@@ -1067,7 +1071,7 @@
             // if `autoInitFlag` is true, make channel automatically
             if( self.autoInitFlag ){
               if(!ch){
-                ch = self._makeChannel(data.C);
+                ch = self._makeChannel(data.C);            
 
                 self._getChannelInfo(data.C,function(err,data){
 
@@ -1077,33 +1081,33 @@
                     ch.setServerInfo(data.result);
                   }
                 });
-                //self.emit('channel-created', {ch: ch, chNm: data.channel});
+                //self.emit('channel.created', {ch: ch, chNm: data.channel});
                 if(!self.isExistChannel(data.channel)) {
                   self.emit('newChannel', ch);
                 }
               }
               ch.emit(data.NM , data.DT);
-            }
+            }          
             self.emit(data.NM, data.C, data.NM, data.DT);
           break;
 
           case 'CONNECT' :
-            self.emit('___session_event', 'SESSION', data);
+            self.emit('___global_event', 'GLOBAL', data);
           break;
 
           case 'DISCONNECT' :
-            self.emit('___session_event', 'SESSION', data);
+            self.emit('___global_event', 'GLOBAL', data);
           break;
 
           case 'LOGOUT' :
-            self.emit('___session_event', 'LOGOUT', data);
+            self.emit('___global_event', 'LOGOUT', data);
           break;
         }
 
       });
 
       socket.on('channel',function(data){
-        debug('xpush : session receive ', 'channel', data, self.userId);
+        debug('xpush : global receive ', 'channel', data, self.userId);
 
         switch(data.event){
           case 'UPDATE':
@@ -1117,13 +1121,14 @@
       });
 
       socket.on('connected',function(){
-        debug('xpush : session receive ', CHANNEL, arguments, self.userId);
+        debug('xpush : global receive ', CHANNEL, arguments, self.userId);
       });
 
       // if `autoInitFlag` is true, get channels
       if( self.autoInitFlag ){
         self.getChannels(function(err,data){
           self.channelNameList = data;
+
           self.getUnreadMessage(function(err, data){
             if(data && data.length > 0 ){
               for(var i = data.length-1 ; i >= 0; i--){
@@ -1288,7 +1293,7 @@
     }
 
     /**
-     * session socket을 이용하여 event를 발생시킨다.
+     * global socket을 이용하여 event를 발생시킨다.
      * @private
      * @function
      * @param {string} socket의 event key
@@ -1314,9 +1319,9 @@
 
       if( typeof(arguments[1]) == 'function' ){
         cb = params;
-        self._sessionConnection._socket.emit(key, returnFunction);
+        self._globalConnection._socket.emit(key, returnFunction);
       }else{
-        self._sessionConnection._socket.emit(key, params, returnFunction);
+        self._globalConnection._socket.emit(key, params, returnFunction);
       }
       return;
     };
@@ -1337,20 +1342,30 @@
       var self = this;
 
       if( !systemFlag ){
-        self._userEventNames.push( event );
+        var isExistEvent = false;
+        for(var idx in self._userEventNames){ 
+          if(self._userEventNames[idx] == event){
+            isExistEvent = true; break;
+          }
+        }
+        if(!isExistEvent) self._userEventNames.push( event );
       }
 
       self._events = self._events || {};
       self._events[event] = self._events[event] || [];
       self._events[event].push(fct);
 
-      if( self._sessionConnection ){
-        self._sessionConnection.attchOnEvent( event );
+      if( self._globalConnection ){
+        self._globalConnection.attchOnEvent( event );
       }
 
+      /*
       for ( var key in self._channels ){
+        console.log("************************ 2");
         self._channels[key].attchOnEvent( event );
       }
+      */
+
     };
 
     /**
@@ -1384,9 +1399,9 @@
      */
     XPush.prototype.clearEvent = function(){
       var self = this;
-      var sessionEvent = self._events['___session_event'];
+      var globalEvent = self._events['___global_event'];
       self._events = {};
-      self._events['___session_event'] = sessionEvent;
+      self._events['___global_event'] = globalEvent;
       self._userEventNames = [];
     };
 
@@ -1400,10 +1415,12 @@
      */
     XPush.prototype.emit = function(event){
       var self = this;
+      self.isExistUnread = false;
       if(self.isExistUnread) {
         self.receiveMessageStack.push(arguments);
       }else{
         self._events = self._events || {};
+
         if( event in self._events === false  )  return;
         for(var i = 0; i < self._events[event].length; i++){
           debug("xpush : test ",arguments);
@@ -1417,7 +1434,7 @@
      * @module Connection
      * @constructor
      * @param {Xpush} Object - Xpush obejct
-     * @param {string} type - 'session' or channel'
+     * @param {string} type - 'global' or channel'
      * @param {string} server - Server Url to connect
      */
     var Connection = function(xpush , type, server){
@@ -1425,8 +1442,8 @@
       this._xpush = xpush;
       this._server = server;
       this._type = type;
-      if(this._type == SESSION){
-        this.chNm = SESSION;
+      if(this._type == GLOBAL){
+        this.chNm = GLOBAL;
       }
       this._socketStatus; // disconnected, connected
       this._socket;
@@ -1479,6 +1496,7 @@
         debug("xpush : setServerInfo end ", arguments,self._xpush.userId, self.chNm);
         //self.connectionCallback();
         if(cb) cb();
+        self.emit("connected");
       });
     };
 
@@ -1491,12 +1509,12 @@
      * @param {string} mode - Optional. `CHANANEL_ONLY`
      */
     Connection.prototype.connect = function(cb, mode){
+
       var self = this;
         var query =
           'A='+self._xpush.appId+'&'+
           'U='+self._xpush.userId+'&'+
-          'D='+self._xpush.deviceId+'&'+
-          'TK='+self._server.token;
+          'D='+self._xpush.deviceId;
           //'mode=CHANNEL_ONLY';
 
       if(self._type == CHANNEL){
@@ -1557,10 +1575,10 @@
 
           switch(data.event){
             case 'CONNECTION' :
-              self._xpush.emit('___session_event', 'CHANNEL', data);
+              self._xpush.emit('___global_event', 'CHANNEL', data);
             break;
             case 'DISCONNECT' :
-              self._xpush.emit('___session_event', 'CHANNEL', data);
+              self._xpush.emit('___global_event', 'CHANNEL', data);
             break;
           }
 
@@ -1629,6 +1647,31 @@
       var self = this;
       if(self._socket.connected){
         ss(self._socket).emit('file-upload', stream, data, cb);
+      }
+    };
+
+    /**
+     * unread message
+     * 조회 후, `message-received` API를 호출하여 조회한 message를 삭제한다.
+     * @name getUnreadMessage
+     * @memberof Connection
+     * @param {callback} cb - uploadCallback
+     * @function
+     */
+    Connection.prototype.getUnreadMessage = function(cb){
+      var self = this;
+      if(self._socket.connected){
+        self._socket.emit('message-unread',function(result){
+          cb(result.status, result.result);
+        });
+      }else{
+        var func = function(){
+          self._socket.emit('message-unread',function(result){
+            cb(result.status, result.result);
+          });
+          self.off('connected',func);
+        }
+        self.on('connected', func);
       }
     };
 
