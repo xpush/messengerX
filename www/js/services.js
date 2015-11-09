@@ -485,7 +485,9 @@ angular.module('messengerx.services', [])
 
             // multi user channel : not need to update channel info
             if( channelJson.US.length > 2 ){
-              channel.name = channelJson.DT.NM;
+              if( channelJson.DT ){
+                channel.name = channelJson.DT.NM;
+              }
               channel.image = '';
 
             // 1:1 channel : update channel image and channel name
@@ -588,7 +590,10 @@ angular.module('messengerx.services', [])
             continue;
           }  
 
-          var sr = data.UO.U == loginUser.userId ? 'S':'R';
+          var sr= 'R';
+          if( data.UO ){
+            sr = data.UO.U == loginUser.userId ? 'S':'R';
+          }
 
           // 초대 message 인 경우
           if( data.T == 'J' ){

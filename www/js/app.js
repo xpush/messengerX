@@ -313,6 +313,7 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
 
     // xpush 를 생성한다.
     $rootScope.xpush = new XPush($rootScope.host, $rootScope.app, function (type, data){
+    //$rootScope.xpush = new XPush('http://54.178.160.166:8000', 'withtalk', function (type, data){
 
       // LOGOUT event 를 설정한다.
       if(type === 'LOGOUT'){
