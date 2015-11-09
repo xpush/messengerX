@@ -93,6 +93,8 @@ angular.module('popupchat', ['ionic', 'messengerx.controllers', 'messengerx.serv
     }, false );
     DB.init();
 
+    $rootScope.xpush.enableDebug();
+
     // rootScope function
     $rootScope.logout = function(){
       Sign.logout();

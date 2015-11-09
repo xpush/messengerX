@@ -895,7 +895,14 @@
 
       debug("xpush : queryUser ",params);
 
-      self.ajax( '/user/search' , 'POST', params, cb);
+      self.ajax( '/user/search' , 'POST', params, function(err, response, count){
+        console.log( response );
+        if( response.status == 'ok'){
+          cb( null, response.result.users, response.result.users.length );
+        } else {
+          cb( response.status, response.message, 0 );
+        }
+      });
     };
 
     /**
@@ -1358,14 +1365,6 @@
       if( self._globalConnection ){
         self._globalConnection.attchOnEvent( event );
       }
-
-      /*
-      for ( var key in self._channels ){
-        console.log("************************ 2");
-        self._channels[key].attchOnEvent( event );
-      }
-      */
-
     };
 
     /**
@@ -1424,6 +1423,7 @@
         if( event in self._events === false  )  return;
         for(var i = 0; i < self._events[event].length; i++){
           debug("xpush : test ",arguments);
+          console.log( self._events );
           self._events[event][i].apply(this, Array.prototype.slice.call(arguments, 1));
         }
       }
@@ -1565,8 +1565,8 @@
       var self = this;
       debug("xpush : connection ",'connectionCallback',self._type, self._xpush.userId,self.chNm);
 
-      for( var key in self._xpush._userEventNames ){
-        self.attchOnEvent( self._xpush._userEventNames[key] );
+      for( var inx = 0 ; inx < self._xpush._userEventNames.length ; inx++ ){
+        self.attchOnEvent( self._xpush._userEventNames[inx] );
       }
 
       if(self._xpush._isEventHandler) {
@@ -1771,4 +1771,28 @@
       window.XPush = XPush;
     }
   }
+
+  /**
+  var myArray = new Entitiy(['Bob', 'Sue', 'Jim']);
+
+  // Entity looks like this
+  function Entity(arr) {
+      if (!Array.isArray(arr)) {
+          arr = [];
+          // maybe:
+          // arr.push.apply(arr, arguments);
+      }
+      arr.__proto__ = Entity.prototype;
+      arr.isChanged = false;
+      return arr;
+  }
+  Entity.prototype = Object.create(Array.prototype);
+  Entity.prototype.constructor = Entity;
+  Entity.prototype.add = function(newPerson) {
+      alert(this.length); //alerts with 3
+      alert(JSON.stringify(this)); //alerts a ["Bob","Sue","Jim"]
+      this.push(newPerson);
+      this.isChanged = true;
+  };
+  */
 })();

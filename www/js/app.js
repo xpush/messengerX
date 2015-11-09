@@ -325,6 +325,8 @@ angular.module('messengerx', ['ionic', 'messengerx.controllers', 'messengerx.ser
       }
     }, autoInitFlag );
 
+    $rootScope.xpush.enableDebug();
+
     // rootScope function
     $rootScope.logout = function( callback ){
       Sign.logout(function(){
