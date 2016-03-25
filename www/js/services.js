@@ -251,8 +251,14 @@ angular.module('messengerx.services', [])
         params.options['pageNum'] = pageNumber;
       }
 
-      $rootScope.xpush.queryUser(params, function( err, userArray, count){
-        callback( userArray );
+      $rootScope.xpush.queryUser(params, function( err, res, count){
+
+        if( res.status == "ok"){
+          callback( res.result.users );
+        } else {
+          callback( [] );
+        }
+        
       });
     }
   };
@@ -1422,7 +1428,7 @@ angular.module('messengerx.services', [])
       args.stateParams = stateParams;
       args.cache = Cache.all();
       args.popupKey = popupKey;
-      args.sessionConnection = $rootScope.xpush._sessionConnection;
+      args.globalConnection = $rootScope.xpush._globalConnection;
       args.parentScope = $rootScope;
 
       // 팝업 오픈이 완료되었음을 알리는 event를 발생시킨다.

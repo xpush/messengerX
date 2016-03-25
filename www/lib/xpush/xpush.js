@@ -841,31 +841,6 @@
     };
 
     /**
-     * server에서 사용자 list를 조회한다.
-     * @name getUserList
-     * @memberof Xpush
-     * @function
-     * @param {Object} [params] - param for search user.
-     * @param {function} cb - 조회 후 수행할 callback function
-     * @example
-     * xpush.getUserList( {'page':{'num':1,'size':10} },function(err, users){
-     *   console.log( users );
-     * });
-     */
-    XPush.prototype.getUserList = function(params,  cb){
-      if(typeof(params) == 'function'){
-        cb = params;
-        params = {};
-      }
-      params = params == undefined ? {}: params;
-      var self = this;
-      debug("xpush : getUsertList ",params);
-      self.sEmit('user-list' , params, function(err, result){
-        if(cb) cb(err, result.users, result.count);
-      });
-    };
-
-    /**
      * server에서 사용자 list를 조회한다. pageing 처리가 가능하다.
      * @name queryUser
      * @memberof Xpush
@@ -895,14 +870,7 @@
 
       debug("xpush : queryUser ",params);
 
-      self.ajax( '/user/search' , 'POST', params, function(err, response, count){
-        console.log( response );
-        if( response.status == 'ok'){
-          cb( null, response.result.users, response.result.users.length );
-        } else {
-          cb( response.status, response.message, 0 );
-        }
-      });
+      self.ajax( '/user/search' , 'POST', params, cb);
     };
 
     /**
@@ -1140,8 +1108,8 @@
             if(data && data.length > 0 ){
               for(var i = data.length-1 ; i >= 0; i--){
 
-                data[i].DT = JSON.parse(data[i].DT);
-                self.receiveMessageStack.unshift([data[i].NM,  data[i].DT.C, data[i].NM,  data[i].DT]);
+                data[i].MG.DT = JSON.parse(data[i].MG.DT);
+                self.receiveMessageStack.unshift([data[i].NM,  data[i].MG.DT.C, data[i].NM,  data[i].MG.DT]);
               }
               self.isExistUnread = false;
               while(self.receiveMessageStack.length > 0 ){
@@ -1423,7 +1391,6 @@
         if( event in self._events === false  )  return;
         for(var i = 0; i < self._events[event].length; i++){
           debug("xpush : test ",arguments);
-          console.log( self._events );
           self._events[event][i].apply(this, Array.prototype.slice.call(arguments, 1));
         }
       }
@@ -1565,8 +1532,8 @@
       var self = this;
       debug("xpush : connection ",'connectionCallback',self._type, self._xpush.userId,self.chNm);
 
-      for( var inx = 0 ; inx < self._xpush._userEventNames.length ; inx++ ){
-        self.attchOnEvent( self._xpush._userEventNames[inx] );
+      for( var key in self._xpush._userEventNames ){
+        self.attchOnEvent( self._xpush._userEventNames[key] );
       }
 
       if(self._xpush._isEventHandler) {
@@ -1628,7 +1595,7 @@
     Connection.prototype.joinChannel = function(param, cb){
       var self = this;
       if(self._socket.connected){
-        self._socket.emit('channel.join', param, function( data ){
+        self._socket.emit('join', param, function( data ){
           cb( data );
         });
       }
@@ -1771,28 +1738,4 @@
       window.XPush = XPush;
     }
   }
-
-  /**
-  var myArray = new Entitiy(['Bob', 'Sue', 'Jim']);
-
-  // Entity looks like this
-  function Entity(arr) {
-      if (!Array.isArray(arr)) {
-          arr = [];
-          // maybe:
-          // arr.push.apply(arr, arguments);
-      }
-      arr.__proto__ = Entity.prototype;
-      arr.isChanged = false;
-      return arr;
-  }
-  Entity.prototype = Object.create(Array.prototype);
-  Entity.prototype.constructor = Entity;
-  Entity.prototype.add = function(newPerson) {
-      alert(this.length); //alerts with 3
-      alert(JSON.stringify(this)); //alerts a ["Bob","Sue","Jim"]
-      this.push(newPerson);
-      this.isChanged = true;
-  };
-  */
 })();

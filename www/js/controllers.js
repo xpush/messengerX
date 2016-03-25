@@ -889,7 +889,7 @@ angular.module('messengerx.controllers', [])
 
     $rootScope.xpush.setSessionInfo( loginUser.userId, loginUser.deviceId, function(){
 
-      $rootScope.xpush._sessionConnection = args.sessionConnection;
+      $rootScope.xpush._globalConnection = args.globalConnection;
       $rootScope.xpush.isExistUnread = false;
 
       // Initialize chat controller
@@ -1103,8 +1103,8 @@ angular.module('messengerx.controllers', [])
     // Channel 에 속해있는 사용자 정보를 조회
 
     $scope.channelUserDatas = [];
+    Users.search( channelUsers[0], -1, function( users ){
 
-    Users.search( { 'U' : { $in: channelUsers } }, -1, function( users ){
       users.forEach( function( user ){
         var data = { "NM" : user.DT.NM, "I" : user.DT.I };
 
