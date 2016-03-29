@@ -925,7 +925,7 @@
             result.sort(UTILS.messageTimeSort);
           }
           self.isExistUnread = false;
-          self.sEmit('message-received');
+          self.sEmit('message.received');
           cb(err, result);
         });
       }
@@ -1627,13 +1627,14 @@
      */
     Connection.prototype.getUnreadMessage = function(cb){
       var self = this;
-      if(self._socket.connected){
-        self._socket.emit('message-unread',function(result){
+      var data = {'C':self.chNm,'A':self._xpush.appId};
+      if(self._socket.connected){        
+        self._socket.emit('message.unread',function(data,result){
           cb(result.status, result.result);
         });
       }else{
         var func = function(){
-          self._socket.emit('message-unread',function(result){
+          self._socket.emit('message.unread',function(data,result){
             cb(result.status, result.result);
           });
           self.off('connected',func);
